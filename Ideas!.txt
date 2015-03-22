@@ -1,20 +1,25 @@
 Main game:
 
-  Ship can move left and right at bottom of screen
+  Ship can move left and right at bottom of screen.
   
-  Aim is to last the level by avoiding (and/or) shooting asteroids out of your way
+  Aim is to last the level by avoiding (and/or) shooting asteroids out of your way.
   
   Different weapons with different fire rates (and projectiles and explosions :D )
   
   Enemy ships as well as asteroids. (They would move around screen like asteroids and also shoot)
     - Big(ish) or 2 or 3 enemies as bosses!
+    
+  Player has number of hitpoints equalling the number of secondary colour "cockpit" pixels they
+  have left. As much as possible, every weapon or collision must do 1 point of damage (but could
+  have different rates of fire, splash damage radius, projectile velocity).
+  
   
 Visual Extras:
 
-  When the level is complete the ship could 'boost' up the screen with a big nice engine blast
+  When the level is complete the ship could 'boost' up the screen with a big nice engine blast.
   
   Need some kind of starfield in the background to show the movement (could use paralax?)
     - "Stars" (pixels with little trails) with random y velocities?
     
-  Primary/secondary colours on ships using coloured overlays
+  Primary/secondary colours on ships using coloured overlays.
     - http://buildnewgames.com/global-composit-operations/
