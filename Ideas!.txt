@@ -1,0 +1,9 @@
+Main game:
+  Ship can move left and right at bottom of screen
+  Aim is to last the level by avoiding (and/or) shooting asteroids out of your way
+  (Maybe a cooldown on the shots else it would be too easy?)
+  Enemy ships as well as asteroids? (They would move down screen like asteroids and also shoot)
+  
+Visual Extras:
+  When the level is complete the ship could 'boost' up the screen with a big nice engine blast
+  Need some kind of starfield in the background to show the movement (could use paralax?)
