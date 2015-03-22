@@ -1,11 +1,11 @@
-/*jslint plusplus: true, browser: true, devel: true, node: true */
+/*jslint plusplus: true, browser: true, devel: true, node: true, vars: true */
 "use strict";
 
 // Canvas compatability code, makes it work in IE
 var animate = window.requestAnimationFrame ||
     window.webkitRequestAnimationFrame ||
     window.mozRequestAnimationFrame ||
-    function (callback) {window.setTimeout(callback, 1000 / 60);};
+    function (callback) { window.setTimeout(callback, 1000 / 60); };
 
 // Menu stuffs
 var debugMenu = document.getElementById("debug");
@@ -13,7 +13,7 @@ var debugMenu = document.getElementById("debug");
 function play31() {
   
   var debug = false; // Enable degug
-  if (!debug) debugMenu.style.display = "none";
+  if (!debug) { debugMenu.style.display = "none"; }
   
   var canvas = document.getElementById("31"),
     ctx = canvas.getContext("2d"),
@@ -48,7 +48,7 @@ function play31() {
       update(step);
     }
     
-    if (debug) debugMenu.innerHTML = "FrameTime: " + now.toFixed();
+    if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
     
     render(dt);
     last = now;
