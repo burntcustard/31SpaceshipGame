@@ -1,6 +1,12 @@
 /*jslint plusplus: true, browser: true, devel: true, node: true */
 "use strict";
 
+// Canvas compatability code, makes it work in IE
+var animate = window.requestAnimationFrame ||
+    window.webkitRequestAnimationFrame ||
+    window.mozRequestAnimationFrame ||
+    function (callback) {window.setTimeout(callback, 1000 / 60);};
+
 function play31() {
   var canvas = document.getElementById("31"),
     ctx = canvas.getContext("2d"),
@@ -35,10 +41,10 @@ function play31() {
     render(dt);
     last = now;
 
-    window.requestAnimationFrame(update);
+    animate(update);
   }
   
-  window.requestAnimationFrame(gameLoop);
+  animate(gameLoop);
   
 }
 
