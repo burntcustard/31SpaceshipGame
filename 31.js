@@ -22,7 +22,8 @@ function play31() {
     last = window.performance.now,
     step = 1 / 60,  // Try to update game 60 times a second
     cSize = 8,  // Size of cell in pixels
-    gridSize = 31;  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+    gridSize = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+    level;
       
   function render() {
     
@@ -31,8 +32,9 @@ function play31() {
       ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
     }
     
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Set canvas background to color of level
+    ctx.fillStyle = level.backgroundColor;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
   }
 
@@ -57,7 +59,25 @@ function play31() {
     animate(gameLoop);
   }
   
-  gameLoop();
+  function newGame(levelLoad) {
+    // Reset anything like list of enemies here, don't want enemies from previous game appearing!
+    level = {};
+    
+    // Populate scene depending on level requested
+    console.log("Loading " + levelLoad);
+    switch (levelLoad) {
+    case "levelTest":
+      level.backgroundColor = "midnightBlue";
+      break;
+    default:
+      // Load a default level or throw error or go back to a menu
+      break;
+    }
+    
+    gameLoop();
+  }
+  
+  newGame("levelTest");
   
 }
 
