@@ -27,7 +27,8 @@ function play31() {
   function render() {
     
     function paintCell(color, x, y) {
-      ctx.fillRect(x * cSize, y * cSize, cSize, cSize);
+      ctx.fillStyle = color;
+      ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
     }
     
     // Clear canvas
