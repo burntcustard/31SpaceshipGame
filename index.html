@@ -35,6 +35,12 @@
         
         box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.46), 0px 2px 10px rgba(0, 0, 0, 0.36);
       }
+      .spriteSelector {
+        display: inline-block;
+        width: 56px;
+        padding: 2px;
+        background: rgba(255,255,255,0.5);;
+      }
     </style>
   </head>
   <body>
@@ -43,6 +49,9 @@
     
     <div id="canvasContainer">
       <canvas id="31" width="248" height="248">Error loading game :(</canvas>
+      <div class="spriteSelector" id="sprite0" onclick="smallShip.index = 0">Sprite 0</div>
+      <div class="spriteSelector" id="sprite1" onclick="smallShip.index = 1">Sprite 1</div>
+      <div class="spriteSelector" id="sprite2" onclick="smallShip.index = 2">Sprite 2</div>
     </div>
     
   </body>
