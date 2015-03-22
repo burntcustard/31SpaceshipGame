@@ -1,6 +1,7 @@
-/*jslint plusplus: true, browser: true, devel: true*/
+/*jslint plusplus: true, browser: true, devel: true, node: true */
+"use strict";
+
 function play31() {
-  "use strict";
   var canvas = document.getElementById("31"),
     ctx = canvas.getContext("2d"),
     now,
