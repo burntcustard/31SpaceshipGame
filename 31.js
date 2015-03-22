@@ -52,8 +52,8 @@ function play31() {
     if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
     
     render(dt);
+    
     last = now;
-
     animate(gameLoop);
   }
   
