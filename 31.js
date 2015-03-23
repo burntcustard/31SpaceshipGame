@@ -1,9 +1,6 @@
 /*jslint plusplus: true, browser: true, devel: true, node: true, vars: true */
 "use strict";
 
-// Menu stuffs
-var debugMenu = document.getElementById("debug");
-
 var canvas = document.getElementById("31"),
   ctx = canvas.getContext("2d"),
   now,
@@ -31,12 +28,21 @@ var ctxPri = canvasPri.getContext("2d");
 // Hopefully makes it scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
 
+
+
+// Menu stuffs
+var debugMenu = document.getElementById("debug");
+
+
+
 // Sprite stuff testing
 var smallShipImage = new Image();
 smallShipImage.src = "smallShipSprite.png";
 
 function sprite(options) {
   var that = {};
+  that.x = options.x;
+  that.y = options.y;
   that.width = options.width;
   that.height = options.height;
   that.index = options.index;
@@ -48,8 +54,8 @@ function sprite(options) {
       0,
       that.width,
       that.height,
-      0,
-      0,
+      that.x * 8,
+      that.y * 8,
       that.width * 8,
       that.height * 8
     );
@@ -59,6 +65,8 @@ function sprite(options) {
 }
 
 var smallShip = sprite({
+  x: 0,
+  y: 0,
   width: 5,
   height: 10,
   index: 0,
@@ -66,6 +74,8 @@ var smallShip = sprite({
   maxHP: 2
 });
 // Sprite testing end
+
+
 
 function Ship(model, primaryColor, secondaryColor, HP) {
   this.model = model || smallShip; // Default ship is the... small one.
@@ -75,6 +85,8 @@ function Ship(model, primaryColor, secondaryColor, HP) {
   this.HP = HP || this.model.maxHP; // Default hit points is the max the ship can have (hopefully..)
   console.log("Ship HP: " + this.HP); // Just testing max HP is set correctly. Seems to work :D
 }
+
+
 
 function play31() {
 
@@ -101,6 +113,7 @@ function play31() {
   }
 
   function update() {
+
   }
 
   function gameLoop() {
@@ -108,14 +121,14 @@ function play31() {
     now = window.performance.now();
     dt = Math.min(1, (now - last) / 1000);  // duration in seconds
 
+    render(dt);
+
     while (dt > step) {
       dt -= step;
       update(step);
     }
 
     //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
-
-    render(dt);
 
     last = now;
     animate(gameLoop);
