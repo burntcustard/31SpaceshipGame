@@ -30,3 +30,7 @@ Visual Extras:
   Do engine trails seperately to rest of ship so can be animated etc.
     
   Colour inspiration: http://7-themes.com/data_images/out/61/6978808-shiny-space-art.jpg
+
+Reference links:
+  
+  Sprite-sheet stuff: http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
