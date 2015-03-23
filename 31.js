@@ -112,6 +112,13 @@ function Ship(options) {
   this.colour.secondary = options.secondaryColor || "rgb(114,102,189)"; // Default secondary colour is purple
 
   this.draw = function() {
+
+    if (this.flip) {
+      ctx.save();
+      ctx.translate(0, canvas.width);
+      ctx.scale(1, -1);
+    }
+
     ctx.drawImage(
       this.spriteSheet,                        // Spritesheet
       this.spriteX + this.width * this.index,  // SourceX (Position of frame)
@@ -123,6 +130,8 @@ function Ship(options) {
       this.width * cSize,                      // DestinationW (Size on canvas)
       this.height * cSize                      // DestinationH
     );
+
+    ctx.restore();
   };
 }
 // ----------- Ship Object End --------
@@ -189,6 +198,11 @@ function play31() {
       if (keys.left) { playerShip.move = "left"; }
       if (keys.right) { playerShip.move = "right"; }
       if (!keys.left && !keys.right) { playerShip.move = false; }
+
+      // Flip this ship!
+      if (keys.space) {
+        playerShip.flip = true;
+      } else { playerShip.flip = false; }
 
       debugMenu.innerHTML = playerShip.move;
 
