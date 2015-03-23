@@ -5,7 +5,7 @@
     <style>
       body {
         /* Remove margins on the sides (where do they come from?!) */
-        margin: 0;
+        margin: 0px;
         background-color: #1b2d3f;
 
         font-family: sans-serif;
@@ -18,15 +18,15 @@
         -ms-user-select: none;
         user-select: none;
       }
+      #canvas {
+        margin-bottom: -4px;
+      }
       #debug {
         padding: 10px;
         background: rgba(255,255,255,0.5);
         position: absolute;
       }
       #canvasContainer {
-        height: min-content;
-        height: -webkit-min-content;
-        height: -moz-min-content;
         width: min-content;
         width: -webkit-min-content;
         width: -moz-min-content;
@@ -45,7 +45,7 @@
     <div id="debug">Debug goes here.</div>
 
     <div id="canvasContainer">
-      <canvas id="31" width="248" height="248">Error loading game :(</canvas>
+      <canvas id="canvas" width="248" height="248">Error loading game :(</canvas>
     </div>
 
     <script src="fpsmeter.min.js" async></script>
