@@ -99,7 +99,7 @@ function Ship(options) {
 
   this.draw = function() {
     ctx.drawImage(
-      this.spriteSheet,               // Spritesheet
+      this.spriteSheet,         // Spritesheet
       this.width * this.index,  // SourceX (Position of frame)
       0,                        // SourceY
       this.width,               // SourceW (Size of frame)
@@ -111,6 +111,7 @@ function Ship(options) {
     );
   };
 }
+// ----------- Ship Object End --------
 
 
 
