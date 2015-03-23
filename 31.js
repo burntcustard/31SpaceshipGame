@@ -28,6 +28,7 @@ var ctxPri = canvasPri.getContext("2d");
 
 // Makes images scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
+ctx.mozImageSmoothingEnabled = false;
 
 
 
@@ -149,6 +150,8 @@ function play31() {
   var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
     playerShip; // Players current ship (and all the fancy stuff on it?)
 
+  var meter = new FPSMeter({ theme: "colorful", heat: 1 });
+
   if (!debug) { debugMenu.style.display = "none"; }
 
 
@@ -211,6 +214,7 @@ function play31() {
 
     //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
 
+    meter.tick();
     last = now;
     animate(gameLoop);
   }
