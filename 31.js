@@ -1,4 +1,4 @@
-/*jslint plusplus: true, browser: true, devel: true, node: true, unparam: true, vars: true*/
+/*jslint plusplus: true, browser: true, devel: true, node: true, unparam: true, vars: true, white: true*/
 /*global FPSMeter*/
 "use strict";
 
@@ -162,7 +162,7 @@ function play31() {
     if (playerShip.model.x < 0) { playerShip.model.x = 0; }
     if (playerShip.model.x > (31 - playerShip.model.width)) { playerShip.model.x = 31 - playerShip.model.width; }
 
-    if (debug) console.log(keys); // THIS IS JUST TEMPORARY, to show key input system
+    if (debug) { console.log(keys); } // THIS IS JUST TEMPORARY, to show key input system
   }
 
 
