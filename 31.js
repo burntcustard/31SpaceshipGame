@@ -197,8 +197,9 @@ function play31() {
     case "level1":
       //Do level1 stuff
       playerShip = new Ship({
-        // Starting ship properties. TODO: on 2nd run through you keep ship from previous game.
-        model: "smallShip"
+        model: "smallShip",
+        x: 13,
+        y: 21
       });
       break;
     case "level2":
