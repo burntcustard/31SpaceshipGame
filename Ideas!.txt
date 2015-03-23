@@ -1,3 +1,13 @@
+Todo:
+  Move ships with velocity rather than impulse
+  Weapon stuff
+  Enemy ships
+  Asteroids
+  Hit point stuff
+
+In-Progress:
+
+
 Main game:
 
   Ship can move left and right at bottom of screen.
@@ -35,7 +45,7 @@ Visual Extras:
 Input:
 
   Have a 'key' object containing all keys used for the game
-  When a key is pressed the timestamp is stored under the correct name
+  When a key is pressed the timestamp is stored under the correct name - Not using now
   This allows for accurate cool downs on keys (check that now - keyTimestamp > than cooldown)
 
 Reference links:
