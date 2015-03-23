@@ -59,6 +59,8 @@ document.onkeydown = function (key) {
     case 187: resize(+2);        break;
     case 189: resize(-2);        break;
     case 191: debug = !debug;    break;
+    case 49: newGame("level1");  break;
+    case 50: newGame("level2");  break;
     default : console.log("Unhandled keypress: " + key.which);
   }
 };
@@ -152,110 +154,111 @@ function Ship(options) {
 
 
 
-function play31() {
-
-  var playerShip; // Players current ship (and all the fancy stuff on it?)
-
-  var meter = new FPSMeter({ theme: "colorful", heat: 1 });
-
-  if (!debug) { debugMenu.style.display = "none"; }
 
 
+var playerShip; // Players current ship (and all the fancy stuff on it?)
+var meter = new FPSMeter({ theme: "colorful", heat: 1 });
+meter.pause();
 
-  function render() {
+if (!debug) { debugMenu.style.display = "none"; }
 
-    // Fill one pixel in with specific colour
-    function paintCell(x, y, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
-    }
 
-    // Fill canvas with levels color
-    ctx.fillStyle = "#2b383b";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+function render() {
+
+  // Fill one pixel in with specific colour
+  function paintCell(x, y, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
   }
 
-
-
-  function update(dt) {
-
-    // Player movement
-    if (playerShip.move === "left") {
-      playerShip.x--;
-      playerShip.index = 0;
-    } else if (playerShip.move === false) {
-      playerShip.index = 1;
-    } else if (playerShip.move === "right") {
-      playerShip.x++;
-      playerShip.index = 2;
-    }
-    if (playerShip.x < 0) { playerShip.x = 0; }
-    if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
-
-    if (debug) { console.log(keys); } // THIS IS JUST TEMPORARY, to show key input system
-  }
-
-
-
-  function gameLoop() {
-
-    now = window.performance.now();
-    dt = Math.min(1000, (now - last));  // duration in mili-seconds
-
-    render(dt);
-    playerShip.draw();
-
-    while (dt > step) {
-      dt -= step;
-
-      // Could be put somewhere better, just for testing
-      if (keys.left) { playerShip.move = "left"; }
-      if (keys.right) { playerShip.move = "right"; }
-      if (!keys.left && !keys.right) { playerShip.move = false; }
-
-      // Flip this ship!
-      if (keys.space) {
-        playerShip.flip = true;
-      } else { playerShip.flip = false; }
-
-      debugMenu.innerHTML = playerShip.move;
-
-      update(dt);
-    }
-
-    //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
-
-    meter.tick();
-    last = now;
-    animate(gameLoop);
-  }
-
-
-
-  function newGame(level) {
-    // Clear old stuff
-
-    switch (level) {
-    case "level1":
-      //Do level1 stuff
-      playerShip = new Ship({
-        model: "bigShip",
-        x: 13,
-        y: 21
-      });
-      break;
-    case "level2":
-      //Do level2 stuff
-      break;
-    default:
-      // Failed to load level, throw error or go back to menu etc.
-    }
-
-    gameLoop();
-  }
-
-  newGame("level1");
-
+  // Fill canvas with levels color
+  ctx.fillStyle = "#2b383b";
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
 }
 
-window.onload = function () { resize(); play31(); };
+
+
+function update(dt) {
+
+  // Player movement
+  if (playerShip.move === "left") {
+    playerShip.x--;
+    playerShip.index = 0;
+  } else if (playerShip.move === false) {
+    playerShip.index = 1;
+  } else if (playerShip.move === "right") {
+    playerShip.x++;
+    playerShip.index = 2;
+  }
+  if (playerShip.x < 0) { playerShip.x = 0; }
+  if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
+
+  if (debug) { console.log(keys); } // THIS IS JUST TEMPORARY, to show key input system
+}
+
+
+
+function gameLoop() {
+
+  meter.tickStart();
+
+  now = window.performance.now();
+  dt = Math.min(1000, (now - last));  // duration in mili-seconds
+
+  render(dt);
+  playerShip.draw();
+
+  while (dt > step) {
+    dt -= step;
+
+    // Could be put somewhere better, just for testing
+    if (keys.left) { playerShip.move = "left"; }
+    if (keys.right) { playerShip.move = "right"; }
+    if (!keys.left && !keys.right) { playerShip.move = false; }
+
+    // Flip this ship!
+    if (keys.space) {
+      playerShip.flip = true;
+    } else { playerShip.flip = false; }
+
+    debugMenu.innerHTML = playerShip.move;
+
+    update(dt);
+  }
+
+  //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
+
+  meter.tick();
+  last = now;
+  animate(gameLoop);
+}
+
+
+
+function newGame(level) {
+  // Clear old stuff
+
+  switch (level) {
+  case "level1":
+    playerShip = new Ship({
+      model: "smallShip",
+      x: 13,
+      y: 21
+    });
+    break;
+  case "level2":
+    playerShip = new Ship({
+      model: "bigShip",
+      x: 13,
+      y: 20
+    });
+    break;
+  default:
+    // Failed to load level, throw error or go back to menu etc.
+  }
+
+  gameLoop();
+}
+
+window.onload = function () { resize(); newGame("level1"); };

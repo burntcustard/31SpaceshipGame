@@ -4,6 +4,7 @@ Todo:
   Enemy ships
   Asteroids
   Hit point stuff
+  Stop FPS bugging on level reload
 
 In-Progress:
 
