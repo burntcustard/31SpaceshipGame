@@ -1,4 +1,5 @@
-/*jslint plusplus: true, browser: true, devel: true, node: true, vars: true */
+/*jslint plusplus: true, browser: true, devel: true, node: true, unparam: true, vars: true*/
+/*global FPSMeter*/
 "use strict";
 
 var canvas = document.getElementById("31"),
