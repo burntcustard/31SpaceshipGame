@@ -6,6 +6,7 @@ var debugMenu = document.getElementById("debug");
 
 var canvas = document.getElementById("31"),
   ctx = canvas.getContext("2d"),
+  debug = false,
   now,
   dt,
   last = window.performance.now,
@@ -19,7 +20,7 @@ var animate = window.requestAnimationFrame ||
   window.mozRequestAnimationFrame ||
   function (callback) { window.setTimeout(callback, 1000 / 60); };
 
-// Extra canvas for creating primary col 
+// Extra canvas for creating primary colour
 var canvasPri = document.createElement("canvas");
 canvas.id = "canvasPri";
 canvasPri.width = "248px";
@@ -28,7 +29,34 @@ document.body.appendChild(canvasPri);
 canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
 var ctxPri = canvasPri.getContext("2d");
 
-// Hopefully makes it scale all pixely (yay!)
+// --- INPUT ---
+var key,
+  keys = {};
+
+// Fuck JSLint formatting this is sexy(might give it the ignor whitespace command thing...)
+document.onkeydown = function (key) {
+  switch (key.which) {
+    case  32: keys.space = true; break; 
+    case  37: keys.left  = true; break;
+    case  38: keys.up    = true; break;
+    case  39: keys.right = true; break;
+    case  40: keys.down  = true; break;
+    case 191: debug = !debug; break;
+    default : console.log("Unhandled keypress: " + key.which);
+  }
+};
+document.onkeyup = function (key) {
+  switch (key.which) {
+    case  32: delete keys.space; break;
+    case  37: delete keys.left;  break;
+    case  38: delete keys.up;    break;
+    case  39: delete keys.right; break;
+    case  40: delete keys.down;  break;
+    default : console.log("Unhandled keyUNpress: " + key.which);
+  }
+};
+
+// Makes images scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
 ctx.webkitImageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
@@ -82,7 +110,6 @@ function Ship(model, primaryColor, secondaryColor, HP) {
 function play31() {
   
   var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
-    debug = true,
     playerShip; // Players current ship (and all the fancy stuff on it?)
   
   if (!debug) { debugMenu.style.display = "none"; }
@@ -100,10 +127,11 @@ function play31() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     smallShip.draw();
-    
+
   }
 
   function update() {
+    if (debug) console.log(keys); // THIS IS JUST TEMPORARY, to show key input system
   }
 
   function gameLoop() {
@@ -131,7 +159,7 @@ function play31() {
     case "level1":
       //Do level1 stuff
       playerShip = new Ship(
-        // Starting ship properties. TODO: on 2nd run through you keep ship from previous game.
+        // Starting ship properties. TODO: on 2nd run through you keep ship from previous game?
         null,
         null,
         null,
