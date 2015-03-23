@@ -30,8 +30,6 @@ var ctxPri = canvasPri.getContext("2d");
 
 // Hopefully makes it scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
-ctx.webkitImageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
 
 // Sprite stuff testing
 var smallShipImage = new Image();
