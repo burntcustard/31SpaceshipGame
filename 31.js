@@ -19,6 +19,15 @@ var animate = window.requestAnimationFrame ||
   window.mozRequestAnimationFrame ||
   function (callback) { window.setTimeout(callback, 1000 / 60); };
 
+// Extra canvas for creating primary col 
+var canvasPri = document.createElement("canvas");
+canvas.id = "canvasPri";
+canvasPri.width = "248px";
+canvasPri.height = "248px";
+document.body.appendChild(canvasPri);
+canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
+var ctxPri = canvasPri.getContext("2d");
+
 // Hopefully makes it scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
 ctx.webkitImageSmoothingEnabled = false;
@@ -28,15 +37,27 @@ ctx.mozImageSmoothingEnabled = false;
 var smallShipImage = new Image();
 smallShipImage.src = "smallShipSprite.png";
 
-function sprite(options) {  // Stole from here: http://www.williammalone.com/articles/create-html5- canvas-javascript-sprite-animation/
+// Stole from here: http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
+function sprite(options) {
   var that = {};
   that.width = options.width;
   that.height = options.height;
   that.index = options.index;
   that.image = options.image;
   that.draw = function () {
-    ctx.drawImage(that.image, that.width * that.index, 0, that.width, that.height, 0, 0, that.width * 8,  that.height * 8);
+    ctx.drawImage(
+      that.image,
+      that.width * that.index,
+      0,
+      that.width,
+      that.height,
+      0,
+      0,
+      that.width * 8,
+      that.height * 8
+    );
   };
+  that.maxHP = options.maxHP; // Seems to be required to return HP of ship
   return that;
 }
 
@@ -44,25 +65,39 @@ var smallShip = sprite({
   width: 5,
   height: 10,
   index: 0,
-  image: smallShipImage
+  image: smallShipImage,
+  maxHP: 2
 });
 // Sprite testing end
 
+function Ship(model, primaryColor, secondaryColor, HP) {
+  this.model = model || smallShip; // Default ship is the... small one.
+  this.color = {}; // Set up color object, yes, this has to be here.
+  this.color.primary = primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
+  this.color.secondary = secondaryColor || "rgb(114,102,189)"; // Default secondary /colour is purple
+  this.HP = HP || this.model.maxHP; // Default hit points is the max the ship can have (hopefully..)
+  console.log("Ship HP: " + this.HP); // Just testing max HP is set correctly. Seems to work :D
+}
 
 function play31() {
   
-  var debug = true; // Enable degug
+  var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
+    debug = true,
+    playerShip; // Players current ship (and all the fancy stuff on it?)
+  
   if (!debug) { debugMenu.style.display = "none"; }
   
   function render() {
     
-    function paintCell(color, x, y) {
+    // Fill one pixel in with specific colour
+    function paintCell(x, y, color) {
       ctx.fillStyle = color;
       ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
     }
     
-    // Clear canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    // Fill canvas with levels color
+    ctx.fillStyle = "#2b383b";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
     
     smallShip.draw();
     
@@ -89,7 +124,31 @@ function play31() {
     animate(gameLoop);
   }
   
-  gameLoop();
+  function newGame(level) {
+    // Clear old stuff
+    
+    switch (level) {
+    case "level1":
+      //Do level1 stuff
+      playerShip = new Ship(
+        // Starting ship properties. TODO: on 2nd run through you keep ship from previous game.
+        null,
+        null,
+        null,
+        null
+      );
+      break;
+    case "level2":
+      //Do level2 stuff
+      break;
+    default:
+      // Failed to load level, throw error or go back to menu etc.
+    }
+    
+    gameLoop();
+  }
+  
+  newGame("level1");
   
 }
 

@@ -1,6 +1,9 @@
 Main game:
 
   Ship can move left and right at bottom of screen.
+    - When you hit left or right, x velocity is applied immediatley, and when xv > 0 or < 0
+      the sprite changes to going left or right, giving player instand feedback, as well as
+      making the ship a teeny tiny bit thinner so could be used to dodge incoming projectiles.
   
   Aim is to last the level by avoiding (and/or) shooting asteroids out of your way.
   
@@ -23,3 +26,7 @@ Visual Extras:
     
   Primary/secondary colours on ships using coloured overlays.
     - http://buildnewgames.com/global-composit-operations/
+    
+  Do engine trails seperately to rest of ship so can be animated etc.
+    
+  Colour inspiration: http://7-themes.com/data_images/out/61/6978808-shiny-space-art.jpg
