@@ -33,7 +33,7 @@ ctx.mozImageSmoothingEnabled = false;
 
 
 
-// --- INPUT ---
+// ----- INPUT ----
 var key,
   keys = {};
 
@@ -58,7 +58,7 @@ document.onkeyup = function (key) {
     default : console.log("Unhandled keyUNpress: " + key.which);
   }
 };
-
+// -- Input End ---
 
 
 // Menu stuffs
@@ -66,64 +66,57 @@ var debugMenu = document.getElementById("debug");
 
 
 
-// Sprite stuff testing
-var smallShipImage = new Image();
-smallShipImage.src = "smallShipSprite.png";
-
-function sprite(options) {
-  var that = {};
-  that.x = options.x;
-  that.y = options.y;
-  that.width = options.width;
-  that.height = options.height;
-  that.index = options.index;
-  that.image = options.image;
-  that.draw = function () {
-    ctx.drawImage(
-      that.image,
-      that.width * that.index,
-      0,
-      that.width,
-      that.height,
-      that.x * cSize,
-      that.y * cSize,
-      that.width * cSize,
-      that.height * cSize
-    );
-  };
-  that.maxHP = options.maxHP; // Seems to be required to return HP of ship
-  return that;
+// -------- Ship Objects Start --------
+function SmallShip() {
+  this.spriteSheet = new Image();
+  this.spriteSheet.src = "smallShipSprite.png";
+  this.width = 5;      // Width of the sheet
+  this.height = 10;
+  this.index = 0;      // Current frame of the sheet
+  this.weapons = {};
+  this.maxHealth = 2;
 }
 
-var smallShip = sprite({
-  x: 0,
-  y: 0,
-  width: 5,
-  height: 10,
-  index: 0,
-  image: smallShipImage,
-  maxHP: 2
-});
-// Sprite testing end
+function Ship(options) {
+  // Inherit from the ship model
+  this.model = options.model || "smallShip";
+  switch(this.model) {
+    case "smallShip": SmallShip.call(this); break;
+    default: console.log("Unknown ship model!!!!");
+  }
 
+  // Properties for all ships go here
+  this.x = options.x || 0;
+  this.y = options.y || 0;
+  this.vx = options.vx || 0;
+  this.vy = options.vy || 0;
+  this.hp = options.hp || this.maxHealth;
 
+  // Colour stuff
+  this.colour = {};
+  this.colour.primary = options.primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
+  this.colour.secondary = options.secondaryColor || "rgb(114,102,189)"; // Default secondary colour is purple
 
-function Ship(options) { // !!!! Changed this to use a object for args
-  this.model = options.model || smallShip; // Default ship is the... small one.
-  this.color = {}; // Set up color object, yes, this has to be here.
-  this.color.primary = options.primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
-  this.color.secondary = options.secondaryColor || "rgb(114,102,189)"; // Default secondary /colour is purple
-  this.HP = options.HP || this.model.maxHP; // Default hit points is the max the ship can have (hopefully..)
-  console.log("Ship HP: " + this.HP); // Just testing max HP is set correctly. Seems to work :D
-  this.move = false;
+  this.draw = function() {
+    ctx.drawImage(
+      this.spriteSheet,               // Spritesheet
+      this.width * this.index,  // SourceX (Position of frame)
+      0,                        // SourceY
+      this.width,               // SourceW (Size of frame)
+      this.height,              // SourceH
+      this.x * cSize,           // DestinationX (Position on canvas)
+      this.y * cSize,           // DestinationY
+      this.width * cSize,       // DestinationW (Size on canvas)
+      this.height * cSize       // DestinationH
+    );
+  };
 }
 
 
 
 function play31() {
 
-  var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
-    playerShip; // Players current ship (and all the fancy stuff on it?)
+  var playerShip; // Players current ship (and all the fancy stuff on it?)
 
   var meter = new FPSMeter({ theme: "colorful", heat: 1 });
 
@@ -150,16 +143,16 @@ function play31() {
 
     // Player movement
     if (playerShip.move === "left") {
-      playerShip.model.x--;
-      playerShip.model.index = 0;
+      playerShip.x--;
+      playerShip.index = 0;
     } else if (playerShip.move === false) {
-      playerShip.model.index = 1;
+      playerShip.index = 1;
     } else if (playerShip.move === "right") {
-      playerShip.model.x++;
-      playerShip.model.index = 2;
+      playerShip.x++;
+      playerShip.index = 2;
     }
-    if (playerShip.model.x < 0) { playerShip.model.x = 0; }
-    if (playerShip.model.x > (31 - playerShip.model.width)) { playerShip.model.x = 31 - playerShip.model.width; }
+    if (playerShip.x < 0) { playerShip.x = 0; }
+    if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
 
     if (debug) { console.log(keys); } // THIS IS JUST TEMPORARY, to show key input system
   }
@@ -172,7 +165,7 @@ function play31() {
     dt = Math.min(1000, (now - last));  // duration in mili-seconds
 
     render(dt);
-    playerShip.model.draw();
+    playerShip.draw();
 
     while (dt > step) {
       dt -= step;
@@ -202,9 +195,9 @@ function play31() {
     switch (level) {
     case "level1":
       //Do level1 stuff
-      playerShip = new Ship({ // !!! Changed to use an object for args
+      playerShip = new Ship({
         // Starting ship properties. TODO: on 2nd run through you keep ship from previous game.
-        model: smallShip
+        model: "smallShip"
       });
       break;
     case "level2":
