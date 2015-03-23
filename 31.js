@@ -9,8 +9,8 @@ var canvas = document.getElementById("31"),
   dt,
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
-  cSize = 8,  // Size of cell in pixels
-  gridSize = 31;  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+  gridSize = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+  cSize = canvas.width / gridSize;  // Size of cell in pixels
 
 // Canvas compatability code, makes it work in IE
 var animate = window.requestAnimationFrame ||
@@ -31,7 +31,11 @@ var ctxPri = canvasPri.getContext("2d");
 ctx.imageSmoothingEnabled = false;
 ctx.mozImageSmoothingEnabled = false;
 
-
+function resize(scale) {
+  canvas.width = canvas.height = (gridSize * (cSize + scale));
+  cSize = Math.round(canvas.width / gridSize);
+  console.log("New cSize: " + cSize + ", canvas size: " + canvas.width);
+}
 
 // ----- INPUT ----
 var key,
@@ -44,7 +48,9 @@ document.onkeydown = function (key) {
     case  38: keys.up    = true; break;
     case  39: keys.right = true; break;
     case  40: keys.down  = true; break;
-    case 191: debug = !debug; break;
+    case 187: resize(+1);        break;
+    case 189: resize(-1);        break;
+    case 191: debug = !debug;    break;
     default : console.log("Unhandled keypress: " + key.which);
   }
 };
