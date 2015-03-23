@@ -32,7 +32,7 @@ ctx.mozImageSmoothingEnabled = false;
 
 
 
-/*// --- INPUT ---
+// --- INPUT ---
 var key,
   keys = {};
 
@@ -57,32 +57,7 @@ document.onkeyup = function (key) {
     case  40: delete keys.down;  break;
     default : console.log("Unhandled keyUNpress: " + key.which);
   }
-};*/
-
-
-
-// Keyboard handling
-// Some common keys
-var KEY = {
-  ENTER:   13,
-  SPACE:    32,
-  LEFT:     37,
-  UP:       38,
-  RIGHT:    39,
-  DOWN:     40
 };
-var pressed = {};
-
-// When the key is first pressed the timestamp (now) is stored in pressed.keyCode. It is removed
-// when the key is released
-document.addEventListener("keydown", function (ev) {
-  ev.preventDefault();
-  if (!pressed[ev.keyCode]) { pressed[ev.keyCode] = now; }
-});
-document.addEventListener("keyup", function (ev) {
-  ev.preventDefault();
-  pressed[ev.keyCode] = false;
-});
 
 
 
@@ -186,7 +161,7 @@ function play31() {
     if (playerShip.model.x < 0) { playerShip.model.x = 0; }
     if (playerShip.model.x > (31 - playerShip.model.width)) { playerShip.model.x = 31 - playerShip.model.width; }
 
-    //if (debug) console.log(keys); // THIS IS JUST TEMPORARY, to show key input system
+    if (debug) console.log(keys); // THIS IS JUST TEMPORARY, to show key input system
   }
 
 
@@ -203,9 +178,9 @@ function play31() {
       dt -= step;
 
       // Could be put somewhere better, just for testing
-      if (pressed[KEY.LEFT]) { playerShip.move = "left"; }
-      if (pressed[KEY.RIGHT]) { playerShip.move = "right"; }
-      if (!pressed[KEY.LEFT] && !pressed[KEY.RIGHT]) { playerShip.move = false; }
+      if (keys.left) { playerShip.move = "left"; }
+      if (keys.right) { playerShip.move = "right"; }
+      if (!keys.left && !keys.right) { playerShip.move = false; }
 
       debugMenu.innerHTML = playerShip.move;
 
