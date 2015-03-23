@@ -2,7 +2,7 @@
 /*global FPSMeter*/
 "use strict";
 
-var canvas = document.getElementById("31"),
+var canvas = document.getElementById("canvas"),
   ctx = canvas.getContext("2d"),
   debug = false,
   now,
@@ -29,14 +29,14 @@ var ctxPri = canvasPri.getContext("2d");
 
 // Resizes game window. If no scale given, you're just setting sizes on first run.
 function resize(scale) {
-  if (!scale) {
+  if (scale && (cSize + scale > 0)) {
+    canvas.width = canvas.height = (gridSize * (cSize + scale));
+    cSize = Math.round(canvas.width / gridSize);
+  } else {
     cSize = canvas.width / gridSize;
     if ( gridSize % 1 !== 0) { // If gridSize is NOT a whole number
       console.log("ERROR: Canvas size not divisible by 31");
     }
-  } else {
-    canvas.width = canvas.height = (gridSize * (cSize + scale));
-    cSize = Math.round(canvas.width / gridSize);
   }
   console.log("Canvas size: " + canvas.width + ", cell size: " + cSize);
   // Makes images scale all pixely (yay!)
@@ -55,8 +55,8 @@ document.onkeydown = function (key) {
     case  38: keys.up    = true; break;
     case  39: keys.right = true; break;
     case  40: keys.down  = true; break;
-    case 187: resize(+1);        break;
-    case 189: resize(-1);        break;
+    case 187: resize(+2);        break;
+    case 189: resize(-2);        break;
     case 191: debug = !debug;    break;
     default : console.log("Unhandled keypress: " + key.which);
   }
