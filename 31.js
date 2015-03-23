@@ -6,7 +6,7 @@ var canvas = document.getElementById("31"),
   now,
   dt,
   last = window.performance.now,
-  step = 1 / 60,  // Try to update game 60 times a second
+  step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
   cSize = 8,  // Size of cell in pixels
   gridSize = 31;  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
 
@@ -27,6 +27,31 @@ var ctxPri = canvasPri.getContext("2d");
 
 // Hopefully makes it scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
+
+
+
+// Keyboard handling
+// Some common keys
+var KEY = {
+  ENTER:   13,
+  SPACE:    32,
+  LEFT:     37,
+  UP:       38,
+  RIGHT:    39,
+  DOWN:     40
+};
+var pressed = {};
+
+// When the key is first pressed the timestamp (now) is stored in pressed.keyCode. It is removed
+// when the key is released
+document.addEventListener("keydown", function (ev) {
+  ev.preventDefault();
+  if (!pressed[ev.keyCode]) { pressed[ev.keyCode] = now; }
+});
+document.addEventListener("keyup", function (ev) {
+  ev.preventDefault();
+  pressed[ev.keyCode] = false;
+});
 
 
 
@@ -77,13 +102,14 @@ var smallShip = sprite({
 
 
 
-function Ship(model, primaryColor, secondaryColor, HP) {
-  this.model = model || smallShip; // Default ship is the... small one.
+function Ship(options) { // !!!! Changed this to use a object for args
+  this.model = options.model || smallShip; // Default ship is the... small one.
   this.color = {}; // Set up color object, yes, this has to be here.
-  this.color.primary = primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
-  this.color.secondary = secondaryColor || "rgb(114,102,189)"; // Default secondary /colour is purple
-  this.HP = HP || this.model.maxHP; // Default hit points is the max the ship can have (hopefully..)
+  this.color.primary = options.primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
+  this.color.secondary = options.secondaryColor || "rgb(114,102,189)"; // Default secondary /colour is purple
+  this.HP = options.HP || this.model.maxHP; // Default hit points is the max the ship can have (hopefully..)
   console.log("Ship HP: " + this.HP); // Just testing max HP is set correctly. Seems to work :D
+  this.move = false;
 }
 
 
@@ -95,6 +121,8 @@ function play31() {
     playerShip; // Players current ship (and all the fancy stuff on it?)
 
   if (!debug) { debugMenu.style.display = "none"; }
+
+
 
   function render() {
 
@@ -108,24 +136,43 @@ function play31() {
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    smallShip.draw();
-
   }
 
-  function update() {
+  function update(dt) {
 
+    // Player movement
+    if (playerShip.move === "left") {
+      playerShip.model.x--;
+      playerShip.model.index = 0;
+    } else if (playerShip.move === false) {
+      playerShip.model.index = 1;
+    } else if (playerShip.move === "right") {
+      playerShip.model.x++;
+      playerShip.model.index = 2;
+    }
+    if (playerShip.model.x < 0) { playerShip.model.x = 0; }
+    if (playerShip.model.x > (31 - playerShip.model.width)) { playerShip.model.x = 31 - playerShip.model.width; }
   }
 
   function gameLoop() {
 
     now = window.performance.now();
-    dt = Math.min(1, (now - last) / 1000);  // duration in seconds
+    dt = Math.min(1000, (now - last));  // duration in mili-seconds
 
     render(dt);
+    playerShip.model.draw();
 
     while (dt > step) {
       dt -= step;
-      update(step);
+
+      // Could be put somewhere better, just for testing
+      if (pressed[KEY.LEFT]) { playerShip.move = "left"; }
+      if (pressed[KEY.RIGHT]) { playerShip.move = "right"; }
+      if (!pressed[KEY.LEFT] && !pressed[KEY.RIGHT]) { playerShip.move = false; }
+
+      debugMenu.innerHTML = playerShip.move;
+
+      update(dt);
     }
 
     //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
@@ -140,13 +187,10 @@ function play31() {
     switch (level) {
     case "level1":
       //Do level1 stuff
-      playerShip = new Ship(
+      playerShip = new Ship({ // !!! Changed to use an object for args
         // Starting ship properties. TODO: on 2nd run through you keep ship from previous game.
-        null,
-        null,
-        null,
-        null
-      );
+        model: smallShip
+      });
       break;
     case "level2":
       //Do level2 stuff
