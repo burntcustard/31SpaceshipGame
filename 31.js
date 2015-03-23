@@ -2,7 +2,7 @@
 /*global FPSMeter*/
 "use strict";
 
-var canvas = document.getElementById("canvas"),
+var canvas = document.getElementById("canvas31"),
   ctx = canvas.getContext("2d"),
   debug = false,
   now,
@@ -18,7 +18,7 @@ var animate = window.requestAnimationFrame ||
   window.mozRequestAnimationFrame ||
   function (callback) { window.setTimeout(callback, 1000 / 60); };
 
-// Extra canvas for creating primary colour
+/* Extra canvas for creating primary colour
 var canvasPri = document.createElement("canvas");
 canvas.id = "canvasPri";
 canvasPri.width = "248px";
@@ -26,6 +26,7 @@ canvasPri.height = "248px";
 document.body.appendChild(canvasPri);
 canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
 var ctxPri = canvasPri.getContext("2d");
+*/
 
 // Resizes game window. If no scale given, you're just setting sizes on first run.
 function resize(scale) {
