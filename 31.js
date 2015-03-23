@@ -37,7 +37,6 @@ ctx.mozImageSmoothingEnabled = false;
 var key,
   keys = {};
 
-// Fuck JSLint formatting this is sexy(might give it the ignor whitespace command thing...)
 document.onkeydown = function (key) {
   switch (key.which) {
     case  32: keys.space = true; break;
@@ -86,10 +85,10 @@ function sprite(options) {
       0,
       that.width,
       that.height,
-      that.x * 8,
-      that.y * 8,
-      that.width * 8,
-      that.height * 8
+      that.x * cSize,
+      that.y * cSize,
+      that.width * cSize,
+      that.height * cSize
     );
   };
   that.maxHP = options.maxHP; // Seems to be required to return HP of ship
