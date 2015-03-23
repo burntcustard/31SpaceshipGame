@@ -3,6 +3,7 @@
 
 var canvas = document.getElementById("31"),
   ctx = canvas.getContext("2d"),
+  debug = false,
   now,
   dt,
   last = window.performance.now,
@@ -16,7 +17,7 @@ var animate = window.requestAnimationFrame ||
   window.mozRequestAnimationFrame ||
   function (callback) { window.setTimeout(callback, 1000 / 60); };
 
-// Extra canvas for creating primary col
+// Extra canvas for creating primary colour
 var canvasPri = document.createElement("canvas");
 canvas.id = "canvasPri";
 canvasPri.width = "248px";
@@ -25,8 +26,37 @@ document.body.appendChild(canvasPri);
 canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
 var ctxPri = canvasPri.getContext("2d");
 
-// Hopefully makes it scale all pixely (yay!)
+// Makes images scale all pixely (yay!)
 ctx.imageSmoothingEnabled = false;
+
+
+
+/*// --- INPUT ---
+var key,
+  keys = {};
+
+// Fuck JSLint formatting this is sexy(might give it the ignor whitespace command thing...)
+document.onkeydown = function (key) {
+  switch (key.which) {
+    case  32: keys.space = true; break;
+    case  37: keys.left  = true; break;
+    case  38: keys.up    = true; break;
+    case  39: keys.right = true; break;
+    case  40: keys.down  = true; break;
+    case 191: debug = !debug; break;
+    default : console.log("Unhandled keypress: " + key.which);
+  }
+};
+document.onkeyup = function (key) {
+  switch (key.which) {
+    case  32: delete keys.space; break;
+    case  37: delete keys.left;  break;
+    case  38: delete keys.up;    break;
+    case  39: delete keys.right; break;
+    case  40: delete keys.down;  break;
+    default : console.log("Unhandled keyUNpress: " + key.which);
+  }
+};*/
 
 
 
@@ -117,7 +147,6 @@ function Ship(options) { // !!!! Changed this to use a object for args
 function play31() {
 
   var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
-    debug = true,
     playerShip; // Players current ship (and all the fancy stuff on it?)
 
   if (!debug) { debugMenu.style.display = "none"; }
@@ -135,8 +164,9 @@ function play31() {
     // Fill canvas with levels color
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-
   }
+
+
 
   function update(dt) {
 
@@ -152,7 +182,11 @@ function play31() {
     }
     if (playerShip.model.x < 0) { playerShip.model.x = 0; }
     if (playerShip.model.x > (31 - playerShip.model.width)) { playerShip.model.x = 31 - playerShip.model.width; }
+
+    //if (debug) console.log(keys); // THIS IS JUST TEMPORARY, to show key input system
   }
+
+
 
   function gameLoop() {
 
@@ -180,6 +214,8 @@ function play31() {
     last = now;
     animate(gameLoop);
   }
+
+
 
   function newGame(level) {
     // Clear old stuff
