@@ -70,6 +70,8 @@ var debugMenu = document.getElementById("debug");
 function SmallShip() {
   this.spriteSheet = new Image();
   this.spriteSheet.src = "smallShipSprite.png";
+  this.spriteX = 0;    // Position of the sprite in the sheet
+  this.spriteY = 0;
   this.width = 5;      // Width of the sheet
   this.height = 10;
   this.index = 0;      // Current frame of the sheet
@@ -99,15 +101,15 @@ function Ship(options) {
 
   this.draw = function() {
     ctx.drawImage(
-      this.spriteSheet,         // Spritesheet
-      this.width * this.index,  // SourceX (Position of frame)
-      0,                        // SourceY
-      this.width,               // SourceW (Size of frame)
-      this.height,              // SourceH
-      this.x * cSize,           // DestinationX (Position on canvas)
-      this.y * cSize,           // DestinationY
-      this.width * cSize,       // DestinationW (Size on canvas)
-      this.height * cSize       // DestinationH
+      this.spriteSheet,                        // Spritesheet
+      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+      this.spriteY,                            // SourceY
+      this.width,                              // SourceW (Size of frame)
+      this.height,                             // SourceH
+      this.x * cSize,                          // DestinationX (Position on canvas)
+      this.y * cSize,                          // DestinationY
+      this.width * cSize,                      // DestinationW (Size on canvas)
+      this.height * cSize                      // DestinationH
     );
   };
 }
