@@ -69,11 +69,22 @@ var debugMenu = document.getElementById("debug");
 // -------- Ship Objects Start --------
 function SmallShip() {
   this.spriteSheet = new Image();
-  this.spriteSheet.src = "smallShipSprite.png";
+  this.spriteSheet.src = "spriteSheet.png";
   this.spriteX = 0;    // Position of the sprite in the sheet
   this.spriteY = 0;
-  this.width = 5;      // Width of the sheet
-  this.height = 10;
+  this.width = 5;      // Width/Height of the Frame
+  this.height = 18;
+  this.index = 0;      // Current frame of the sheet
+  this.weapons = {};
+  this.maxHealth = 2;
+}
+function BigShip() {
+  this.spriteSheet = new Image();
+  this.spriteSheet.src = "spriteSheet.png";
+  this.spriteX = 0;    // Position of the sprite in the sheet
+  this.spriteY = 19;
+  this.width = 9;      // Width/Height of the Frame
+  this.height = 20;
   this.index = 0;      // Current frame of the sheet
   this.weapons = {};
   this.maxHealth = 2;
@@ -84,6 +95,7 @@ function Ship(options) {
   this.model = options.model || "smallShip";
   switch(this.model) {
     case "smallShip": SmallShip.call(this); break;
+    case "bigShip": BigShip.call(this); break;
     default: console.log("Unknown ship model!!!!");
   }
 
@@ -199,7 +211,7 @@ function play31() {
     case "level1":
       //Do level1 stuff
       playerShip = new Ship({
-        model: "smallShip",
+        model: "bigShip",
         x: 13,
         y: 21
       });
