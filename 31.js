@@ -10,7 +10,7 @@ var canvas = document.getElementById("31"),
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
   gridSize = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
-  cSize = canvas.width / gridSize;  // Size of cell in pixels
+  cSize;  // Size of cell in pixels
 
 // Canvas compatability code, makes it work in IE
 var animate = window.requestAnimationFrame ||
@@ -27,14 +27,21 @@ document.body.appendChild(canvasPri);
 canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
 var ctxPri = canvasPri.getContext("2d");
 
-// Makes images scale all pixely (yay!)
-ctx.imageSmoothingEnabled = false;
-ctx.mozImageSmoothingEnabled = false;
-
+// Resizes game window. If no scale given, you're just setting sizes on first run.
 function resize(scale) {
-  canvas.width = canvas.height = (gridSize * (cSize + scale));
-  cSize = Math.round(canvas.width / gridSize);
-  console.log("New cSize: " + cSize + ", canvas size: " + canvas.width);
+  if (!scale) {
+    cSize = canvas.width / gridSize;
+    if ( gridSize % 1 !== 0) { // If gridSize is NOT a whole number
+      console.log("ERROR: Canvas size not divisible by 31");
+    }
+  } else {
+    canvas.width = canvas.height = (gridSize * (cSize + scale));
+    cSize = Math.round(canvas.width / gridSize);
+  }
+  console.log("Canvas size: " + canvas.width + ", cell size: " + cSize);
+  // Makes images scale all pixely (yay!)
+  ctx.mozImageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = false;
 }
 
 // ----- INPUT ----
@@ -250,4 +257,4 @@ function play31() {
 
 }
 
-window.onload = function () { play31(); };
+window.onload = function () { resize(); play31(); };
