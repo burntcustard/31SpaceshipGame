@@ -45,3 +45,6 @@ Reference links:
   Good tutorial: http://codeincomplete.com/posts/2013/12/1/javascript_game_foundations/
 
   Prototypes: https://msdn.microsoft.com/en-us/magazine/ff852808.aspx
+  
+  More Inheritance/Protoypes: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
+  
