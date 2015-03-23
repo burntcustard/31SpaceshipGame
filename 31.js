@@ -19,7 +19,7 @@ var animate = window.requestAnimationFrame ||
   window.mozRequestAnimationFrame ||
   function (callback) { window.setTimeout(callback, 1000 / 60); };
 
-// Extra canvas for creating primary col 
+// Extra canvas for creating primary col
 var canvasPri = document.createElement("canvas");
 canvas.id = "canvasPri";
 canvasPri.width = "248px";
@@ -37,7 +37,6 @@ ctx.mozImageSmoothingEnabled = false;
 var smallShipImage = new Image();
 smallShipImage.src = "smallShipSprite.png";
 
-// Stole from here: http://www.williammalone.com/articles/create-html5-canvas-javascript-sprite-animation/
 function sprite(options) {
   var that = {};
   that.width = options.width;
@@ -80,53 +79,53 @@ function Ship(model, primaryColor, secondaryColor, HP) {
 }
 
 function play31() {
-  
+
   var // The vars have got to be at an odd angle (JSLint), this might be clearer than having 1st on same line
     debug = true,
     playerShip; // Players current ship (and all the fancy stuff on it?)
-  
+
   if (!debug) { debugMenu.style.display = "none"; }
-  
+
   function render() {
-    
+
     // Fill one pixel in with specific colour
     function paintCell(x, y, color) {
       ctx.fillStyle = color;
       ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
     }
-    
+
     // Fill canvas with levels color
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
+
     smallShip.draw();
-    
+
   }
 
   function update() {
   }
 
   function gameLoop() {
-    
+
     now = window.performance.now();
     dt = Math.min(1, (now - last) / 1000);  // duration in seconds
-    
+
     while (dt > step) {
       dt -= step;
       update(step);
     }
-    
+
     //if (debug) { debugMenu.innerHTML = "FrameTime: " + now.toFixed(); }
-    
+
     render(dt);
-    
+
     last = now;
     animate(gameLoop);
   }
-  
+
   function newGame(level) {
     // Clear old stuff
-    
+
     switch (level) {
     case "level1":
       //Do level1 stuff
@@ -144,12 +143,12 @@ function play31() {
     default:
       // Failed to load level, throw error or go back to menu etc.
     }
-    
+
     gameLoop();
   }
-  
+
   newGame("level1");
-  
+
 }
 
 window.onload = function () { play31(); };
