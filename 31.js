@@ -31,21 +31,24 @@ var ctxPri = canvasPri.getContext("2d");
 // Resizes game window. If no scale given, you're just setting sizes on first run.
 function resize(scale) {
   if (scale && (cSize + scale > 0)) {
-    canvas.width = canvas.height = (gridSize * (cSize + scale));
-    cSize = Math.round(canvas.width / gridSize);
-  } else {
+    // Rescaling, and won't end up too small (remember, scale could be negative)
+    canvas.width = canvas.height = gridSize * (cSize + scale);
     cSize = canvas.width / gridSize;
-    if ( gridSize % 1 !== 0) { // If gridSize is NOT a whole number
-      console.log("ERROR: Canvas size not divisible by 31");
+  } else {
+    // Setting size on page load
+    cSize = canvas.width / gridSize;
+    if (cSize % 1 !== 0) {  // If gridSize is NOT a whole number (probably dodgy CSS)
+      throw new Error ("Canvas size not divisible by 31.");
     }
   }
-  console.log("Canvas size: " + canvas.width + ", cell size: " + cSize);
-  // Makes images scale all pixely (yay!)
+  // Makes images scale all pixely rather than blurring
   ctx.mozImageSmoothingEnabled = false;
   ctx.imageSmoothingEnabled = false;
 }
 
-// ----- INPUT ----
+
+
+// ----- INPUT ---- //
 var key,
   keys = {};
 
@@ -74,7 +77,7 @@ document.onkeyup = function (key) {
     default : console.log("Unhandled keyUNpress: " + key.which);
   }
 };
-// -- Input End ---
+// --- INPUT END -- //
 
 
 // Menu stuffs
