@@ -34,9 +34,9 @@ function sprite(options) {  // Stole from here: http://www.williammalone.com/art
   that.height = options.height;
   that.index = options.index;
   that.image = options.image;
-  that.draw = function() {
+  that.draw = function () {
     ctx.drawImage(that.image, that.width * that.index, 0, that.width, that.height, 0, 0, that.width * 8,  that.height * 8);
-  }
+  };
   return that;
 }
 
