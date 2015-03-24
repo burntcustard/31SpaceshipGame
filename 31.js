@@ -98,9 +98,13 @@ function SmallShip() {
   this.spriteY = 3;
   this.width = 5;      // Width/Height of the Frame
   this.height = 6;
-  this.index = 0;      // Current frame of the sheet
+  this.index = 1;      // Current frame of the sheet
   this.weapons = {};
-  this.maxHealth = 2;
+  this.hp = [
+    {x: 2, y: 2, tiltOffsetL: 1, tiltOffsetR: 1},
+    {x: 2, y: 3, tiltOffsetL: 1, tiltOffsetR: 1}
+  ];
+  this.maxHealth = this.hp.length;
   this.maxVelocity = 0.5;
 }
 function BigShip() {
@@ -109,9 +113,19 @@ function BigShip() {
   this.spriteY = 0;
   this.width = 9;      // Width/Height of the Frame
   this.height = 9;
-  this.index = 0;      // Current frame of the sheet
+  this.index = 1;      // Current frame of the sheet
   this.weapons = {};
-  this.maxHealth = 8;
+  this.hp = [  // Use hp.shift() to remove a piece of health.
+    {x: 4, y: 3, tiltOffsetL: 2, tiltOffsetR: 2},
+    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR: 2}, // tiltOffset: false means not displayed
+    {x: 4, y: 4, tiltOffsetL: 2, tiltOffsetR: 2},
+    {x: 5, y: 4, tiltOffsetL: 2, tiltOffsetR: false},
+    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR: 2},
+    {x: 4, y: 5, tiltOffsetL: 2, tiltOffsetR: 2},
+    {x: 5, y: 5, tiltOffsetL: 2, tiltOffsetR: false},
+    {x: 4, y: 6, tiltOffsetL: 2, tiltOffsetR: 2}
+  ];
+  this.maxHealth = this.hp.length;
   this.maxVelocity = 0.25;
 }
 
@@ -313,7 +327,9 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
-        y: 22
+        y: 22,
+        primaryColor: "rgba(0,235,230,0.5)",
+        secondaryColor: "rgba(80,50,255,0.5)"
       });
     }
 
