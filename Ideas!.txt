@@ -1,13 +1,14 @@
+In-Progress:
+  Asteroids - Physco
+  Colour layering - Burnt
+
 Todo:
-  Asteroids
   Stop FPS bugging on level reload <-- This because you were loading another level ON TOP :D
   Weapon stuff
   Enemy ships
   Hit point stuff
   Move ships with velocity rather than impulse
-
-In-Progress:
-
+  Level constructor (and level changing?)
 
 Main game:
 

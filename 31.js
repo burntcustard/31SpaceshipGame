@@ -98,10 +98,13 @@ document.onkeyup = function (key) {
 
 
 
-// ----- SHIP OBJECTS ----- //
+// -------- OBJECTS ------- //
+
+var mainSprites = new Image();
+mainSprites.src = "spriteSheet.png";
+
 function SmallShip() {
-  this.spriteSheet = new Image();
-  this.spriteSheet.src = "spriteSheet.png";
+  this.spriteSheet = mainSprites;
   this.spriteX = 0;    // Position of the sprite in the sheet
   this.spriteY = 0;
   this.width = 5;      // Width/Height of the Frame
@@ -112,8 +115,7 @@ function SmallShip() {
   this.maxVelocity = 0.5;  // 0.25 pixels/s max speed. Probably shouldn't have anything slower 'coz clunky
 }
 function BigShip() {
-  this.spriteSheet = new Image();
-  this.spriteSheet.src = "spriteSheet.png";
+  this.spriteSheet = mainSprites;
   this.spriteX = 0;    // Position of the sprite in the sheet
   this.spriteY = 19;
   this.width = 9;      // Width/Height of the Frame
@@ -124,17 +126,28 @@ function BigShip() {
   this.maxVelocity = 0.25;
 }
 
-function Ship(options) {
-  // Inherit from the ship model
-  this.model = options.model || "smallShip";
-  switch(this.model) {
+function MediumRock() {
+  this.spriteSheet = mainSprites;
+  this.spriteX = 16;    // Position of the sprite in the sheet
+  this.spriteY = 0;
+  this.width = 4;      // Width/Height of the Frame
+  this.height = 4;
+  this.index = 0;      // Current frame of the sheet
+  this.maxHealth = 8;
+  this.maxVelocity = 1;
+}
+
+function Entity(options) {
+  // Inherit from the correct object type
+  this.type = options.type || "smallShip";
+  switch(this.type) {
     case "smallShip": SmallShip.call(this); break;
     case "bigShip": BigShip.call(this); break;
-    default: throw new Error ("Tried to load unknown ship.");
+    case "mediumRock": MediumRock.call(this); break;
+    default: throw new Error ("Tried to load unknown object.");
   }
 
-  // Properties for all ships go here
-  // ACTUALLY every sprite in the game will need these things, not just ships? ^.-
+  // Properties for all objects go here
   this.x = options.x || 0;
   this.y = options.y || 0;
   this.vx = options.vx || 0;
@@ -169,17 +182,20 @@ function Ship(options) {
     ctx.restore();
   };
 }
-// --- SHIP OBJECTS END --- //
+// ------ OBJECTS END ----- //
 
 
 
 function play31() {
 
   var playerShip, // Players current ship and all the fancy stuff on it
-      level;      // Data about the level
+      level = [],      // Data about the level
+      i;
 
 
   function render() {
+
+    if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
 
     // Fill one pixel in with specific colour
     function paintCell(x, y, color) {
@@ -191,17 +207,17 @@ function play31() {
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
-
     if (debug) {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
     }
 
-    playerShip.draw();
+    for (i = 0; i < level.length; i++) {
+      level[i].draw();
+    }
 
-    if (meter) { meter.tick(); }  // FPS Meter measure FPS
+    playerShip.draw();
   }
 
 
@@ -212,22 +228,22 @@ function play31() {
     // level rather than on the fly like this.
 
     if (keys.one) {
-      playerShip = new Ship({
-        model: "smallShip",
+      playerShip = new Entity({
+        type: "smallShip",
         x: 13,
         y: 22
       });
     }
 
     if (keys.two) {
-      playerShip = new Ship({
-        model: "bigShip",
+      playerShip = new Entity({
+        type: "bigShip",
         x: 11,
         y: 20
       });
     }
 
-// Test!
+
 
     // Player movement
     if (playerShip.move === "left") {
@@ -287,27 +303,35 @@ function play31() {
       update(dt);
     }
 
+    if (meter) { meter.tick(); }  // FPS Meter tick finish
+
     last = now;
     window.requestAnimationFrame(gameLoop);
   }
 
 
 
-  function newGame(level) {
+  function newGame(levelNum) {
     // Clear old stuff
 
-    switch (level) {
+    switch (levelNum) {
     case "level1":
       // TODO: level = new Level (and add a nice constructor class)?
-      playerShip = new Ship({
-        model: "smallShip",
+      playerShip = new Entity({
+        type: "smallShip",
         x: 13,
         y: 22
       });
+      var r = new Entity({
+        type: "mediumRock",
+        x: 5,
+        y: 5
+      });
+      level.push(r);
       break;
     case "level2":
-      playerShip = new Ship({
-        model: "bigShip",
+      playerShip = new Entity({
+        type: "bigShip",
         x: 13,
         y: 20
       });
