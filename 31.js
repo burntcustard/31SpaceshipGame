@@ -188,8 +188,12 @@ function Entity(options) {
 
 function play31() {
 
-  var playerShip, // Players current ship and all the fancy stuff on it
-      level = [],      // Data about the level
+  var playerShip,   // Players current ship and all the fancy stuff on it
+      level = {     // Data about the level
+        rocks: [],
+        enemies: [],
+        background: "Pink!"
+      },
       i;
 
 
@@ -207,17 +211,22 @@ function play31() {
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
+    // Draw space rocks
+    for (i = 0; i < level.rocks.length; i++) {
+      level.rocks[i].draw();
+    }
+
+    playerShip.draw();
+
+
+
+    // ------ DEBUG INFO ------ //
     if (debug) {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
     }
-
-    for (i = 0; i < level.length; i++) {
-      level[i].draw();
-    }
-
-    playerShip.draw();
+    // ------- DEBUG END ------ //
   }
 
 
@@ -244,16 +253,13 @@ function play31() {
       });
     }
 
-
-
-    // Rock movement - not using a 'rock' list for now
-    for (i = 0; i < level.length; i++) {
-      var ent = level[i];
+    // Rock movement
+    for (i = 0; i < level.rocks.length; i++) {
+      var ent = level.rocks[i];
       ent.y += ent.maxVelocity;
+      // If the rock goes off the bottom move to the top, wont want this in the final
       if (ent.y > 32) { ent.y = -ent.height; }
     }
-
-
 
     // Player movement
     if (playerShip.move === "left") {
@@ -337,7 +343,7 @@ function play31() {
         x: 5,
         y: 5
       });
-      level.push(r);
+      level.rocks.push(r);
       break;
     case "level2":
       playerShip = new Entity({
@@ -352,6 +358,8 @@ function play31() {
 
     gameLoop();
   }
+
+  console.log(level);
 
   newGame("level1");
 
