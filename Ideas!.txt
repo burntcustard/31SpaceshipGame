@@ -43,6 +43,9 @@ Visual Extras:
 
   Primary/secondary colours on ships using coloured overlays.
     - http://buildnewgames.com/global-composit-operations/
+    
+  Greyscale values for black'n'white images that will have colour put over the top:
+  255, 192, 128, 80, 32
 
   Do engine trails seperately to rest of ship so can be animated etc.
 
