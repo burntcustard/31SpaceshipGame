@@ -153,10 +153,49 @@ function Entity(options) {
   this.hp = options.hp || this.maxHealth;
 
   // Colour stuff
-  this.colour = {};
-  this.colour.primary = options.primaryColor || "rgba(0,235,230,0.5)"; // Default primary colour is cyan
-  this.colour.secondary = options.secondaryColor || "rgba(114,102,189,0.5)"; // Default secondary colour is purple
+  //this.primaryColor = options.primaryColor || "rgba(0,235,230,0.5)"; // Default primary colour is cyan
+  //this.secondaryColor = options.secondaryColor || "rgba(80,50,255,0.5)"; // Default secondary colour is purple
 
+  // Starting to think not everything should have a primary and secondary colour :/
+  this.primaryColor = options.primaryColor || false;
+  this.secondaryColor = options.secondaryColor || false;
+  
+  
+  // Initial draw creates the object off screen, then these two images both get
+  // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
+  // in this way needs to have it's own canvas or two (I think), so we should come up with a way
+  // to make hidden canvaseses on the fly whenever a coloured object is spawned.
+  
+  if (this.primaryColor && this.secondaryColor) {
+    var canvasPri = document.getElementById('canvasPri');
+    var ctxPri = canvasPri.getContext('2d');
+    ctxPri.mozImageSmoothingEnabled = false;
+    ctxPri.imageSmoothingEnabled = false;
+
+    ctxPri.drawImage(this.spriteSheet, 0, 0);
+    ctxPri.globalCompositeOperation = "source-atop";
+    ctxPri.fillStyle = this.primaryColor;
+    ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
+
+    var canvasSec = document.getElementById('canvasSec');
+    var ctxSec = canvasSec.getContext('2d');
+    ctxSec.mozImageSmoothingEnabled = false;
+    ctxSec.imageSmoothingEnabled = false;
+
+    ctxSec.drawImage(this.spriteSheet, 0, 0);
+    ctxSec.globalCompositeOperation = "source-atop";
+    ctxSec.fillStyle = this.secondaryColor;
+    ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
+
+    var canvas = document.getElementById('canvas31');
+    var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+  }
+  // End initial hidden draw
+  
+  
+  
   this.draw = function() {
 
     /*
@@ -166,54 +205,55 @@ function Entity(options) {
       ctx.scale(1, -1);
     }
     */
-    
-    var canvasPri = document.getElementById('canvasPri');
-    var ctxPri = canvasPri.getContext('2d');
-    ctxPri.mozImageSmoothingEnabled = false;
-    ctxPri.imageSmoothingEnabled = false;
-
-    ctxPri.drawImage(this.spriteSheet, 0, 0);
-    ctxPri.globalCompositeOperation = "source-atop";
-    ctxPri.fillStyle = this.colour.primary;
-    ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
-    
-    var canvasSec = document.getElementById('canvasSec');
-    var ctxSec = canvasSec.getContext('2d');
-    ctxSec.mozImageSmoothingEnabled = false;
-    ctxSec.imageSmoothingEnabled = false;
-    
-    ctxSec.drawImage(this.spriteSheet, 0, 0);
-    ctxSec.globalCompositeOperation = "source-atop";
-    ctxSec.fillStyle = this.colour.secondary;
-    ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
-    
-    var canvas = document.getElementById('canvas31');
-    var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-    
-    ctx.drawImage(
-      canvasPri,
-      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-      this.spriteY,                            // SourceY
-      this.width,                              // SourceW (Size of frame)
-      this.height,                             // SourceH
-      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-      this.width * cSize,                      // DestinationW (Size on canvas)
-      this.height * cSize                      // DestinationH
-    );
-    ctx.drawImage(
-      canvasSec,
-      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-      this.spriteY + this.height + 1,          // SourceY
-      this.width,                              // SourceW (Size of frame)
-      this.height,                             // SourceH
-      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-      this.width * cSize,                      // DestinationW (Size on canvas)
-      this.height * cSize                      // DestinationH
-    );
+    // I'm getting the feeling only ships should have primary and secondary colours because confusing
+    if (this.primaryColor && this.secondaryColor) {
+      ctx.drawImage(
+        canvasPri,
+        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+        this.spriteY,                            // SourceY
+        this.width,                              // SourceW (Size of frame)
+        this.height,                             // SourceH
+        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        this.width * cSize,                      // DestinationW (Size on canvas)
+        this.height * cSize                      // DestinationH
+      );
+      ctx.drawImage(
+        canvasSec,
+        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+        this.spriteY + this.height + 1,          // SourceY
+        this.width,                              // SourceW (Size of frame)
+        this.height,                             // SourceH
+        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        this.width * cSize,                      // DestinationW (Size on canvas)
+        this.height * cSize                      // DestinationH
+      );
+      // This is so messy herpa derp
+      ctx.drawImage(
+        this.spriteSheet,
+        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+        this.spriteY + this.height * 2 + 2,      // SourceY
+        this.width,                              // SourceW (Size of frame)
+        this.height * 2,                             // SourceH
+        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+        Math.round(this.y + this.height - 1) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        this.width * cSize,                      // DestinationW (Size on canvas)
+        this.height * cSize * 2                     // DestinationH
+      );
+    } else {
+      ctx.drawImage(
+        this.spriteSheet,
+        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+        this.spriteY,                            // SourceY
+        this.width,                              // SourceW (Size of frame)
+        this.height,                             // SourceH
+        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        this.width * cSize,                      // DestinationW (Size on canvas)
+        this.height * cSize                      // DestinationH
+      );
+    }
     //ctx.restore();
   };
 }
@@ -362,10 +402,10 @@ function play31() {
 
 
 
-  function newGame(levelNum) {
+  function newGame(levelID) {
     // Clear old stuff
 
-    switch (levelNum) {
+    switch (levelID) {
     case "level1":
       // TODO: level = new Level (and add a nice constructor class)?
       playerShip = new Entity({
@@ -384,7 +424,9 @@ function play31() {
       playerShip = new Entity({
         type: "bigShip",
         x: 13,
-        y: 20
+        y: 20,
+        primaryColor: "rgba(80,80,0,0.7)",
+        secondaryColor: "rgba(0,235,230,0.5)"
       });
       break;
     default:
