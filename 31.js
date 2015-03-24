@@ -4,6 +4,10 @@
 
 var canvas = document.getElementById("canvas31"),
   ctx = canvas.getContext("2d"),
+  canvasPri = document.getElementById("canvas31"),
+  ctxPri = canvasPri.getContext("2d"),
+  canvasSec = document.getElementById("canvas31"),
+  ctxSec = canvasSec.getContext("2d"),
   debug = false,
   debugMenu = document.getElementById("debug"),
   meter,
@@ -15,16 +19,6 @@ var canvas = document.getElementById("canvas31"),
   cSize;  // Size of cell in pixels
 
 
-
-/* Extra canvas for creating primary colour
-var canvasPri = document.createElement("canvas");
-canvas.id = "canvasPri";
-canvasPri.width = "248px";
-canvasPri.height = "248px";
-document.body.appendChild(canvasPri);
-canvasPri = document.getElementById("canvasPri"); // Reusing variable to grab canvas
-var ctxPri = canvasPri.getContext("2d");
-*/
 
 // Resizes game window. If no scale given, you're just setting sizes on first run.
 function resize(scale) {
@@ -42,6 +36,10 @@ function resize(scale) {
   // Makes images scale all pixely rather than blurring
   ctx.mozImageSmoothingEnabled = false;
   ctx.imageSmoothingEnabled = false;
+  ctxPri.mozImageSmoothingEnabled = false;
+  ctxPri.imageSmoothingEnabled = false;
+  ctxSec.mozImageSmoothingEnabled = false;
+  ctxSec.imageSmoothingEnabled = false;
 }
 
 
@@ -101,7 +99,7 @@ document.onkeyup = function (key) {
 // -------- OBJECTS ------- //
 
 var mainSprites = new Image();
-mainSprites.src = "spriteSheet.png";
+mainSprites.src = "greyscaleSpriteSheet.png";
 
 function SmallShip() {
   this.spriteSheet = mainSprites;
@@ -116,10 +114,10 @@ function SmallShip() {
 }
 function BigShip() {
   this.spriteSheet = mainSprites;
-  this.spriteX = 0;    // Position of the sprite in the sheet
-  this.spriteY = 19;
+  this.spriteX = 1;    // Position of the sprite in the sheet
+  this.spriteY = 4;
   this.width = 9;      // Width/Height of the Frame
-  this.height = 20;
+  this.height = 9;
   this.index = 0;      // Current frame of the sheet
   this.weapons = {};
   this.maxHealth = 8;
@@ -156,18 +154,25 @@ function Entity(options) {
 
   // Colour stuff
   this.colour = {};
-  this.colour.primary = options.primaryColor || "rgb(80,255,240)"; // Default primary colour is cyan
-  this.colour.secondary = options.secondaryColor || "rgb(114,102,189)"; // Default secondary colour is purple
+  this.colour.primary = options.primaryColor || "rgba(80,255,240,0.5)"; // Default primary colour is cyan
+  this.colour.secondary = options.secondaryColor || "rgba(114,102,189,0.5)"; // Default secondary colour is purple
 
   this.draw = function() {
 
+    /*
     if (this.flip) {
       ctx.save();
       ctx.translate(0, canvas.width);
       ctx.scale(1, -1);
     }
+    */
+    
+    var canvasPri = document.getElementById('canvasPri');
+    var ctxPri = canvasPri.getContext('2d');
+    ctxPri.mozImageSmoothingEnabled = false;
+    ctxPri.imageSmoothingEnabled = false;
 
-    ctx.drawImage(
+    ctxPri.drawImage(
       this.spriteSheet,                        // Spritesheet
       this.spriteX + this.width * this.index,  // SourceX (Position of frame)
       this.spriteY,                            // SourceY
@@ -178,8 +183,39 @@ function Entity(options) {
       this.width * cSize,                      // DestinationW (Size on canvas)
       this.height * cSize                      // DestinationH
     );
+    ctxPri.globalCompositeOperation = "source-atop";
+    ctxPri.fillStyle = this.colour.primary;
+    ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
+    
+    var canvasSec = document.getElementById('canvasSec');
+    var ctxSec = canvasSec.getContext('2d');
+    ctxSec.mozImageSmoothingEnabled = false;
+    ctxSec.imageSmoothingEnabled = false;
+    
+    ctxSec.drawImage(
+      this.spriteSheet,                        // Spritesheet
+      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+      this.spriteY + this.height,              // SourceY (Like er... cockpit is underneath)
+      this.width,                              // SourceW (Size of frame)
+      this.height,                             // SourceH
+      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+      this.width * cSize,                      // DestinationW (Size on canvas)
+      this.height * cSize                      // DestinationH
+    );
+    ctxSec.globalCompositeOperation = "source-atop";
+    ctxSec.fillStyle = this.colour.secondary;
+    ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
+    
+    var canvas = document.getElementById('canvas31');
+    var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+    
+    ctx.drawImage(canvasPri,0,0);
+    ctx.drawImage(canvasSec,0,0);
 
-    ctx.restore();
+    //ctx.restore();
   };
 }
 // ------ OBJECTS END ----- //
