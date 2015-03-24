@@ -3,7 +3,7 @@
 //=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
 
 In-Progress:
-  Asteroids(Sorry, "Rocks") - Kinda done
+  Asteroids(Sorry, "Rocks") - Kinda done - SPACE ROCKS
   Colour layering - Burnt
 
 To-do:
@@ -55,7 +55,9 @@ Visual Extras:
     - http://buildnewgames.com/global-composit-operations/
     
   Grey-scale values for black'n'white images that will have colour put over the top:
-  255, 192, 128, 80, 32
+  255, 192, 128, 64, 0
+  When setting a light primary use rgba(x,x,x,0.5).
+  When setting a dark colour use rgba(x,x,x,>0.5). 
 
   Do engine trails separately to rest of ship so can be animated etc.
 

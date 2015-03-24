@@ -4,9 +4,9 @@
 
 var canvas = document.getElementById("canvas31"),
   ctx = canvas.getContext("2d"),
-  canvasPri = document.getElementById("canvas31"),
+  canvasPri = document.getElementById("canvasPri"),
   ctxPri = canvasPri.getContext("2d"),
-  canvasSec = document.getElementById("canvas31"),
+  canvasSec = document.getElementById("canvasSec"),
   ctxSec = canvasSec.getContext("2d"),
   debug = false,
   debugMenu = document.getElementById("debug"),
@@ -110,7 +110,7 @@ function SmallShip() {
   this.index = 0;      // Current frame of the sheet
   this.weapons = {};
   this.maxHealth = 2;
-  this.maxVelocity = 0.5;  // 0.25 pixels/s max speed. Probably shouldn't have anything slower 'coz clunky
+  this.maxVelocity = 0.5;
 }
 function BigShip() {
   this.spriteSheet = mainSprites;
@@ -165,9 +165,11 @@ function Entity(options) {
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
   // to make hidden canvaseses on the fly whenever a coloured object is spawned.
+  // This is currently kinda broken :/
   
   if (this.primaryColor && this.secondaryColor) {
-    var canvasPri = document.getElementById('canvasPri');
+    if (debug) { console.log("Creating a fancy colourful ship"); }
+    canvasPri = document.getElementById('canvasPri');
     var ctxPri = canvasPri.getContext('2d');
     ctxPri.mozImageSmoothingEnabled = false;
     ctxPri.imageSmoothingEnabled = false;
@@ -177,7 +179,7 @@ function Entity(options) {
     ctxPri.fillStyle = this.primaryColor;
     ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
 
-    var canvasSec = document.getElementById('canvasSec');
+    canvasSec = document.getElementById('canvasSec');
     var ctxSec = canvasSec.getContext('2d');
     ctxSec.mozImageSmoothingEnabled = false;
     ctxSec.imageSmoothingEnabled = false;
@@ -187,7 +189,13 @@ function Entity(options) {
     ctxSec.fillStyle = this.secondaryColor;
     ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
 
-    var canvas = document.getElementById('canvas31');
+    canvas = document.getElementById('canvas31');
+    var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+  } else {
+    // Why does this give error here but not 4 lines before? ^.-
+    canvas = document.getElementById('canvas31');
     var ctx = canvas.getContext('2d');
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
@@ -197,7 +205,7 @@ function Entity(options) {
   
   
   this.draw = function() {
-
+    
     /*
     if (this.flip) {
       ctx.save();
@@ -324,7 +332,9 @@ function play31() {
       playerShip = new Entity({
         type: "bigShip",
         x: 11,
-        y: 20
+        y: 20,
+        primaryColor: "rgba(80,80,0,0.7)",
+        secondaryColor: "rgba(0,235,230,0.5)"
       });
     }
 
