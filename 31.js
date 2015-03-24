@@ -3,11 +3,8 @@
 "use strict";
 
 var canvas = document.getElementById("canvas31"),
-  ctx = canvas.getContext("2d"),
   canvasPri = document.getElementById("canvasPri"),
-  ctxPri = canvasPri.getContext("2d"),
   canvasSec = document.getElementById("canvasSec"),
-  ctxSec = canvasSec.getContext("2d"),
   debug = false,
   debugMenu = document.getElementById("debug"),
   meter,
@@ -33,13 +30,7 @@ function resize(scale) {
       throw new Error ("Canvas size not divisible by 31.");
     }
   }
-  // Makes images scale all pixely rather than blurring
-  ctx.mozImageSmoothingEnabled = false;
-  ctx.imageSmoothingEnabled = false;
-  ctxPri.mozImageSmoothingEnabled = false;
-  ctxPri.imageSmoothingEnabled = false;
-  ctxSec.mozImageSmoothingEnabled = false;
-  ctxSec.imageSmoothingEnabled = false;
+
 }
 
 
@@ -132,7 +123,7 @@ function MediumRock() {
   this.height = 4;
   this.index = 0;      // Current frame of the sheet
   this.maxHealth = 8;
-  this.maxVelocity = 0;
+  this.maxVelocity = 0.25;
 }
 
 function Entity(options) {
@@ -169,7 +160,7 @@ function Entity(options) {
   
   if (this.primaryColor && this.secondaryColor) {
     if (debug) { console.log("Creating a fancy colourful ship"); }
-    canvasPri = document.getElementById('canvasPri');
+    //canvasPri = document.getElementById('canvasPri');
     var ctxPri = canvasPri.getContext('2d');
     ctxPri.mozImageSmoothingEnabled = false;
     ctxPri.imageSmoothingEnabled = false;
@@ -179,7 +170,7 @@ function Entity(options) {
     ctxPri.fillStyle = this.primaryColor;
     ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
 
-    canvasSec = document.getElementById('canvasSec');
+    //canvasSec = document.getElementById('canvasSec');
     var ctxSec = canvasSec.getContext('2d');
     ctxSec.mozImageSmoothingEnabled = false;
     ctxSec.imageSmoothingEnabled = false;
@@ -189,13 +180,7 @@ function Entity(options) {
     ctxSec.fillStyle = this.secondaryColor;
     ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
 
-    canvas = document.getElementById('canvas31');
-    var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-  } else {
-    // Why does this give error here but not 4 lines before? ^.-
-    canvas = document.getElementById('canvas31');
+    //canvas = document.getElementById('canvas31');
     var ctx = canvas.getContext('2d');
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
@@ -204,8 +189,8 @@ function Entity(options) {
   
   
   
-  this.draw = function() {
-    
+  this.draw = function(ctx) {
+
     /*
     if (this.flip) {
       ctx.save();
@@ -284,6 +269,10 @@ function play31() {
 
     if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
 
+    var ctx = canvas.getContext('2d');
+    ctx.mozImageSmoothingEnabled = false;
+    ctx.imageSmoothingEnabled = false;
+    
     // Fill one pixel in with specific colour
     function paintCell(x, y, color) {
       ctx.fillStyle = color;
@@ -296,10 +285,10 @@ function play31() {
 
     // Draw space rocks
     for (i = 0; i < level.rocks.length; i++) {
-      level.rocks[i].draw();
+      level.rocks[i].draw(ctx);
     }
 
-    playerShip.draw();
+    playerShip.draw(ctx);
 
 
 
@@ -448,7 +437,7 @@ function play31() {
 
   console.log(level);
 
-  newGame("level2");
+  newGame("level1");
 
 }
 window.onload = function () { resize(); play31(); };
