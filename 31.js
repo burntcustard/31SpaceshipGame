@@ -3,8 +3,8 @@
 "use strict";
 
 var canvas = document.getElementById("canvas31"),
-  canvasPri = document.getElementById("canvasPri"),
-  canvasSec = document.getElementById("canvasSec"),
+  canvasPri = document.createElement("canvas"),
+  canvasSec = document.createElement("canvas"),
   debug = false,
   debugMenu = document.getElementById("debug"),
   meter,
@@ -150,14 +150,14 @@ function Entity(options) {
   // Starting to think not everything should have a primary and secondary colour :/
   this.primaryColor = options.primaryColor || false;
   this.secondaryColor = options.secondaryColor || false;
-  
-  
+
+
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
   // to make hidden canvaseses on the fly whenever a coloured object is spawned.
   // This is currently kinda broken :/
-  
+
   if (this.primaryColor && this.secondaryColor) {
     if (debug) { console.log("Creating a fancy colourful ship"); }
     //canvasPri = document.getElementById('canvasPri');
@@ -186,9 +186,9 @@ function Entity(options) {
     ctx.imageSmoothingEnabled = false;
   }
   // End initial hidden draw
-  
-  
-  
+
+
+
   this.draw = function(ctx) {
 
     /*
@@ -272,7 +272,7 @@ function play31() {
     var ctx = canvas.getContext('2d');
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
-    
+
     // Fill one pixel in with specific colour
     function paintCell(x, y, color) {
       ctx.fillStyle = color;

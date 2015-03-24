@@ -7,12 +7,12 @@ In-Progress:
   Colour layering - Burnt
 
 To-do:
-  Stop FPS bugging on level reload <-- This because you were loading another level ON TOP :D
   Weapon stuff
   Enemy ships
   Hit point stuff
   Move ships with velocity rather than impulse
   Level constructor (and level changing?)
+  Collisions
 
 Done:
   Better level object
@@ -79,4 +79,6 @@ Reference links:
   Prototypes: https://msdn.microsoft.com/en-us/magazine/ff852808.aspx
 
   More Inheritance/Prototypes: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
+  
+  Pixel collision: https://www.youtube.com/watch?v=MzzStgSmn3Y
 
