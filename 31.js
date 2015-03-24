@@ -14,15 +14,7 @@ var canvas = document.getElementById("canvas31"),
   gridSize = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
   cSize;  // Size of cell in pixels
 
-// Canvas compatability code, makes it work in IE.
-// I vote we drop these because I don't care about the ~4% we'd lose,
-// and as we're not testing on those browsers, something else would
-// probably fuck it up on them anyway.
-// http://www.w3schools.com/browsers/browsers_stats.asp
-var animate = window.requestAnimationFrame ||
-  window.webkitRequestAnimationFrame ||
-  window.mozRequestAnimationFrame ||
-  function (callback) { window.setTimeout(callback, 1000 / 60); };
+
 
 /* Extra canvas for creating primary colour
 var canvasPri = document.createElement("canvas");
@@ -296,7 +288,7 @@ function play31() {
     }
 
     last = now;
-    animate(gameLoop);
+    window.requestAnimationFrame(gameLoop);
   }
 
 
