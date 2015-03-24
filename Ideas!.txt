@@ -1,7 +1,10 @@
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
+// -------------------- Current Progress -------------------- //
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
+
 In-Progress:
   Asteroids(Sorry, "Rocks") - Kinda done
   Colour layering - Burnt
-  Proper level object - Physco
 
 To-do:
   Stop FPS bugging on level reload <-- This because you were loading another level ON TOP :D
@@ -11,9 +14,16 @@ To-do:
   Move ships with velocity rather than impulse
   Level constructor (and level changing?)
 
-  
-  
-  
+Done:
+  Better level object
+  Ship movement and tilting
+  Change ships - need a more graceful method for when level changes work
+  Entity objects and ship/rock sub types (inheritance yay!)
+  Keyboard stuff
+
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
+// -------------------- IDEAS / PLANNING -------------------- //
+//=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-//
 
 Main game:
 
@@ -65,6 +75,6 @@ Reference links:
   Good tutorial: http://codeincomplete.com/posts/2013/12/1/javascript_game_foundations/
 
   Prototypes: https://msdn.microsoft.com/en-us/magazine/ff852808.aspx
-  
+
   More Inheritance/Protoypes: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Inheritance_and_the_prototype_chain
-  
+
