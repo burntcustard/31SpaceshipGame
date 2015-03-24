@@ -87,7 +87,7 @@ document.onkeydown = function (key) {
     case 187: resize(+2);        break;
     case 189: resize(-2);        break;
     case 191: toggleDebug();     break;
-    default : console.log("Unhandled keypress: " + key.which);
+    default : if (debug) { console.log("Unhandled keypress: " + key.which); }
   }
 };
 document.onkeyup = function (key) {
@@ -99,7 +99,7 @@ document.onkeyup = function (key) {
     case  40: delete keys.down;  break;
     case  49: delete keys.one;   break;
     case  50: delete keys.two;   break;
-    default : console.log("Unhandled keyUNpress: " + key.which);
+    default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
   }
 };
 // ------- INPUT END ------ //
