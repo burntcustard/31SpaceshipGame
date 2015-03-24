@@ -95,9 +95,9 @@ mainSprites.src = "greyscaleSpriteSheet.png";
 function SmallShip() {
   this.spriteSheet = mainSprites;
   this.spriteX = 0;    // Position of the sprite in the sheet
-  this.spriteY = 0;
+  this.spriteY = 3;
   this.width = 5;      // Width/Height of the Frame
-  this.height = 18;
+  this.height = 6;
   this.index = 0;      // Current frame of the sheet
   this.weapons = {};
   this.maxHealth = 2;
@@ -105,8 +105,8 @@ function SmallShip() {
 }
 function BigShip() {
   this.spriteSheet = mainSprites;
-  this.spriteX = 1;    // Position of the sprite in the sheet
-  this.spriteY = 4;
+  this.spriteX = 16;    // Position of the sprite in the sheet
+  this.spriteY = 0;
   this.width = 9;      // Width/Height of the Frame
   this.height = 9;
   this.index = 0;      // Current frame of the sheet
@@ -117,7 +117,7 @@ function BigShip() {
 
 function MediumRock() {
   this.spriteSheet = mainSprites;
-  this.spriteX = 16;    // Position of the sprite in the sheet
+  this.spriteX = 44;    // Position of the sprite in the sheet
   this.spriteY = 0;
   this.width = 4;      // Width/Height of the Frame
   this.height = 4;
@@ -214,7 +214,7 @@ function Entity(options) {
       ctx.drawImage(
         canvasSec,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height + 1,          // SourceY
+        this.spriteY + this.height,          // SourceY
         this.width,                              // SourceW (Size of frame)
         this.height,                             // SourceH
         Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
@@ -226,7 +226,7 @@ function Entity(options) {
       ctx.drawImage(
         this.spriteSheet,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height * 2 + 2,      // SourceY
+        this.spriteY + this.height * 2,      // SourceY
         this.width,                              // SourceW (Size of frame)
         this.height * 2,                             // SourceH
         Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
@@ -410,7 +410,9 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
-        y: 22
+        y: 22,
+        primaryColor: "rgba(80,80,0,0.7)",
+        secondaryColor: "rgba(0,235,230,0.5)"
       });
       var r = new Entity({
         type: "mediumRock",
