@@ -219,15 +219,19 @@ function play31() {
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
 
-    // I thought I could do this :/
-    if (keys.one) { playerShip.model = "smallShip"; }
+    if (keys.one) {
+      playerShip = new Ship({
+        model: "smallShip",
+        x: 13,
+        y: 22
+      });
+    }
 
-    // But this works, but not sure is best way?
     if (keys.two) {
       playerShip = new Ship({
         model: "bigShip",
         x: 11,
-        y: 21
+        y: 20
       });
     }
 
