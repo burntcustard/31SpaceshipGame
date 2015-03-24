@@ -80,7 +80,7 @@ document.onkeydown = function (key) {
     case  38: keys.up    = true; break;
     case  39: keys.right = true; break;
     case  40: keys.down  = true; break;
-      
+
     // Other keys
     case  49: keys.one = true;   break;  // So many things can't start with a number char!
     case  50: keys.two = true;   break;
@@ -117,7 +117,7 @@ function SmallShip() {
   this.index = 0;      // Current frame of the sheet
   this.weapons = {};
   this.maxHealth = 2;
-  this.maxVelocity = 0.25;  // 0.25 pixels/s max speed. Probably shouldn't have anything slower 'coz clunky
+  this.maxVelocity = 0.5;  // 0.25 pixels/s max speed. Probably shouldn't have anything slower 'coz clunky
 }
 function BigShip() {
   this.spriteSheet = new Image();
@@ -188,7 +188,7 @@ function play31() {
 
 
   function render() {
-    
+
     // Fill one pixel in with specific colour
     function paintCell(x, y, color) {
       ctx.fillStyle = color;
@@ -200,15 +200,15 @@ function play31() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
-    
-    if (debug) { 
+
+    if (debug) {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
     }
-    
+
     playerShip.draw();
-    
+
     if (meter) { meter.tick(); }  // FPS Meter measure FPS
   }
 
@@ -218,10 +218,10 @@ function play31() {
 
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
-    
+
     // I thought I could do this :/
     if (keys.one) { playerShip.model = "smallShip"; }
-    
+
     // But this works, but not sure is best way?
     if (keys.two) {
       playerShip = new Ship({
@@ -230,9 +230,9 @@ function play31() {
         y: 21
       });
     }
-    
-    
-    
+
+
+
     // Player movement
     if (playerShip.move === "left") {
       playerShip.x -= playerShip.maxVelocity;
@@ -243,7 +243,7 @@ function play31() {
       playerShip.x += playerShip.maxVelocity;
       playerShip.index = 2;
     }
-    
+
     // I feel like this should be just a tiny bit seperate from movement :P
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
@@ -252,7 +252,7 @@ function play31() {
     // Minus and plusses look wrong way around but remember 1,1 is top left!
     if (playerShip.move === "up") { playerShip.y -= playerShip.maxVelocity; }
     if (playerShip.move === "down") { playerShip.y += playerShip.maxVelocity; }
-    
+
   }
 
 
@@ -278,7 +278,7 @@ function play31() {
           playerShip.move = false;
         }
       }
-      
+
       // Testing up/down movement for "going off top of screen" because looks cool
       if (keys.up) { playerShip.move = "up"; }
       if (keys.down) { playerShip.move = "down"; }
@@ -322,8 +322,8 @@ function play31() {
 
     gameLoop();
   }
-  
+
   newGame("level1");
-  
+
 }
 window.onload = function () { resize(); play31(); };
