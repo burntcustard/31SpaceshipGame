@@ -154,7 +154,7 @@ function Entity(options) {
 
   // Colour stuff
   this.colour = {};
-  this.colour.primary = options.primaryColor || "rgba(80,255,240,0.5)"; // Default primary colour is cyan
+  this.colour.primary = options.primaryColor || "rgba(0,235,230,0.5)"; // Default primary colour is cyan
   this.colour.secondary = options.secondaryColor || "rgba(114,102,189,0.5)"; // Default secondary colour is purple
 
   this.draw = function() {
@@ -172,17 +172,7 @@ function Entity(options) {
     ctxPri.mozImageSmoothingEnabled = false;
     ctxPri.imageSmoothingEnabled = false;
 
-    ctxPri.drawImage(
-      this.spriteSheet,                        // Spritesheet
-      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-      this.spriteY,                            // SourceY
-      this.width,                              // SourceW (Size of frame)
-      this.height,                             // SourceH
-      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-      this.width * cSize,                      // DestinationW (Size on canvas)
-      this.height * cSize                      // DestinationH
-    );
+    ctxPri.drawImage(this.spriteSheet, 0, 0);
     ctxPri.globalCompositeOperation = "source-atop";
     ctxPri.fillStyle = this.colour.primary;
     ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
@@ -192,17 +182,7 @@ function Entity(options) {
     ctxSec.mozImageSmoothingEnabled = false;
     ctxSec.imageSmoothingEnabled = false;
     
-    ctxSec.drawImage(
-      this.spriteSheet,                        // Spritesheet
-      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-      this.spriteY + this.height,              // SourceY (Like er... cockpit is underneath)
-      this.width,                              // SourceW (Size of frame)
-      this.height,                             // SourceH
-      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-      this.width * cSize,                      // DestinationW (Size on canvas)
-      this.height * cSize                      // DestinationH
-    );
+    ctxSec.drawImage(this.spriteSheet, 0, 0);
     ctxSec.globalCompositeOperation = "source-atop";
     ctxSec.fillStyle = this.colour.secondary;
     ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
@@ -212,9 +192,28 @@ function Entity(options) {
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
     
-    ctx.drawImage(canvasPri,0,0);
-    ctx.drawImage(canvasSec,0,0);
-
+    ctx.drawImage(
+      canvasPri,
+      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+      this.spriteY,                            // SourceY
+      this.width,                              // SourceW (Size of frame)
+      this.height,                             // SourceH
+      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+      this.width * cSize,                      // DestinationW (Size on canvas)
+      this.height * cSize                      // DestinationH
+    );
+    ctx.drawImage(
+      canvasSec,
+      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+      this.spriteY + this.height + 1,          // SourceY
+      this.width,                              // SourceW (Size of frame)
+      this.height,                             // SourceH
+      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+      this.width * cSize,                      // DestinationW (Size on canvas)
+      this.height * cSize                      // DestinationH
+    );
     //ctx.restore();
   };
 }
@@ -397,7 +396,7 @@ function play31() {
 
   console.log(level);
 
-  newGame("level1");
+  newGame("level2");
 
 }
 window.onload = function () { resize(); play31(); };
