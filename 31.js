@@ -134,7 +134,7 @@ function MediumRock() {
   this.height = 4;
   this.index = 0;      // Current frame of the sheet
   this.maxHealth = 8;
-  this.maxVelocity = 1;
+  this.maxVelocity = 0;
 }
 
 function Entity(options) {
@@ -224,9 +224,10 @@ function play31() {
 
   function update(dt) {
 
+    var i;
+
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
-
     if (keys.one) {
       playerShip = new Entity({
         type: "smallShip",
@@ -241,6 +242,15 @@ function play31() {
         x: 11,
         y: 20
       });
+    }
+
+
+
+    // Rock movement - not using a 'rock' list for now
+    for (i = 0; i < level.length; i++) {
+      var ent = level[i];
+      ent.y += ent.maxVelocity;
+      if (ent.y > 32) { ent.y = -ent.height; }
     }
 
 
