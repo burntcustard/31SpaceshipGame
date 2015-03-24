@@ -1,10 +1,10 @@
 Todo:
-  Move ships with velocity rather than impulse
+  Asteroids
+  Stop FPS bugging on level reload <-- This because you were loading another level ON TOP :D
   Weapon stuff
   Enemy ships
-  Asteroids
   Hit point stuff
-  Stop FPS bugging on level reload
+  Move ships with velocity rather than impulse
 
 In-Progress:
 
