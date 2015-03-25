@@ -83,7 +83,7 @@ function BigShip() {
   this.height = 9;
   this.index = 1;      // Current frame of the sheet
   this.weapons = {};
-  this.hp = [  // hp[i].lost = true to remove a hitpoint, delete hp[i].lost to restore
+  this.hp = [
     {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
     {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
     {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
@@ -134,7 +134,7 @@ function Entity(options) {
     for (i = 0; i < this.maxHealth; i++) {
       if (!this.hp[i].lost && !lostHp) { this.hp[i].lost = true; lostHp = true; }
     }
-    if (!lostHp) { this.dead = true; }  // Been hit after running out of HP so deaded
+    if (!lostHp) { this.dead = true; console.log(this.type + " Dead"); }  // Been hit after running out of HP so deaded
   };
 
   this.hpRestore = function() {
@@ -352,6 +352,8 @@ function play31() {
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
       debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
+      debugMenu.innerHTML += "Player ship dead: " + playerShip.dead + "<br>";
+      debugMenu.innerHTML += "Number of emitters: " + level.emmitters.length + "<br>";
       debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
       debugMenu.innerHTML += "Frame: " + now.toFixed() + "<br>";
     }
@@ -414,7 +416,9 @@ function play31() {
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
     if (keys.one) {
-      level.collidable.splice(level.collidable.indexOf(playerShip), 1);
+      if (level.collidable.indexOf(playerShip) !== -1) {
+        level.collidable.splice(level.collidable.indexOf(playerShip), 1);
+      }
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
@@ -426,7 +430,9 @@ function play31() {
     }
 
     if (keys.two) {
-      level.collidable.splice(level.collidable.indexOf(playerShip), 1);
+      if (level.collidable.indexOf(playerShip) !== -1) {
+        level.collidable.splice(level.collidable.indexOf(playerShip), 1);
+      }
       playerShip = new Entity({
         type: "bigShip",
         x: 11,
@@ -499,9 +505,20 @@ function play31() {
             ctx.fillRect( Math.round(obj1.x) * cSize, Math.round(obj1.y) * cSize, Math.round(obj1.width) * cSize, Math.round(obj1.height) * cSize);
             ctx.fillRect( Math.round(obj2.x) * cSize, Math.round(obj2.y) * cSize, Math.round(obj2.width) * cSize, Math.round(obj2.height) * cSize);
           }
+          obj1.hpLost();
+          obj2.hpLost();
+          //if ((obj1.type === MediumRock) && obj1.dead) { level.rocks.splice(i+1, 1); level.collidable.splice(i, 1); }
+          //if ((obj2.type === MediumRock) && obj2.dead) { level.rocks.splice(j+1, 1); level.collidable.splice(j, 1); }
+          for (var r = 0; r < level.rocks.length; r++) {
+            if (level.rocks[r].dead) { level.rocks.splice(i, 1); }
+          }
+          for (var c = 0; c < level.collidable.length; c++) {
+            if (level.collidable[c].dead) { level.collidable.splice(c, 1); }
+          }
         }
       }
     }
+    
   }
 
 
