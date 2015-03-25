@@ -54,49 +54,6 @@ function toggleDebug() {
 toggleDebug(); // On by defauly for now!
 
 
-// --------- INPUT -------- //
-var key,
-  keys = {};
-
-document.onkeydown = function (key) {
-  switch (key.which) {
-    // Gameplay input keys - should be duplicated in .onkeyup
-    case  32: keys.space = true; break;
-    case  37: keys.left  = true; break;
-    case  38: keys.up    = true; break;
-    case  39: keys.right = true; break;
-    case  40: keys.down  = true; break;
-
-    // Other keys
-    case  49: keys.one   = true; break;
-    case  50: keys.two   = true; break;
-    case  51: keys.three = true; break;
-    case  52: keys.four  = true; break;
-    case  76: keys.l     = true; break;
-    case 187: resize(+2);        break;
-    case 189: resize(-2);        break;
-    case 191: toggleDebug();     break;
-    default : if (debug) { console.log("Unhandled keypress: " + key.which); }
-  }
-};
-document.onkeyup = function (key) {
-  switch (key.which) {
-    case  32: delete keys.space; break;
-    case  37: delete keys.left;  break;
-    case  38: delete keys.up;    break;
-    case  39: delete keys.right; break;
-    case  40: delete keys.down;  break;
-    case  49: delete keys.one;   break;
-    case  50: delete keys.two;   break;
-    case  51: delete keys.three; break;
-    case  52: delete keys.four;  break;
-    case  76: delete keys.l;     break;
-    default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
-  }
-};
-// ------- INPUT END ------ //
-
-
 
 // -------- OBJECTS ------- //
 var mainSprites = new Image();
@@ -138,7 +95,6 @@ function BigShip() {
   ];
   this.maxVelocity = 0.3;
 }
-
 function MediumRock() {
   this.spriteSheet = mainSprites;
   this.spriteX = 44;   // Position of the sprite in the sheet
@@ -206,7 +162,7 @@ function Entity(options) {
 
   if (this.primaryColor && this.secondaryColor) {
     if (debug) { console.log("Creating a fancy colourful ship"); }
-    //canvasPri = document.getElementById('canvasPri');
+    //canvasPri = document.createElement('canvas');
     var ctxPri = canvasPri.getContext('2d');
     ctxPri.mozImageSmoothingEnabled = false;
     ctxPri.imageSmoothingEnabled = false;
@@ -317,14 +273,56 @@ function Entity(options) {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
+      i,
       level = {     // Data about the level
         rocks: [],
         enemies: [],
         collidable: [], // All things that collide
         emmitters: [], // Entity emitters
         background: "Pink!"
-      },
-      i;
+      };
+
+  // --------- INPUT -------- //
+  var key,
+    keys = {};
+
+  document.onkeydown = function (key) {
+    switch (key.which) {
+      // Gameplay input keys - should be duplicated in .onkeyup
+      case  32: keys.space = true; break;
+      case  37: keys.left  = true; break;
+      case  38: keys.up    = true; break;
+      case  39: keys.right = true; break;
+      case  40: keys.down  = true; break;
+
+      // Other keys
+      case  49: keys.one   = true; break;
+      case  50: keys.two   = true; break;
+      case  51: keys.three = true; break;
+      case  52: keys.four  = true; break;
+      case 76: console.log(level); break;
+      case 187: resize(+2);        break;
+      case 189: resize(-2);        break;
+      case 191: toggleDebug();     break;
+      default : if (debug) { console.log("Unhandled keypress: " + key.which); }
+    }
+  };
+  document.onkeyup = function (key) {
+    switch (key.which) {
+      case  32: delete keys.space; break;
+      case  37: delete keys.left;  break;
+      case  38: delete keys.up;    break;
+      case  39: delete keys.right; break;
+      case  40: delete keys.down;  break;
+      case  49: delete keys.one;   break;
+      case  50: delete keys.two;   break;
+      case  51: delete keys.three; break;
+      case  52: delete keys.four;  break;
+      default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
+    }
+  };
+  // ------- INPUT END ------ //
+
 
 
   function render() {
@@ -493,9 +491,6 @@ function play31() {
           playerShip.move = false;
         }
       }
-
-      // Log the level object for debugging
-      if (keys.l) { console.log(level); keys.l = false;}
 
       // Testing up/down movement for "going off top of screen" because looks cool
       if (keys.up) { playerShip.move = "up"; }
