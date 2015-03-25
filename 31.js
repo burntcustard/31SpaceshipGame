@@ -51,6 +51,7 @@ function toggleDebug() {
   }
 }
 
+toggleDebug(); // On by defauly for now!
 
 
 // --------- INPUT -------- //
@@ -99,6 +100,7 @@ document.onkeyup = function (key) {
 var mainSprites = new Image();
 mainSprites.src = "greyscaleSpriteSheet.png";
 
+// Need to have the types of entity before the constuctor (Grrrr JSLint)
 function SmallShip() {
   this.spriteSheet = mainSprites;
   this.spriteX = 0;    // Position of the sprite in the sheet
@@ -147,6 +149,7 @@ function MediumRock() {
   this.hp = [];  // Not sure if this actually needs to be set
 }
 
+// General entity constuctor function
 function Entity(options) {
   var i;
   // Inherit from the correct object type
@@ -316,6 +319,7 @@ function play31() {
         rocks: [],
         enemies: [],
         collidable: [], // All things that collide
+        emmitters: [], // Entity emitters
         background: "Pink!"
       },
       i;
@@ -349,8 +353,35 @@ function play31() {
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
       debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
       debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
+      debugMenu.innerHTML += "Frame: " + now.toFixed() + "<br>";
     }
     // ------- DEBUG END ------ //
+  }
+
+
+
+  // Entity emitter (Options: type, x, y, start, end)
+  function Emitter(options) {
+    this.type = options.type;                // Emitted entity (can be array)
+    this.x = options.x || 0;                 // Position of the spawned entity
+    this.y = options.y || 0;
+    this.start = options.start || 0;         // When to start emitting
+    this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
+    this.enable = options.enable || true;    // Toggle emission
+    this.frequency = options.frequency || 1000; // Frequency of emission
+    this.lasEmitted = 0;                     // Store when the last object was emitted for timing
+
+    this.emit = function() {
+      if (now - this.lasEmitted > this.frequency) {
+        var e = new Entity({
+          type: this.type,
+          x: this.x,
+          y: this.y
+        });
+        level.rocks.push(e);
+        this.lasEmitted = now;
+      }
+    };
   }
 
 
@@ -381,8 +412,6 @@ function play31() {
       });
     }
 
-
-
     // Testing up/down movement for "going off top of screen" because looks cool
     // Minus and plusses look wrong way around but remember 1,1 is top left!
     if (playerShip.move === "up") { playerShip.y -= playerShip.maxVelocity; }
@@ -394,31 +423,12 @@ function play31() {
 
 
 
-    /* Making space rocks testing. Shouldl be turned into a "rock spawner"
-      Like this?
-        emitter{
-          startTime,
-          endTime,
-          type(like ships model? could emit rocks, or harmless particles),
-          frequency,
-          x, y
-        }
-    */
-
-    var random100 = Math.floor(Math.random()*100); // Random number between 0 and 100ish
-
-    // Random number between 0 and 31ish, should be - this.width/2? Unless rocks can appear off the side
-    // and you can strafe (moving camera) sideways into them
-    var random31 = Math.floor(Math.random()*(31-2));
-    var rockSpawnerFrequency = 5;
-    if (random100 < rockSpawnerFrequency) {
-      var r = new Entity({
-        type: "mediumRock",
-        x: random31,
-        y: -10  // Should be - this.height
-      });
-      level.rocks.push(r);
+    // Trigger emitters
+    for (i = 0; i < level.emmitters.length; i++) {
+      level.emmitters[i].emit();
     }
+
+
 
     // Rock movement
     i = level.rocks.length;
@@ -508,13 +518,15 @@ function play31() {
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
-      var r = new Entity({
-        type: "mediumRock",
+
+      var rockEmitter = new Emitter({
         x: 5,
-        y: 5
+        y: 2,
+        type: "mediumRock"
       });
-      level.rocks.push(r);
+        level.emmitters.push(rockEmitter);
       break;
+
     case "level2":
       playerShip = new Entity({
         type: "bigShip",
@@ -524,6 +536,7 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       break;
+
     default:
       throw new Error ("Tried to load unknown level.");
     }
