@@ -33,7 +33,11 @@ function resize(scale) {
 
 }
 
-
+// Fill one pixel in with specific colour
+function paintCell(ctx, x, y, color) {
+  ctx.fillStyle = color;
+  ctx.fillRect(Math.round(x * cSize), Math.round(y * cSize), cSize, cSize);
+}
 
 function toggleDebug() {
   debug = !debug;
@@ -63,8 +67,10 @@ document.onkeydown = function (key) {
     case  40: keys.down  = true; break;
 
     // Other keys
-    case  49: keys.one = true;   break;  // So many things can't start with a number char!
-    case  50: keys.two = true;   break;
+    case  49: keys.one   = true; break;
+    case  50: keys.two   = true; break;
+    case  51: keys.three = true; break;
+    case  52: keys.four  = true; break;
     case 187: resize(+2);        break;
     case 189: resize(-2);        break;
     case 191: toggleDebug();     break;
@@ -80,6 +86,8 @@ document.onkeyup = function (key) {
     case  40: delete keys.down;  break;
     case  49: delete keys.one;   break;
     case  50: delete keys.two;   break;
+    case  51: delete keys.three; break;
+    case  52: delete keys.four;  break;
     default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
   }
 };
@@ -101,13 +109,13 @@ function SmallShip() {
   this.index = 1;      // Current frame of the sheet
   this.weapons = {};
   this.hp = [
-    {x: 2, y: 2, tiltOffsetL: 1, tiltOffsetR: 1},
-    {x: 2, y: 3, tiltOffsetL: 1, tiltOffsetR: 1}
+    {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
+    {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
   ];
-  this.maxHealth = this.hp.length;
   this.maxVelocity = 0.5;
 }
 function BigShip() {
+  var i;
   this.spriteSheet = mainSprites;
   this.spriteX = 16;    // Position of the sprite in the sheet
   this.spriteY = 0;
@@ -115,32 +123,33 @@ function BigShip() {
   this.height = 9;
   this.index = 1;      // Current frame of the sheet
   this.weapons = {};
-  this.hp = [  // Use hp.shift() to remove a piece of health.
-    {x: 4, y: 3, tiltOffsetL: 2, tiltOffsetR: 2},
-    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR: 2}, // tiltOffset: false means not displayed
-    {x: 4, y: 4, tiltOffsetL: 2, tiltOffsetR: 2},
-    {x: 5, y: 4, tiltOffsetL: 2, tiltOffsetR: false},
-    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR: 2},
-    {x: 4, y: 5, tiltOffsetL: 2, tiltOffsetR: 2},
-    {x: 5, y: 5, tiltOffsetL: 2, tiltOffsetR: false},
-    {x: 4, y: 6, tiltOffsetL: 2, tiltOffsetR: 2}
+  this.hp = [  // hp[i].lost = true to remove a hitpoint, delete hp[i].lost to restore
+    {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
+    {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false },
+    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2    },
+    {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false },
+    {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
   ];
-  this.maxHealth = this.hp.length;
-  this.maxVelocity = 0.25;
+  this.maxVelocity = 0.3;
 }
 
 function MediumRock() {
   this.spriteSheet = mainSprites;
-  this.spriteX = 44;    // Position of the sprite in the sheet
+  this.spriteX = 44;   // Position of the sprite in the sheet
   this.spriteY = 0;
   this.width = 4;      // Width/Height of the Frame
   this.height = 4;
   this.index = 0;      // Current frame of the sheet
   this.maxHealth = 8;
   this.maxVelocity = 0.25;
+  this.hp = [];  // Not sure if this actually needs to be set
 }
 
 function Entity(options) {
+  var i;
   // Inherit from the correct object type
   this.type = options.type || "smallShip";
   switch(this.type) {
@@ -149,28 +158,48 @@ function Entity(options) {
     case "mediumRock": MediumRock.call(this); break;
     default: throw new Error ("Tried to load unknown object.");
   }
+  
+  this.maxHealth = this.hp.length;
+  
+  Object.defineProperty(this, "getHealth", {
+    get: function() {
+      var currentHealth = this.maxHealth;
+      for (i = 0; i < this.maxHealth; i++) {
+        if (this.hp[i].hasOwnProperty("lost")) { currentHealth--; }
+      }
+      return currentHealth;
+  }});
+  
+  this.hpLost = function() {
+    var lostHp;
+    for (i = 0; i < this.maxHealth; i++) {
+      if (!this.hp[i].lost && !lostHp) { this.hp[i].lost = true; lostHp = true; }
+    }
+    if (!lostHp) { this.dead = true; }  // Been hit after running out of HP so deaded
+  };
+  
+  this.hpRestore = function() {
+    var restoredHp;
+    for (i = 0; i < this.maxHealth; i++) {
+      if (this.hp[i].lost && !restoredHp) { delete this.hp[i].lost; restoredHp = true; }
+    }
+  };
 
   // Properties for all objects go here
   this.x = options.x || 0;
   this.y = options.y || 0;
   this.vx = options.vx || 0;
   this.vy = options.vy || 0;
-  this.hp = options.hp || this.maxHealth;
+  this.dead = false;
 
   // Colour stuff
-  //this.primaryColor = options.primaryColor || "rgba(0,235,230,0.5)"; // Default primary colour is cyan
-  //this.secondaryColor = options.secondaryColor || "rgba(80,50,255,0.5)"; // Default secondary colour is purple
-
-  // Starting to think not everything should have a primary and secondary colour :/
   this.primaryColor = options.primaryColor || false;
   this.secondaryColor = options.secondaryColor || false;
-
 
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
   // to make hidden canvaseses on the fly whenever a coloured object is spawned.
-  // This is currently kinda broken :/
 
   if (this.primaryColor && this.secondaryColor) {
     if (debug) { console.log("Creating a fancy colourful ship"); }
@@ -214,7 +243,7 @@ function Entity(options) {
     */
     // I'm getting the feeling only ships should have primary and secondary colours because confusing
     if (this.primaryColor && this.secondaryColor) {
-      ctx.drawImage(
+      ctx.drawImage(  // Ship hull (primary colour)
         canvasPri,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
         this.spriteY,                            // SourceY
@@ -225,10 +254,10 @@ function Entity(options) {
         this.width * cSize,                      // DestinationW (Size on canvas)
         this.height * cSize                      // DestinationH
       );
-      ctx.drawImage(
+      ctx.drawImage(  // Cockpit (secondary colour)
         canvasSec,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height,          // SourceY
+        this.spriteY + this.height,              // SourceY
         this.width,                              // SourceW (Size of frame)
         this.height,                             // SourceH
         Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
@@ -236,19 +265,33 @@ function Entity(options) {
         this.width * cSize,                      // DestinationW (Size on canvas)
         this.height * cSize                      // DestinationH
       );
-      // This is so messy herpa derp
-      ctx.drawImage(
+      ctx.drawImage(  // Engine trails
         this.spriteSheet,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height * 2,      // SourceY
+        this.spriteY + this.height * 2,          // SourceY
         this.width,                              // SourceW (Size of frame)
-        this.height * 2,                             // SourceH
+        12, // Max height of engine trails is 12 // SourceH
         Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y + this.height - 1) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        Math.round(this.y + this.height - 1) * cSize, // DestinationY (-1 because goes up in ship hull)
         this.width * cSize,                      // DestinationW (Size on canvas)
-        this.height * cSize * 2                     // DestinationH
+        12 * cSize                               // DestinationH
       );
-    } else {
+      // And now for the magic cockpit code
+      var tilt = 0;
+      for (i = 0; i < this.maxHealth; i++) {
+        if (this.index === 0) { tilt = this.hp[i].tiltOffsetL; }
+        if (this.index === 2) { tilt = this.hp[i].tiltOffsetR; }
+        if (this.hp[i].lost) {
+          var c = Math.floor(Math.random() * 64);
+          paintCell(
+            ctx,
+            Math.round(this.x) + this.hp[i].x + tilt,
+            Math.round(this.y) + this.hp[i].y,
+            ('rgb(' + (c+191) + ',' + (c*3) + ',' + c + ')')
+          );
+        }
+      }
+    } else { // Draw simple sprite that doesn't have fancy colours and shit
       ctx.drawImage(
         this.spriteSheet,
         this.spriteX + this.width * this.index,  // SourceX (Position of frame)
@@ -287,12 +330,6 @@ function play31() {
     ctx.mozImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
-    // Fill one pixel in with specific colour
-    function paintCell(x, y, color) {
-      ctx.fillStyle = color;
-      ctx.fillRect(x * cSize - cSize, y * cSize - cSize, cSize, cSize);
-    }
-
     // Fill canvas with levels color
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -311,6 +348,7 @@ function play31() {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
+      debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth + "<br>";
     }
     // ------- DEBUG END ------ //
   }
@@ -342,6 +380,10 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
     }
+    
+    // hitpoints / hp / health debugging
+    if (keys.three) { delete keys.three; playerShip.hpLost(); }
+    if (keys.four) { delete keys.four; playerShip.hpRestore(); }
 
     // Rock movement
     for (i = 0; i < level.rocks.length; i++) {
