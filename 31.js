@@ -57,7 +57,7 @@ toggleDebug(); // On by defauly for now!
 
 // -------- OBJECTS ------- //
 var mainSprites = new Image();
-mainSprites.src = "greyscaleSpriteSheet.png";
+mainSprites.src = "spriteSheet.png";
 
 // Need to have the types of entity before the constuctor (Grrrr JSLint)
 function SmallShip() {
