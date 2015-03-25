@@ -348,6 +348,7 @@ function play31() {
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
       debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
+      debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
     }
     // ------- DEBUG END ------ //
   }
@@ -420,11 +421,14 @@ function play31() {
     }
 
     // Rock movement
-    for (i = 0; i < level.rocks.length; i++) {
+    i = level.rocks.length;
+    while (i--) {
       var ent = level.rocks[i];
       ent.y += ent.maxVelocity;
-      // If the rock goes off the bottom move to the top, wont want this in the final
-      //if (ent.y > 32) { ent.y = -ent.height; }
+      // If the rock is off the bottom + height, remove
+      if (ent.y > gridSize + ent.height) {
+        level.rocks.splice(level.rocks[i], 1);
+      }
     }
 
 
@@ -532,4 +536,5 @@ function play31() {
   newGame("level1");
 
 }
+
 window.onload = function () { resize(); play31(); };
