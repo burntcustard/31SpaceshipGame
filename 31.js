@@ -363,19 +363,19 @@ function play31() {
   // Entity emitter (Options: type, x, y, start, end)
   function Emitter(options) {
     this.type = options.type;                // Emitted entity (can be array)
-    this.x = options.x || 0;                 // Position of the spawned entity
+    this.x = options.x || [0, 0];            // Position of the spawned entity (array: [min, max])
     this.y = options.y || 0;
     this.start = options.start || 0;         // When to start emitting
     this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
     this.enable = options.enable || true;    // Toggle emission
-    this.frequency = options.frequency || 1000; // Frequency of emission
+    this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
     this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
     this.emit = function() {
-      if (now - this.lasEmitted > this.frequency) {
+      if (now - this.lasEmitted > this.frequency && now > this.start && now < this.start + this.duration) {
         var e = new Entity({
           type: this.type,
-          x: this.x,
+          x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
           y: this.y
         });
         level.rocks.push(e);
@@ -520,9 +520,11 @@ function play31() {
       });
 
       var rockEmitter = new Emitter({
-        x: 5,
-        y: 2,
-        type: "mediumRock"
+        x: [3, 25],
+        y: -10, // Should be -height, hard to define here though
+        type: "mediumRock",
+        start: 5000,
+        duration: 5000
       });
         level.emmitters.push(rockEmitter);
       break;
