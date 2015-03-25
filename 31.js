@@ -12,7 +12,8 @@ var canvas = document.getElementById("canvas31"),
   dt,
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
-  gridSize = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+  gridSizeX = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
+  gridSizeY  = 55,
   cSize;  // Size of cell in pixels
 
 
@@ -21,11 +22,12 @@ var canvas = document.getElementById("canvas31"),
 function resize(scale) {
   if (scale && (cSize + scale > 0)) {
     // Rescaling, and won't end up too small (remember, scale could be negative)
-    canvas.width = canvas.height = gridSize * (cSize + scale);
-    cSize = canvas.width / gridSize;
+    canvas.width = gridSizeX * (cSize + scale);
+    canvas.height = gridSizeY * (cSize + scale);
+    cSize = canvas.width / gridSizeX;
   } else {
     // Setting size on page load
-    cSize = canvas.width / gridSize;
+    cSize = canvas.width / gridSizeX;
     if (cSize % 1 !== 0) {  // If gridSize is NOT a whole number (probably dodgy CSS)
       throw new Error ("Canvas size not divisible by 31.");
     }
@@ -467,7 +469,7 @@ function play31() {
       var ent = level.rocks[i];
       ent.y += ent.maxVelocity;
       // If the rock is off the bottom + height, remove
-      if (ent.y > gridSize + ent.height) {
+      if (ent.y > gridSizeY + ent.height) {
         level.rocks.splice(level.rocks[i], 1);
         level.collidable.splice(level.collidable.indexOf(ent), 1);
       }
@@ -510,7 +512,7 @@ function play31() {
           //if ((obj1.type === MediumRock) && obj1.dead) { level.rocks.splice(i+1, 1); level.collidable.splice(i, 1); }
           //if ((obj2.type === MediumRock) && obj2.dead) { level.rocks.splice(j+1, 1); level.collidable.splice(j, 1); }
           for (var r = 0; r < level.rocks.length; r++) {
-            if (level.rocks[r].dead) { level.rocks.splice(i, 1); }
+            if (level.rocks[r].dead) { level.rocks.splice(r, 1); }
           }
           for (var c = 0; c < level.collidable.length; c++) {
             if (level.collidable[c].dead) { level.collidable.splice(c, 1); }
