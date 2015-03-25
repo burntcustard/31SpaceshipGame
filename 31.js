@@ -388,19 +388,19 @@ function play31() {
 
 
   function checkCollision(obj1, obj2) {
-    var t1 = obj1.y,
-        r1 = obj1.x + obj1.width,
-        b1 = obj1.y + obj1.height,
-        l1 = obj1.x,
-        t2 = obj2.y,
-        r2 = obj2.x + obj2.width,
-        b2 = obj2.y + obj2.height,
-        l2 = obj2.x;
+    var t1 = Math.round(obj1.y),
+        r1 = Math.round(obj1.x + obj1.width),
+        b1 = Math.round(obj1.y + obj1.height),
+        l1 = Math.round(obj1.x),
+        t2 = Math.round(obj2.y),
+        r2 = Math.round(obj2.x + obj2.width),
+        b2 = Math.round(obj2.y + obj2.height),
+        l2 = Math.round(obj2.x);
 
-    if (t1 > b2) {return false;}
-    if (r1 < l2) {return false;}
-    if (b1 < t2) {return false;}
-    if (l1 > r2) {return false;}
+    if (t1 >= b2) {return false;}
+    if (r1 <= l2) {return false;}
+    if (b1 <= t2) {return false;}
+    if (l1 >= r2) {return false;}
     // It got to here so is colliding
     return true;
   }
@@ -414,6 +414,7 @@ function play31() {
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
     if (keys.one) {
+      level.collidable.splice(level.collidable.indexOf(playerShip), 1);
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
@@ -421,9 +422,11 @@ function play31() {
         primaryColor: "rgba(0,235,230,0.5)",
         secondaryColor: "rgba(80,50,255,0.5)"
       });
+      level.collidable.push(playerShip);
     }
 
     if (keys.two) {
+      level.collidable.splice(level.collidable.indexOf(playerShip), 1);
       playerShip = new Entity({
         type: "bigShip",
         x: 11,
@@ -431,6 +434,7 @@ function play31() {
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
+      level.collidable.push(playerShip);
     }
 
     // Testing up/down movement for "going off top of screen" because looks cool
@@ -489,12 +493,15 @@ function play31() {
         var obj2 = level.collidable[j];
         // Make sure you are not colliding the object with its self
         if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
-          console.log("Collision: " + obj1.type + " with " + obj2.type);
+          if (debug) {
+            var ctx = canvas.getContext('2d');
+            ctx.fillStyle = "rgba(230, 32, 81, 0.2)";
+            ctx.fillRect( Math.round(obj1.x) * cSize, Math.round(obj1.y) * cSize, Math.round(obj1.width) * cSize, Math.round(obj1.height) * cSize);
+            ctx.fillRect( Math.round(obj2.x) * cSize, Math.round(obj2.y) * cSize, Math.round(obj2.width) * cSize, Math.round(obj2.height) * cSize);
+          }
         }
       }
     }
-
-
   }
 
 
