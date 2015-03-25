@@ -13,7 +13,7 @@ var canvas = document.getElementById("canvas31"),
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
   gridSizeX = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
-  gridSizeY  = 55,
+  gridSizeY  = 39,
   cSize;  // Size of cell in pixels
 
 
