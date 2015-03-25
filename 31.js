@@ -365,7 +365,7 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
-        y: 22,
+        y: 23,
         primaryColor: "rgba(0,235,230,0.5)",
         secondaryColor: "rgba(80,50,255,0.5)"
       });
@@ -468,7 +468,7 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         x: 13,
-        y: 22,
+        y: 23,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
