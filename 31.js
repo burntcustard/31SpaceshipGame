@@ -273,7 +273,7 @@ function Entity(options) {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
-      i,
+      i, j,
       level = {     // Data about the level
         rocks: [],
         enemies: [],
@@ -367,7 +367,7 @@ function play31() {
     this.y = options.y || 0;
     this.start = options.start || 0;         // When to start emitting
     this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
-    this.enable = options.enable || true;    // Toggle emfission
+    this.enable = options.enable || true;    // Toggle emission
     this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
     this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
@@ -388,7 +388,21 @@ function play31() {
 
 
   function checkCollision(obj1, obj2) {
+    var t1 = obj1.y,
+        r1 = obj1.x + obj1.width,
+        b1 = obj1.y + obj1.height,
+        l1 = obj1.x,
+        t2 = obj2.y,
+        r2 = obj2.x + obj2.width,
+        b2 = obj2.y + obj2.height,
+        l2 = obj2.x;
 
+    if (t1 > b2) {return false;}
+    if (r1 < l2) {return false;}
+    if (b1 < t2) {return false;}
+    if (l1 > r2) {return false;}
+    // It got to here so is colliding
+    return true;
   }
 
 
@@ -465,6 +479,20 @@ function play31() {
     // I feel like this should be just a tiny bit seperate from movement :P
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
+
+
+
+    // Collision checking
+    for (i = 0; i < level.collidable.length; i++) {
+      var obj1 = level.collidable[i];
+      for (j = 0; j < level.collidable.length; j++) {
+        var obj2 = level.collidable[j];
+        // Make sure you are not colliding the object with its self
+        if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
+          console.log("Collision: " + obj1.type + " with " + obj2.type);
+        }
+      }
+    }
 
 
   }
