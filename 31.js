@@ -96,7 +96,6 @@ document.onkeyup = function (key) {
 
 
 // -------- OBJECTS ------- //
-
 var mainSprites = new Image();
 mainSprites.src = "greyscaleSpriteSheet.png";
 
@@ -158,18 +157,17 @@ function Entity(options) {
     case "mediumRock": MediumRock.call(this); break;
     default: throw new Error ("Tried to load unknown object.");
   }
-  
+
   this.maxHealth = this.hp.length;
-  
-  Object.defineProperty(this, "getHealth", {
-    get: function() {
-      var currentHealth = this.maxHealth;
-      for (i = 0; i < this.maxHealth; i++) {
-        if (this.hp[i].hasOwnProperty("lost")) { currentHealth--; }
-      }
-      return currentHealth;
-  }});
-  
+
+  this.getHealth = function() {
+    var currentHealth = this.maxHealth;
+    for (i = 0; i < this.maxHealth; i++) {
+      if (this.hp[i].hasOwnProperty("lost")) { currentHealth--; }
+    }
+    return currentHealth;
+  };
+
   this.hpLost = function() {
     var lostHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -177,7 +175,7 @@ function Entity(options) {
     }
     if (!lostHp) { this.dead = true; }  // Been hit after running out of HP so deaded
   };
-  
+
   this.hpRestore = function() {
     var restoredHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -317,6 +315,7 @@ function play31() {
       level = {     // Data about the level
         rocks: [],
         enemies: [],
+        collidable: [], // All things that collide
         background: "Pink!"
       },
       i;
@@ -348,7 +347,7 @@ function play31() {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
-      debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth + "<br>";
+      debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
     }
     // ------- DEBUG END ------ //
   }
@@ -380,7 +379,7 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
     }
-    
+
     // hitpoints / hp / health debugging
     if (keys.three) { delete keys.three; playerShip.hpLost(); }
     if (keys.four) { delete keys.four; playerShip.hpRestore(); }
@@ -492,10 +491,10 @@ function play31() {
       throw new Error ("Tried to load unknown level.");
     }
 
+    console.log(level);
+
     gameLoop();
   }
-
-  console.log(level);
 
   newGame("level1");
 
