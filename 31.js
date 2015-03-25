@@ -380,18 +380,57 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
     }
+
+    
+    
+    // Testing up/down movement for "going off top of screen" because looks cool
+    // Minus and plusses look wrong way around but remember 1,1 is top left!
+    if (playerShip.move === "up") { playerShip.y -= playerShip.maxVelocity; }
+    if (playerShip.move === "down") { playerShip.y += playerShip.maxVelocity; }
+    
+    
     
     // hitpoints / hp / health debugging
     if (keys.three) { delete keys.three; playerShip.hpLost(); }
     if (keys.four) { delete keys.four; playerShip.hpRestore(); }
 
+    
+    
+    /* Making space rocks testing. Shouldl be turned into a "rock spawner"
+      Like this?
+        emitter{
+          startTime,
+          endTime,
+          type(like ships model? could emit rocks, or harmless particles),
+          frequency,
+          x, y
+        }
+    */
+    
+    var random100 = Math.floor(Math.random()*100); // Random number between 0 and 100ish
+    
+    // Random number between 0 and 31ish, should be - this.width/2? Unless rocks can appear off the side
+    // and you can strafe (moving camera) sideways into them
+    var random31 = Math.floor(Math.random()*(31-2));
+    var rockSpawnerFrequency = 5;
+    if (random100 < rockSpawnerFrequency) {
+      var r = new Entity({
+        type: "mediumRock",
+        x: random31,
+        y: -10  // Should be - this.height
+      });
+      level.rocks.push(r);
+    }
+    
     // Rock movement
     for (i = 0; i < level.rocks.length; i++) {
       var ent = level.rocks[i];
       ent.y += ent.maxVelocity;
       // If the rock goes off the bottom move to the top, wont want this in the final
-      if (ent.y > 32) { ent.y = -ent.height; }
+      //if (ent.y > 32) { ent.y = -ent.height; }
     }
+    
+    
 
     // Player movement
     if (playerShip.move === "left") {
@@ -408,10 +447,6 @@ function play31() {
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
 
-    // Testing up/down movement for "going off top of screen" because looks cool
-    // Minus and plusses look wrong way around but remember 1,1 is top left!
-    if (playerShip.move === "up") { playerShip.y -= playerShip.maxVelocity; }
-    if (playerShip.move === "down") { playerShip.y += playerShip.maxVelocity; }
 
   }
 
