@@ -72,6 +72,7 @@ document.onkeydown = function (key) {
     case  50: keys.two   = true; break;
     case  51: keys.three = true; break;
     case  52: keys.four  = true; break;
+    case  76: keys.l     = true; break;
     case 187: resize(+2);        break;
     case 189: resize(-2);        break;
     case 191: toggleDebug();     break;
@@ -89,6 +90,7 @@ document.onkeyup = function (key) {
     case  50: delete keys.two;   break;
     case  51: delete keys.three; break;
     case  52: delete keys.four;  break;
+    case  76: delete keys.l;     break;
     default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
   }
 };
@@ -367,21 +369,28 @@ function play31() {
     this.y = options.y || 0;
     this.start = options.start || 0;         // When to start emitting
     this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
-    this.enable = options.enable || true;    // Toggle emission
+    this.enable = options.enable || true;    // Toggle emfission
     this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
     this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
     this.emit = function() {
-      if (now - this.lasEmitted > this.frequency && now > this.start && now < this.start + this.duration) {
+      if (now - this.lasEmitted > this.frequency && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
         var e = new Entity({
           type: this.type,
           x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
           y: this.y
         });
         level.rocks.push(e);
+        level.collidable.push(e);
         this.lasEmitted = now;
       }
     };
+  }
+
+
+
+  function checkCollision(obj1, obj2) {
+
   }
 
 
@@ -438,6 +447,7 @@ function play31() {
       // If the rock is off the bottom + height, remove
       if (ent.y > gridSize + ent.height) {
         level.rocks.splice(level.rocks[i], 1);
+        level.collidable.splice(level.collidable.indexOf(ent), 1);
       }
     }
 
@@ -473,8 +483,7 @@ function play31() {
     while (dt > step) {
       dt -= step;
 
-      // Could be put somewhere better, just for testing. Edited so don't delete without reason!
-      // In my head this is really simple, but formatted like this looks like crap
+      // ------------ INPUT START --------------- //
       if (keys.left && !keys.right) {
         playerShip.move = "left";
       } else {
@@ -485,6 +494,9 @@ function play31() {
         }
       }
 
+      // Log the level object for debugging
+      if (keys.l) { console.log(level); keys.l = false;}
+
       // Testing up/down movement for "going off top of screen" because looks cool
       if (keys.up) { playerShip.move = "up"; }
       if (keys.down) { playerShip.move = "down"; }
@@ -493,6 +505,8 @@ function play31() {
       if (keys.space) {
         playerShip.flip = true;
       } else { playerShip.flip = false; }
+      // ------------ INPUT END ----------------- //
+
 
       update(dt);
     }
@@ -518,15 +532,16 @@ function play31() {
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
+      level.collidable.push(playerShip);
 
       var rockEmitter = new Emitter({
         x: [3, 25],
         y: -10, // Should be -height, hard to define here though
         type: "mediumRock",
-        start: 5000,
-        duration: 5000
+        start: 0,
+        duration: -1
       });
-        level.emmitters.push(rockEmitter);
+      level.emmitters.push(rockEmitter);
       break;
 
     case "level2":
@@ -537,13 +552,12 @@ function play31() {
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
+      level.collidable.push(playerShip);
       break;
 
     default:
       throw new Error ("Tried to load unknown level.");
     }
-
-    console.log(level);
 
     gameLoop();
   }
