@@ -195,8 +195,8 @@ function BigShip() {
 }
 function MediumRock() {
   this.spriteSheet = mainSprites;
-  this.spriteX = 44;   // Position of the sprite in the sheet
-  this.spriteY = 0;
+  this.spriteX = 51;   // Position of the sprite in the sheet
+  this.spriteY = 3;
   this.width = 4;      // Width/Height of the Frame
   this.height = 4;
   this.index = 0;      // Current frame of the sheet
@@ -373,7 +373,7 @@ function Entity(options) {
 
 
 // Entity emitter (Options: type, x, y, start, end)
-function Emitter(level, options) {
+function Emitter(attachedTo, options) {
   this.type = options.type;                // Emitted entity (can be array)
   this.x = options.x || [0, 0];            // Position of the spawned entity (array: [min, max])
   this.y = options.y || 0;
@@ -383,6 +383,16 @@ function Emitter(level, options) {
   this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
   this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
+  /*
+  // Additions to make work with weapons hopefully:
+  this.direction = options.direction || 'D'; // "Down"
+  this.spriteSheet = mainSprites;
+  this.spriteX = 51;   // Position of the sprite in the sheet
+  this.spriteY = 3;
+  this.width = 4;      // Width/Height of the Frame
+  this.height = 4;
+  */
+  
   this.emit = function() {
     if (now - this.lasEmitted > this.frequency && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
@@ -390,10 +400,24 @@ function Emitter(level, options) {
         x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
         y: this.y
       });
-      level.rocks.push(e);
-      level.collidable.push(e);
+      attachedTo.rocks.push(e);
+      attachedTo.collidable.push(e);
       this.lasEmitted = now;
     }
+  };
+
+  this.draw = function(ctx) {
+    ctx.drawImage(
+      this.spriteSheet,
+      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+      this.spriteY,                            // SourceY
+      this.width,                              // SourceW (Size of frame)
+      this.height,                             // SourceH
+      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+      this.width * cSize,                      // DestinationW (Size on canvas)
+      this.height * cSize                      // DestinationH
+    );
   };
 }
 
