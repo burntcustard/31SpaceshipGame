@@ -279,8 +279,8 @@ function Entity(options) {
   };
 
   // Properties for all objects go here
-  this.x = options.x || 0;
-  this.y = options.y || 0;
+  this.x = options.x || Math.round(gridSizeX / 2) - Math.round(this.width / 2);
+  this.y = options.y || gridSizeY - this.height - 1;
   this.vx = options.vx || 0;
   this.vy = options.vy || 0;
   this.index = options.index || 0;
@@ -564,8 +564,6 @@ function play31() {
       }
       playerShip = new Entity({
         type: "smallShip",
-        x: 13,
-        y: 23,
         primaryColor: "rgba(0,235,230,0.5)",
         secondaryColor: "rgba(80,50,255,0.5)"
       });
@@ -578,8 +576,6 @@ function play31() {
       }
       playerShip = new Entity({
         type: "bigShip",
-        x: 11,
-        y: 20,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
@@ -717,8 +713,6 @@ function play31() {
       // TODO: level = new Level (and add a nice constructor class)?
       playerShip = new Entity({
         type: "smallShip",
-        x: 13,
-        y: 23,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
