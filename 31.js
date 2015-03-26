@@ -5,6 +5,7 @@
 var canvas = document.getElementById("canvas31"),
   canvasPri = document.createElement("canvas"),
   canvasSec = document.createElement("canvas"),
+  canvasCollision = document.createElement("canvas"),
   debug = false,
   debugMenu = document.getElementById("debug"),
   meter,
@@ -14,25 +15,23 @@ var canvas = document.getElementById("canvas31"),
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
   gridSizeX = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
   gridSizeY  = 39,
-  cSize;  // Size of cell in pixels
+  initialScale = 16,  // Starting size of cell in pixels
+  cSize = initialScale;  // Size of cell in pixels
 
 
 
 // Resizes game window. If no scale given, you're just setting sizes on first run.
-function resize(scale) {
-  if (scale && (cSize + scale > 0)) {
-    // Rescaling, and won't end up too small (remember, scale could be negative)
+function resize(requestedScale) {
+  var scale = requestedScale || 0;
+  if (cSize + scale > 0) {
     canvas.width = gridSizeX * (cSize + scale);
     canvas.height = gridSizeY * (cSize + scale);
-    cSize = canvas.width / gridSizeX;
-  } else {
-    // Setting size on page load
     cSize = canvas.width / gridSizeX;
     if (cSize % 1 !== 0) {  // If gridSize is NOT a whole number (probably dodgy CSS)
       throw new Error ("Canvas size not divisible by 31.");
     }
+    canvas.style.display = "block";
   }
-
 }
 
 // Fill one pixel in with specific colour
@@ -53,11 +52,105 @@ function toggleDebug() {
   }
 }
 
-toggleDebug(); // On by defauly for now!
+
+
+// --- COLLISION DETECTION --- //
+/**
+ * Creates a map of all of the visible pixels in the object. Effectively draws the objects sprite 
+ * onto a hidden canvas with no scaling, and then checks each pixel, top to bottom (similar to how
+ * text is read along and then down a line) If a pixel is fully transparent, i.e. rgba(-,-,-,0),
+ * it adds that pixels x, y coordinates as an object to the pixelMap array. Also offsets the those
+ * coordinates in the pixel map to align with the sprites current position in the "real" game canvas.
+ * 
+ * @todo Make this decription shorter and easier to understand :D
+ * @todo Consider calling this function only once per sprite, rather than every time for both
+ *       sprites that might be colliding.
+ * @todo Consider passing this function only relevant info about the object rather than the whole thing.
+ * 
+ * @param   {Object}  obj The object with the sprite to look at, e.g. a spaceship or a space rock.
+ * @returns {[array]} An array of objects containing x, y coordinates.
+ */
+function createPixelMap(obj) {
+  var pixelMap = [], x, y, i;
+  var ctxCollision = canvasCollision.getContext('2d');
+  ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
+  ctxCollision.drawImage(
+    obj.spriteSheet,
+    obj.spriteX + obj.width * obj.index,  // SourceX (Position of frame)
+    obj.spriteY,                          // SourceY
+    obj.width,                            // SourceW (Size of frame)
+    obj.height,                           // SourceH
+    0,                                    // DestinationX (Position on canvas)
+    0,                                    // DestinationY
+    obj.width,                            // DestinationW (Size on canvas)
+    obj.height                            // DestinationH
+  );
+  for(y = 0; y < obj.height; y++) {
+    for(x = 0; x < obj.width; x++) {
+    // Fetch pixel at current position
+      var pixel = ctxCollision.getImageData(x, y, 1, 1);
+      // Check that opacity is above zero
+      if(pixel.data[3] !== 0) {
+        pixelMap.push({x: x, y: y});
+      }
+    }
+  }
+  // Add the x and y offset of the object in the game to the pixel map
+  for (i = 0; i < pixelMap.length; i++) {
+    pixelMap[i].x += Math.round(obj.x);
+    pixelMap[i].y += Math.round(obj.y);
+  }
+  return pixelMap; 
+}
 
 
 
-// -------- OBJECTS ------- //
+/**
+ * Checks if two objects have sprites that are colliding.
+ * 
+ * @todo Make the crazy long if statement a bit neater.
+ * @todo Check if the object already has a pixelMap so it doesn't have to be generated again.
+ * 
+ * @param   {Object}  obj1 [[Description]]
+ * @param   {Object}  obj2 [[Description]]
+ * @returns {Boolean} True if the objects have collided, else false.
+ */
+function checkCollision(obj1, obj2) {
+  var t1 = Math.round(obj1.y),
+      r1 = Math.round(obj1.x + obj1.width),
+      b1 = Math.round(obj1.y + obj1.height),
+      l1 = Math.round(obj1.x),
+      t2 = Math.round(obj2.y),
+      r2 = Math.round(obj2.x + obj2.width),
+      b2 = Math.round(obj2.y + obj2.height),
+      l2 = Math.round(obj2.x),
+      obj1PixelMap,
+      obj2PixelMap,
+      obj1i, obj2i;
+
+  // Bounding box collisions
+  if (t1 >= b2) {return false;}
+  if (r1 <= l2) {return false;}
+  if (b1 <= t2) {return false;}
+  if (l1 >= r2) {return false;}
+  // It got to here so bounding boxes are colliding!
+  
+  // Per pixel collisions
+  obj1PixelMap = createPixelMap(obj1);
+  obj2PixelMap = createPixelMap(obj2);
+    for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
+      for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
+        if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
+            obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) { 
+          return true;
+        }
+      }
+    }
+}
+// - COLLISION DETECTION END - //
+
+
+// --------- OBJECTS --------- //
 var mainSprites = new Image();
 mainSprites.src = "spriteSheet.png";
 
@@ -136,7 +229,10 @@ function Entity(options) {
     for (i = 0; i < this.maxHealth; i++) {
       if (!this.hp[i].lost && !lostHp) { this.hp[i].lost = true; lostHp = true; }
     }
-    if (!lostHp) { this.dead = true; console.log(this.type + " Dead"); }  // Been hit after running out of HP so deaded
+    if (!lostHp) {  // Been hit after running out of HP so deaded
+      this.dead = true;
+      if (debug) { console.log(this.type + " Dead"); }
+    }
   };
 
   this.hpRestore = function() {
@@ -268,7 +364,7 @@ function Entity(options) {
     //ctx.restore();
   };
 }
-// ------ OBJECTS END ----- //
+// ------- OBJECTS END ------- //
 
 
 
@@ -284,7 +380,7 @@ function play31() {
         background: "Pink!"
       };
 
-  // --------- INPUT -------- //
+  // ---------- INPUT ---------- //
   var key,
     keys = {};
 
@@ -302,7 +398,7 @@ function play31() {
       case  50: keys.two   = true; break;
       case  51: keys.three = true; break;
       case  52: keys.four  = true; break;
-      case 76: console.log(level); break;
+      case 76: console.log(level); break;  // Pretty sure we could avoid having this here *grumpy face*
       case 187: resize(+2);        break;
       case 189: resize(-2);        break;
       case 191: toggleDebug();     break;
@@ -323,7 +419,7 @@ function play31() {
       default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
     }
   };
-  // ------- INPUT END ------ //
+  // -------- INPUT END -------- //
 
 
 
@@ -347,8 +443,7 @@ function play31() {
     playerShip.draw(ctx);
 
 
-
-    // ------ DEBUG INFO ------ //
+    // ------- DEBUG INFO -------- //
     if (debug) {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
@@ -359,7 +454,7 @@ function play31() {
       debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
       debugMenu.innerHTML += "Frame: " + now.toFixed() + "<br>";
     }
-    // ------- DEBUG END ------ //
+    // -------- DEBUG END -------- //
   }
 
 
@@ -387,26 +482,6 @@ function play31() {
         this.lasEmitted = now;
       }
     };
-  }
-
-
-
-  function checkCollision(obj1, obj2) {
-    var t1 = Math.round(obj1.y),
-        r1 = Math.round(obj1.x + obj1.width),
-        b1 = Math.round(obj1.y + obj1.height),
-        l1 = Math.round(obj1.x),
-        t2 = Math.round(obj2.y),
-        r2 = Math.round(obj2.x + obj2.width),
-        b2 = Math.round(obj2.y + obj2.height),
-        l2 = Math.round(obj2.x);
-
-    if (t1 >= b2) {return false;}
-    if (r1 <= l2) {return false;}
-    if (b1 <= t2) {return false;}
-    if (l1 >= r2) {return false;}
-    // It got to here so is colliding
-    return true;
   }
 
 
@@ -499,26 +574,19 @@ function play31() {
       var obj1 = level.collidable[i];
       for (j = 0; j < level.collidable.length; j++) {
         var obj2 = level.collidable[j];
-        // Make sure you are not colliding the object with its self
+        // If object not colliding with its self
         if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
-          if (debug) {
-            var ctx = canvas.getContext('2d');
-            ctx.fillStyle = "rgba(230, 32, 81, 0.2)";
-            ctx.fillRect( Math.round(obj1.x) * cSize, Math.round(obj1.y) * cSize, Math.round(obj1.width) * cSize, Math.round(obj1.height) * cSize);
-            ctx.fillRect( Math.round(obj2.x) * cSize, Math.round(obj2.y) * cSize, Math.round(obj2.width) * cSize, Math.round(obj2.height) * cSize);
-          }
           obj1.hpLost();
           obj2.hpLost();
-          //if ((obj1.type === MediumRock) && obj1.dead) { level.rocks.splice(i+1, 1); level.collidable.splice(i, 1); }
-          //if ((obj2.type === MediumRock) && obj2.dead) { level.rocks.splice(j+1, 1); level.collidable.splice(j, 1); }
-          for (var r = 0; r < level.rocks.length; r++) {
-            if (level.rocks[r].dead) { level.rocks.splice(r, 1); }
-          }
-          for (var c = 0; c < level.collidable.length; c++) {
-            if (level.collidable[c].dead) { level.collidable.splice(c, 1); }
-          }
+          if (obj1.dead) { level.collidable.splice(i, 1); }
+          if (obj2.dead) { level.collidable.splice(j, 1); }
         }
       }
+    }
+    
+    // Remove dead rocks (you already can't collide with them since the collision check)
+    for (i = 0; i < level.rocks.length; i++) {
+      if (level.rocks[i].dead) { level.rocks.splice(i, 1); }
     }
     
   }
@@ -534,8 +602,8 @@ function play31() {
 
     while (dt > step) {
       dt -= step;
-
-      // ------------ INPUT START --------------- //
+      
+      // ----- INPUT HANDLING ------ //
       if (keys.left && !keys.right) {
         playerShip.move = "left";
       } else {
@@ -554,8 +622,7 @@ function play31() {
       if (keys.space) {
         playerShip.flip = true;
       } else { playerShip.flip = false; }
-      // ------------ INPUT END ----------------- //
-
+      // --- INPUT HANDLING END ---- //
 
       update(dt);
     }
@@ -615,4 +682,4 @@ function play31() {
 
 }
 
-window.onload = function () { resize(); play31(); };
+window.onload = function () { resize(); play31(); toggleDebug(); };
