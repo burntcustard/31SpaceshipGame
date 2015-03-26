@@ -216,24 +216,24 @@ function BigShip() {
   this.maxVelocity = 0.3;
 }
 function SmallGun() {
-  this.spriteSheet = mainSprites; 
+  this.spriteSheet = mainSprites;
   this.spriteX = 56;   // Position of the sprite in the sheet
   this.spriteY = 4;
   this.width = 1;      // Width/Height of the Frame
   this.height = 3;
   this.maxVelocity = 2;  // Dunno if we need this but set high just in case it would slow ship
   this.hp = [];  // Not sure if this actually needs to be set
-  this.rof = 1;
+  this.cooldown = 1;
 }
 function BigGun() {
-  this.spriteSheet = mainSprites; 
+  this.spriteSheet = mainSprites;
   this.spriteX = 56;   // Position of the sprite in the sheet
   this.spriteY = 3;
   this.width = 1;      // Width/Height of the Frame
   this.height = 4;
   this.maxVelocity = 2;
   this.hp = [];  // Not sure if this actually needs to be set
-  this.rof = 2;
+  this.cooldown = 2;
 }
 function Bullet() {
   this.spriteSheet = mainSprites;
@@ -422,15 +422,23 @@ function Entity(options) {
 
 
 
-// Entity emitter (Options: type, x, y, start, end)
-function Emitter(attachedTo, options) {
-  this.type = options.type;                // Emitted entity (can be array)
-  this.x = options.x || [0, 0];            // Position of the spawned entity (array: [min, max])
-  this.y = options.y || 0;
+/**
+ * Emitter object that emits other Entities, can be 'attatched' to an entity (weapon for example)
+ * @param {Object} options (All the options for the emitter)
+ */
+function Emitter(options) {
+
+  Entity.call(this, options);
+
+  this.attatchedTo = options.attatchedTo; // Where the emitter is being put (level object)
+
+  this.emittedType = options.emittedType;  // Emitted entity (can be array)
+  this.emitX = options.emitX || [0, 0];    // RELATIVE Position of the spawned entity (array: [min, max])
+  this.emitY = options.emitY || 0;
   this.start = options.start || 0;         // When to start emitting
   this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
   this.enable = options.enable || true;    // Toggle emission
-  this.rof = options.rof || 1000; // Frequency of emission (in ms)
+  this.cooldown = options.cooldown || 1000;// Delay between emissions (in ms)
   this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
   /*
@@ -444,14 +452,14 @@ function Emitter(attachedTo, options) {
   */
 
   this.emit = function() {
-    if (now - this.lasEmitted > this.rof && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
+    if (now - this.lasEmitted > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
         type: this.type,
-        x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
+        x: Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
         y: this.y
       });
-      attachedTo.rocks.push(e);
-      attachedTo.collidable.push(e);
+      this.attatchedTo.rocks.push(e);
+      this.attatchedTo.collidable.push(e);
       this.lasEmitted = now;
     }
   };
@@ -789,9 +797,9 @@ function play31() {
       level.collidable.push(playerShip);
 
       var rockEmitter = new Emitter(
-        level,
         {
-          x: [3, 25],
+          attatchedTo: level,
+          emitX: [3, 25],
           y: -10, // Should be -height, hard to define here though
           type: "mediumRock",
           start: 0,
@@ -815,7 +823,7 @@ function play31() {
     default:
       throw new Error ("Tried to load unknown level.");
     }
-
+    console.log(level.emmitters[0]);
     gameLoop();
   }
 
