@@ -498,12 +498,12 @@ function play31() {
 
   function update(dt) {
 
-    var i;
+    var i, j, deads;
 
     // Switching ships for testing. Ship only actually have to be changed at the start of the
     // level rather than on the fly like this.
     if (keys.one) {
-      if (level.collidable.indexOf(playerShip) !== -1) {
+      if (level.collidable.indexOf(playerShip) >= 0) {
         level.collidable.splice(level.collidable.indexOf(playerShip), 1);
       }
       playerShip = new Entity({
@@ -517,7 +517,7 @@ function play31() {
     }
 
     if (keys.two) {
-      if (level.collidable.indexOf(playerShip) !== -1) {
+      if (level.collidable.indexOf(playerShip) >= 0) {
         level.collidable.splice(level.collidable.indexOf(playerShip), 1);
       }
       playerShip = new Entity({
@@ -588,8 +588,13 @@ function play31() {
         if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
           obj1.hpLost();
           obj2.hpLost();
-          if (obj1.dead) { level.collidable.splice(i, 1); }
-          if (obj2.dead) { level.collidable.splice(j, 1); }
+          // Remove dead things from the collidable list:
+          // This fucks up when ship respawned and not sure why, replaced with for loop that works but slower.
+          //if (obj1.dead) { level.collidable.splice(i, 1); }
+          //if (obj2.dead) { level.collidable.splice(j, 1); }
+          for (deads = 0; deads < level.collidable.length; deads++) {
+            if (level.collidable[deads].dead) { level.collidable.splice(deads, 1); }
+          }
         }
       }
     }
@@ -647,7 +652,9 @@ function play31() {
 
   function newGame(levelID) {
     // Clear old stuff
+    //  - Old collidable list, rocks, etc.
 
+    // Create new level
     switch (levelID) {
     case "level1":
       // TODO: level = new Level (and add a nice constructor class)?
