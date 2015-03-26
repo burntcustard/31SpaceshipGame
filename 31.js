@@ -165,7 +165,9 @@ function SmallShip() {
   this.width = 5;      // Width/Height of the Frame
   this.height = 6;
   this.index = 1;      // Current frame of the sheet
-  this.weapons = {};
+  this.weapons = [
+    {x: 2, y: 1, tiltOffsetL: -1, tiltOffsetR: 1, type: false}
+  ];
   this.hp = [
     {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
     {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
@@ -173,14 +175,16 @@ function SmallShip() {
   this.maxVelocity = 0.5;
 }
 function BigShip() {
-  var i;
   this.spriteSheet = mainSprites;
   this.spriteX = 16;    // Position of the sprite in the sheet
   this.spriteY = 0;
   this.width = 9;      // Width/Height of the Frame
   this.height = 9;
   this.index = 1;      // Current frame of the sheet
-  this.weapons = {};
+  this.weapons = [
+    {x: 1, y: 6, tiltOffsetL: 0, tiltOffsetR: 0, type: false},
+    {x: 2, y: 7, tiltOffsetL: 0, tiltOffsetR: 0, type: false}
+  ];
   this.hp = [
     {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
     {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
@@ -193,14 +197,30 @@ function BigShip() {
   ];
   this.maxVelocity = 0.3;
 }
+function SmallGun() {
+  this.spriteSheet = mainSprites; 
+  this.spriteX = 56;   // Position of the sprite in the sheet
+  this.spriteY = 4;
+  this.width = 1;      // Width/Height of the Frame
+  this.height = 3;
+  this.maxVelocity = 2;  // Dunno if we need this but set high just in case it would slow ship
+  this.hp = [];  // Not sure if this actually needs to be set
+}
+function BigGun() {
+  this.spriteSheet = mainSprites; 
+  this.spriteX = 56;   // Position of the sprite in the sheet
+  this.spriteY = 3;
+  this.width = 1;      // Width/Height of the Frame
+  this.height = 4;
+  this.maxVelocity = 2;
+  this.hp = [];  // Not sure if this actually needs to be set
+}
 function MediumRock() {
   this.spriteSheet = mainSprites;
   this.spriteX = 51;   // Position of the sprite in the sheet
   this.spriteY = 3;
   this.width = 4;      // Width/Height of the Frame
   this.height = 4;
-  this.index = 0;      // Current frame of the sheet
-  this.maxHealth = 8;
   this.maxVelocity = 0.25;
   this.hp = [];  // Not sure if this actually needs to be set
 }
@@ -252,6 +272,7 @@ function Entity(options) {
   this.y = options.y || 0;
   this.vx = options.vx || 0;
   this.vy = options.vy || 0;
+  this.index = options.index || 0;
   this.dead = false;
 
   // Colour stuff
