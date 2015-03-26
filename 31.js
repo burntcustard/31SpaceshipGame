@@ -264,8 +264,9 @@ function Entity(options) {
   switch(this.type) {
     case "smallShip": SmallShip.call(this); break;
     case "bigShip": BigShip.call(this); break;
+    case "smallGun": SmallGun.call(this); break;
     case "mediumRock": MediumRock.call(this); break;
-    default: throw new Error ("Tried to load unknown object.");
+    default: throw new Error ("Tried to load unknown object: " + this.type);
   }
 
   this.maxHealth = this.hp.length;
@@ -629,9 +630,14 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         primaryColor: "rgba(0,235,230,0.5)",
-        secondaryColor: "rgba(80,50,255,0.5)"
+        secondaryColor: "rgba(80,50,255,0.5)",
       });
       level.collidable.push(playerShip);
+      playerShip.weapons[0].type = new Emitter({
+        attatchedTo: playerShip,
+        type: "smallGun"
+      });
+      console.log("Ship has: " + JSON.stringify(playerShip.weapons));
     }
 
     if (keys.two) {
