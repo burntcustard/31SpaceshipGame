@@ -55,6 +55,7 @@ function toggleDebug() {
 
 
 // --- COLLISION DETECTION --- //
+
 /**
  * Creates a map of all of the visible pixels in the object. Effectively draws the objects sprite 
  * onto a hidden canvas with no scaling, and then checks each pixel, top to bottom (similar to how
@@ -150,7 +151,9 @@ function checkCollision(obj1, obj2) {
 // - COLLISION DETECTION END - //
 
 
+
 // --------- OBJECTS --------- //
+
 var mainSprites = new Image();
 mainSprites.src = "spriteSheet.png";
 
@@ -201,6 +204,8 @@ function MediumRock() {
   this.maxVelocity = 0.25;
   this.hp = [];  // Not sure if this actually needs to be set
 }
+
+
 
 // General entity constuctor function
 function Entity(options) {
@@ -364,6 +369,34 @@ function Entity(options) {
     //ctx.restore();
   };
 }
+
+
+
+// Entity emitter (Options: type, x, y, start, end)
+function Emitter(level, options) {
+  this.type = options.type;                // Emitted entity (can be array)
+  this.x = options.x || [0, 0];            // Position of the spawned entity (array: [min, max])
+  this.y = options.y || 0;
+  this.start = options.start || 0;         // When to start emitting
+  this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
+  this.enable = options.enable || true;    // Toggle emission
+  this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
+  this.lasEmitted = 0;                     // Store when the last object was emitted for timing
+
+  this.emit = function() {
+    if (now - this.lasEmitted > this.frequency && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
+      var e = new Entity({
+        type: this.type,
+        x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
+        y: this.y
+      });
+      level.rocks.push(e);
+      level.collidable.push(e);
+      this.lasEmitted = now;
+    }
+  };
+}
+
 // ------- OBJECTS END ------- //
 
 
@@ -459,30 +492,7 @@ function play31() {
 
 
 
-  // Entity emitter (Options: type, x, y, start, end)
-  function Emitter(options) {
-    this.type = options.type;                // Emitted entity (can be array)
-    this.x = options.x || [0, 0];            // Position of the spawned entity (array: [min, max])
-    this.y = options.y || 0;
-    this.start = options.start || 0;         // When to start emitting
-    this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
-    this.enable = options.enable || true;    // Toggle emission
-    this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
-    this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
-    this.emit = function() {
-      if (now - this.lasEmitted > this.frequency && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
-        var e = new Entity({
-          type: this.type,
-          x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
-          y: this.y
-        });
-        level.rocks.push(e);
-        level.collidable.push(e);
-        this.lasEmitted = now;
-      }
-    };
-  }
 
 
 
@@ -650,13 +660,16 @@ function play31() {
       });
       level.collidable.push(playerShip);
 
-      var rockEmitter = new Emitter({
-        x: [3, 25],
-        y: -10, // Should be -height, hard to define here though
-        type: "mediumRock",
-        start: 0,
-        duration: -1
-      });
+      var rockEmitter = new Emitter(
+        level,
+        {
+          x: [3, 25],
+          y: -10, // Should be -height, hard to define here though
+          type: "mediumRock",
+          start: 0,
+          duration: -1
+        }
+      );
       level.emmitters.push(rockEmitter);
       break;
 
