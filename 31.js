@@ -57,17 +57,17 @@ function toggleDebug() {
 // --- COLLISION DETECTION --- //
 
 /**
- * Creates a map of all of the visible pixels in the object. Effectively draws the objects sprite 
+ * Creates a map of all of the visible pixels in the object. Effectively draws the objects sprite
  * onto a hidden canvas with no scaling, and then checks each pixel, top to bottom (similar to how
  * text is read along and then down a line) If a pixel is fully transparent, i.e. rgba(-,-,-,0),
  * it adds that pixels x, y coordinates as an object to the pixelMap array. Also offsets the those
  * coordinates in the pixel map to align with the sprites current position in the "real" game canvas.
- * 
+ *
  * @todo Make this decription shorter and easier to understand :D
  * @todo Consider calling this function only once per sprite, rather than every time for both
  *       sprites that might be colliding.
  * @todo Consider passing this function only relevant info about the object rather than the whole thing.
- * 
+ *
  * @param   {Object}  obj The object with the sprite to look at, e.g. a spaceship or a space rock.
  * @returns {[array]} An array of objects containing x, y coordinates.
  */
@@ -101,17 +101,17 @@ function createPixelMap(obj) {
     pixelMap[i].x += Math.round(obj.x);
     pixelMap[i].y += Math.round(obj.y);
   }
-  return pixelMap; 
+  return pixelMap;
 }
 
 
 
 /**
  * Checks if two objects have sprites that are colliding.
- * 
+ *
  * @todo Make the crazy long if statement a bit neater.
  * @todo Check if the object already has a pixelMap so it doesn't have to be generated again.
- * 
+ *
  * @param   {Object}  obj1 [[Description]]
  * @param   {Object}  obj2 [[Description]]
  * @returns {Boolean} True if the objects have collided, else false.
@@ -135,14 +135,14 @@ function checkCollision(obj1, obj2) {
   if (b1 <= t2) {return false;}
   if (l1 >= r2) {return false;}
   // It got to here so bounding boxes are colliding!
-  
+
   // Per pixel collisions
   obj1PixelMap = createPixelMap(obj1);
   obj2PixelMap = createPixelMap(obj2);
     for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
       for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
         if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
-            obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) { 
+            obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) {
           return true;
         }
       }
@@ -236,7 +236,7 @@ function Entity(options) {
     }
     if (!lostHp) {  // Been hit after running out of HP so deaded
       this.dead = true;
-      if (debug) { console.log(this.type + " Dead"); }
+      if (debug) { console.log(this.type + " Dead at X: " + this.x + " Y: " + this.y); }
     }
   };
 
@@ -610,6 +610,7 @@ function play31() {
         var obj2 = level.collidable[j];
         // If object not colliding with its self
         if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
+          if (debug) { console.log(now.toFixed() + " " + obj1.type + " colliding with " + obj2.type); }
           obj1.hpLost();
           obj2.hpLost();
           // Remove dead things from the collidable list:
@@ -622,12 +623,12 @@ function play31() {
         }
       }
     }
-    
+
     // Remove dead rocks (you already can't collide with them since the collision check)
     for (i = 0; i < level.rocks.length; i++) {
       if (level.rocks[i].dead) { level.rocks.splice(i, 1); }
     }
-    
+
   }
 
 
@@ -641,7 +642,7 @@ function play31() {
 
     while (dt > step) {
       dt -= step;
-      
+
       // ----- INPUT HANDLING ------ //
       if (keys.left && !keys.right) {
         playerShip.move = "left";
