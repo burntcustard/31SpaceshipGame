@@ -404,18 +404,6 @@ function Entity(options) {
           );
         }
       }
-    } else if (this.attatchedTo) { // It is attatched to a parent
-      ctx.drawImage(
-        this.spriteSheet,
-        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY,                            // SourceY
-        this.width,                              // SourceW (Size of frame)
-        this.height,                             // SourceH
-        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-        this.width * cSize,                      // DestinationW (Size on canvas)
-        this.height * cSize                      // DestinationH
-      );
     } else { // Draw simple sprite that doesn't have fancy colours and shit
       ctx.drawImage(
         this.spriteSheet,
@@ -653,6 +641,11 @@ function play31() {
         primaryColor: "rgba(0,235,230,0.5)",
         secondaryColor: "rgba(80,50,255,0.5)"
       });
+
+      playerShip.weapons[0] = new Emitter({
+        attatchedTo: "playerShip",
+        type: "smallGun"
+      });
     }
 
     if (keys.two) {
@@ -663,6 +656,10 @@ function play31() {
         type: "bigShip",
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
+      });
+      playerShip.weapons[0] = new Emitter({
+        attatchedTo: "playerShip",
+        type: "smallGun"
       });
       level.collidable.push(playerShip);
     }
@@ -818,8 +815,9 @@ function play31() {
       level.collidable.push(playerShip);
 
       playerShip.weapons[0] = new Emitter({
-        attatchedTo: "playerShip",
-        type: "smallGun"
+        attatchedTo: playerShip,
+        type: "smallGun",
+        x: 1
       });
 
       rockEmitter = new Emitter(
@@ -846,12 +844,16 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(playerShip);
+
+      playerShip.weapons[0] = new Emitter({
+        attatchedTo: playerShip,
+        type: "smallGun"
+      });
       break;
 
     default:
       throw new Error ("Tried to load unknown level.");
     }
-    console.log(playerShip.weapons[0]);
     gameLoop();
   }
 
