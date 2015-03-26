@@ -431,7 +431,8 @@ function Emitter(options) {
 
   Entity.call(this, options);
 
-  this.attatchedTo = options.attatchedTo; // Where the emitter is being put (level object)
+  this.spawnInto = options.spawnInto;      // Where the emitter is being put (level object)
+  this.attachedTo = options.attachedTo || false; // Can set a parent object for the emitter
 
   this.emittedType = options.emittedType;  // Emitted entity (can be array)
   this.emitX = options.emitX || [0, 0];    // RELATIVE Position of the spawned entity (array: [min, max])
@@ -459,8 +460,8 @@ function Emitter(options) {
         x: Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
         y: this.y
       });
-      this.attatchedTo.rocks.push(e);
-      this.attatchedTo.collidable.push(e);
+      this.spawnInto.rocks.push(e);
+      this.spawnInto.collidable.push(e);
       this.lasEmitted = now;
     }
   };
@@ -630,7 +631,7 @@ function play31() {
       playerShip = new Entity({
         type: "smallShip",
         primaryColor: "rgba(0,235,230,0.5)",
-        secondaryColor: "rgba(80,50,255,0.5)",
+        secondaryColor: "rgba(80,50,255,0.5)"
       });
       level.collidable.push(playerShip);
       playerShip.weapons[0].type = new Emitter({
@@ -804,7 +805,7 @@ function play31() {
 
       var rockEmitter = new Emitter(
         {
-          attatchedTo: level,
+          spawnInto: level,
           emitX: [3, 25],
           y: -10, // Should be -height, hard to define here though
           type: "mediumRock",
