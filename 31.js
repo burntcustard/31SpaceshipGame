@@ -205,6 +205,7 @@ function SmallGun() {
   this.height = 3;
   this.maxVelocity = 2;  // Dunno if we need this but set high just in case it would slow ship
   this.hp = [];  // Not sure if this actually needs to be set
+  this.rof = 1;
 }
 function BigGun() {
   this.spriteSheet = mainSprites; 
@@ -214,6 +215,16 @@ function BigGun() {
   this.height = 4;
   this.maxVelocity = 2;
   this.hp = [];  // Not sure if this actually needs to be set
+  this.rof = 2;
+}
+function Bullet() {
+  this.spriteSheet = mainSprites;
+  this.spriteX = 58;
+  this.spriteY = 3;
+  this.width = 1;
+  this.height = 2;
+  this.maxVelocity = 0.5;
+  this.hp = [];
 }
 function MediumRock() {
   this.spriteSheet = mainSprites;
@@ -401,7 +412,7 @@ function Emitter(attachedTo, options) {
   this.start = options.start || 0;         // When to start emitting
   this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
   this.enable = options.enable || true;    // Toggle emission
-  this.frequency = options.frequency || 1000; // Frequency of emission (in ms)
+  this.rof = options.rof || 1000; // Frequency of emission (in ms)
   this.lasEmitted = 0;                     // Store when the last object was emitted for timing
 
   /*
@@ -415,7 +426,7 @@ function Emitter(attachedTo, options) {
   */
   
   this.emit = function() {
-    if (now - this.lasEmitted > this.frequency && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
+    if (now - this.lasEmitted > this.rof && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
         type: this.type,
         x: Math.floor(this.x[0] + Math.random() * (this.x[1] - this.x[0])),
