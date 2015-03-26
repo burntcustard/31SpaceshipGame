@@ -456,7 +456,7 @@ function Emitter(options) {
   this.emit = function() {
     if (now - this.lasEmitted > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
-        type: this.type,
+        type: this.emittedType,
         x: Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
         y: this.y
       });
@@ -501,6 +501,7 @@ function Emitter(options) {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
+      rockEmitter,
       i, j,
       level = {     // Data about the level
         rocks: [],
@@ -589,6 +590,10 @@ function play31() {
 
     playerShip.draw(ctx);
 
+    rockEmitter.draw(ctx);
+
+    playerShip.weapons[0].draw(ctx);
+
 
     // ------- DEBUG INFO -------- //
     if (debug) {
@@ -633,12 +638,6 @@ function play31() {
         primaryColor: "rgba(0,235,230,0.5)",
         secondaryColor: "rgba(80,50,255,0.5)"
       });
-      level.collidable.push(playerShip);
-      playerShip.weapons[0].type = new Emitter({
-        attatchedTo: playerShip,
-        type: "smallGun"
-      });
-      console.log("Ship has: " + JSON.stringify(playerShip.weapons));
     }
 
     if (keys.two) {
@@ -803,12 +802,19 @@ function play31() {
       });
       level.collidable.push(playerShip);
 
-      var rockEmitter = new Emitter(
+      playerShip.weapons[0] = new Emitter({
+        attatchedTo: playerShip,
+        type: "smallGun"
+      });
+
+      rockEmitter = new Emitter(
         {
           spawnInto: level,
           emitX: [3, 25],
-          y: -10, // Should be -height, hard to define here though
-          type: "mediumRock",
+          index: 1,
+          X: 11,
+          y: 5,
+          emittedType: "mediumRock",
           start: 0,
           duration: -1
         }
