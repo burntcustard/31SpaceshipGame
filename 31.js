@@ -404,6 +404,18 @@ function Entity(options) {
           );
         }
       }
+    } else if (this.attatchedTo) { // It is attatched to a parent
+      ctx.drawImage(
+        this.spriteSheet,
+        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
+        this.spriteY,                            // SourceY
+        this.width,                              // SourceW (Size of frame)
+        this.height,                             // SourceH
+        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
+        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
+        this.width * cSize,                      // DestinationW (Size on canvas)
+        this.height * cSize                      // DestinationH
+      );
     } else { // Draw simple sprite that doesn't have fancy colours and shit
       ctx.drawImage(
         this.spriteSheet,
@@ -432,7 +444,7 @@ function Emitter(options) {
   Entity.call(this, options);
 
   this.spawnInto = options.spawnInto;      // Where the emitter is being put (level object)
-  this.attachedTo = options.attachedTo || false; // Can set a parent object for the emitter
+  this.attatchedTo = options.attatchedTo || false; // Can set a parent object for the emitter
 
   this.emittedType = options.emittedType;  // Emitted entity (can be array)
   this.emitX = options.emitX || [0, 0];    // RELATIVE Position of the spawned entity (array: [min, max])
@@ -453,11 +465,14 @@ function Emitter(options) {
   this.height = 4;
   */
 
+  console.log(this.x);
+  console.log(this.emitX);
+
   this.emit = function() {
     if (now - this.lasEmitted > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
         type: this.emittedType,
-        x: Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
+        x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
         y: this.y
       });
       this.spawnInto.rocks.push(e);
@@ -803,17 +818,17 @@ function play31() {
       level.collidable.push(playerShip);
 
       playerShip.weapons[0] = new Emitter({
-        attatchedTo: playerShip,
+        attatchedTo: "playerShip",
         type: "smallGun"
       });
 
       rockEmitter = new Emitter(
         {
           spawnInto: level,
-          emitX: [3, 25],
+          emitX: [0, 20],
           index: 1,
-          X: 11,
-          y: 5,
+          x: 0.1, // Can't have as 0 else it will reset to the defualt case :(
+          y: -10,
           emittedType: "mediumRock",
           start: 0,
           duration: -1
@@ -836,7 +851,7 @@ function play31() {
     default:
       throw new Error ("Tried to load unknown level.");
     }
-    console.log(level.emmitters[0]);
+    console.log(playerShip.weapons[0]);
     gameLoop();
   }
 
