@@ -85,15 +85,15 @@ function createPixelMap(obj) {
   var ctxCollision = canvasCollision.getContext('2d');
   ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   ctxCollision.drawImage(
-    obj.spriteSheet,
-    obj.spriteX + obj.width * obj.index,  // SourceX (Position of frame)
-    obj.spriteY,                          // SourceY
-    obj.width,                            // SourceW (Size of frame)
-    obj.height,                           // SourceH
-    0,                                    // DestinationX (Position on canvas)
-    0,                                    // DestinationY
-    obj.width,                            // DestinationW (Size on canvas)
-    obj.height                            // DestinationH
+    obj.sprite.source,
+    obj.sprite.x + obj.sprite.w * obj.sprite.index, // SourceX (Position of frame)
+    obj.sprite.y,                                   // SourceY
+    obj.sprite.w,                                   // SourceW (Size of frame)
+    obj.sprite.h,                                   // SourceH
+    0,                                              // DestinationX (Position on canvas)
+    0,                                              // DestinationY
+    obj.sprite.w * 10,                                   // DestinationW (Size on canvas)
+    obj.sprite.h * 10                                    // DestinationH
   );
   for(y = 0; y < obj.height; y++) {
     for(x = 0; x < obj.width; x++) {
@@ -105,6 +105,7 @@ function createPixelMap(obj) {
       }
     }
   }
+  ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   // Add the x and y offset of the object in the game to the pixel map
   for (i = 0; i < pixelMap.length; i++) {
     pixelMap[i].x += Math.round(obj.x);
@@ -127,12 +128,12 @@ function createPixelMap(obj) {
  */
 function checkCollision(obj1, obj2) {
   var t1 = Math.round(obj1.y),
-      r1 = Math.round(obj1.x + obj1.width),
-      b1 = Math.round(obj1.y + obj1.height),
+      r1 = Math.round(obj1.x + obj1.sprite.w),
+      b1 = Math.round(obj1.y + obj1.sprite.h),
       l1 = Math.round(obj1.x),
       t2 = Math.round(obj2.y),
-      r2 = Math.round(obj2.x + obj2.width),
-      b2 = Math.round(obj2.y + obj2.height),
+      r2 = Math.round(obj2.x + obj2.sprite.w),
+      b2 = Math.round(obj2.y + obj2.sprite.h),
       l2 = Math.round(obj2.x),
       obj1PixelMap,
       obj2PixelMap,
@@ -144,18 +145,20 @@ function checkCollision(obj1, obj2) {
   if (b1 <= t2) {return false;}
   if (l1 >= r2) {return false;}
   // It got to here so bounding boxes are colliding!
+  return true;
 
-  // Per pixel collisions
-  obj1PixelMap = createPixelMap(obj1);
+  // Per pixel collisions !! NOT WORKING
+  /*obj1PixelMap = createPixelMap(obj1);
   obj2PixelMap = createPixelMap(obj2);
-    for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
-      for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
-        if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
-            obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) {
-          return true;
-        }
+  for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
+    for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
+      if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
+          obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) {
+        console.log("Collision");
+        return true;
       }
     }
+  }*/
 }
 // - COLLISION DETECTION END - //
 
@@ -175,102 +178,22 @@ function checkCollision(obj1, obj2) {
 var mainSprites = new Image();
 mainSprites.src = "spriteSheet.png";
 
-// Need to have the types of entity before the constuctor (Grrrr JSLint)
-function SmallShip() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 0;    // Position of the sprite in the sheet
-  this.spriteY = 3;
-  this.width = 5;      // Width/Height of the Frame
-  this.height = 6;
-  this.index = 1;      // Current frame of the sheet
-  this.weapons = [
-    {x: 2, y: 1, tiltOffsetL: -1, tiltOffsetR: 1, type: false}
-  ];
-  this.hp = [
-    {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
-    {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
-  ];
-  this.maxVelocity = 0.5;
-}
-function BigShip() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 16;    // Position of the sprite in the sheet
-  this.spriteY = 0;
-  this.width = 9;      // Width/Height of the Frame
-  this.height = 9;
-  this.index = 1;      // Current frame of the sheet
-  this.weapons = [
-    {x: 1, y: 6, tiltOffsetL: 0, tiltOffsetR: 0, type: false},
-    {x: 2, y: 7, tiltOffsetL: 0, tiltOffsetR: 0, type: false}
-  ];
-  this.hp = [
-    {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
-    {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false },
-    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2    },
-    {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false },
-    {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
-  ];
-  this.maxVelocity = 0.3;
-}
-function SmallGun() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 56;   // Position of the sprite in the sheet
-  this.spriteY = 4;
-  this.width = 1;      // Width/Height of the Frame
-  this.height = 3;
-  this.maxVelocity = 2;  // Dunno if we need this but set high just in case it would slow ship
-  this.hp = [];  // Not sure if this actually needs to be set
-  this.cooldown = 1;
-}
-function BigGun() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 56;   // Position of the sprite in the sheet
-  this.spriteY = 3;
-  this.width = 1;      // Width/Height of the Frame
-  this.height = 4;
-  this.maxVelocity = 2;
-  this.hp = [];  // Not sure if this actually needs to be set
-  this.cooldown = 2;
-}
-function Bullet() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 58;
-  this.spriteY = 3;
-  this.width = 1;
-  this.height = 2;
-  this.maxVelocity = 0.5;
-  this.hp = [];
-}
-function MediumRock() {
-  this.spriteSheet = mainSprites;
-  this.spriteX = 51;   // Position of the sprite in the sheet
-  this.spriteY = 3;
-  this.width = 4;      // Width/Height of the Frame
-  this.height = 4;
-  this.maxVelocity = 0.25;
-  this.hp = [];  // Not sure if this actually needs to be set
-}
-
-
-
-// General entity constuctor function
-function Entity(options) {
+// Entity super class
+function Entity(options, type) {
   var i;
-  // Inherit from the correct object type
-  this.type = options.type || "smallShip";
-  switch(this.type) {
-    case "smallShip": SmallShip.call(this); break;
-    case "bigShip": BigShip.call(this); break;
-    case "smallGun": SmallGun.call(this); break;
-    case "mediumRock": MediumRock.call(this); break;
-    default: throw new Error ("Tried to load unknown object: " + this.type);
-  }
 
+  this.name = options.name || type.name || "Entity"; // For debugging
+
+  this.x = options.x || 0;
+  this.y = options.y || 0;
+  this.vx = options.vx || 0;
+  this.vy = options.vy || 0;
+
+  this.maxVelocity = options.maxVelocity|| type.maxVelocity || 1;
+
+  this.hp = type.hp || [];
   this.maxHealth = this.hp.length;
-
+  this.dead = false;
   this.getHealth = function() {
     var currentHealth = this.maxHealth;
     for (i = 0; i < this.maxHealth; i++) {
@@ -278,7 +201,6 @@ function Entity(options) {
     }
     return currentHealth;
   };
-
   this.hpLost = function() {
     var lostHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -286,10 +208,9 @@ function Entity(options) {
     }
     if (!lostHp) {  // Been hit after running out of HP so deaded
       this.dead = true;
-      if (debug) { console.log(this.type + " Dead at X: " + this.x + " Y: " + this.y); }
+      if (debug) { console.log(this.name + " Dead at X: " + this.x + " Y: " + this.y); }
     }
   };
-
   this.hpRestore = function() {
     var restoredHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -297,13 +218,35 @@ function Entity(options) {
     }
   };
 
-  // Properties for all objects go here
-  this.x = options.x || Math.round(gridSizeX / 2) - Math.round(this.width / 2);
-  this.y = options.y || gridSizeY - this.height - 1;
-  this.vx = options.vx || 0;
-  this.vy = options.vy || 0;
-  this.index = options.index || 0;
-  this.dead = false;
+  this.sprite = {
+    source: type.source || mainSprites,
+    index: type.index || 0,
+    x: type.x || 0,
+    y: type.y || 0,
+    w: type.w || 1,
+    h: type.h || 1
+  };
+
+  this.draw = function(context) {
+    context.drawImage(
+        this.sprite.source,
+        this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
+        this.sprite.y,                                     // SourceY
+        this.sprite.w,                                     // SourceW (Frame size)
+        this.sprite.h,                                     // SourceH
+        Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+        Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
+        this.sprite.w * cSize,                             // DestinationW (Size on canvas)
+        this.sprite.h * cSize);                            // DestinationH
+  };
+}
+
+// Ship sub class
+function Ship(options, type) {
+  var i;
+  Entity.call(this, options, type);
+
+  this.weapons = type.weapons || [];
 
   // Colour stuff
   this.primaryColor = options.primaryColor || false;
@@ -316,22 +259,24 @@ function Entity(options) {
 
   if (this.primaryColor && this.secondaryColor) {
     if (debug) { console.log("Creating a fancy colourful ship"); }
-    //canvasPri = document.createElement('canvas');
+
+    //canvasPri = document.getElementById('canvasPri');
     var ctxPri = canvasPri.getContext('2d');
     ctxPri.mozImageSmoothingEnabled = false;
     ctxPri.imageSmoothingEnabled = false;
 
-    ctxPri.drawImage(this.spriteSheet, 0, 0);
+    ctxPri.drawImage(this.sprite.source, 0, 0);
     ctxPri.globalCompositeOperation = "source-atop";
     ctxPri.fillStyle = this.primaryColor;
     ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
+
 
     //canvasSec = document.getElementById('canvasSec');
     var ctxSec = canvasSec.getContext('2d');
     ctxSec.mozImageSmoothingEnabled = false;
     ctxSec.imageSmoothingEnabled = false;
 
-    ctxSec.drawImage(this.spriteSheet, 0, 0);
+    ctxSec.drawImage(this.sprite.source, 0, 0);
     ctxSec.globalCompositeOperation = "source-atop";
     ctxSec.fillStyle = this.secondaryColor;
     ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
@@ -343,147 +288,159 @@ function Entity(options) {
   }
   // End initial hidden draw
 
-
-
-  this.draw = function(ctx) {
-
-    /*
-    if (this.flip) {
-      ctx.save();
-      ctx.translate(0, canvas.width);
-      ctx.scale(1, -1);
-    }
-    */
-    // I'm getting the feeling only ships should have primary and secondary colours because confusing
-    if (this.primaryColor && this.secondaryColor) {
-      ctx.drawImage(  // Ship hull (primary colour)
-        canvasPri,
-        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY,                            // SourceY
-        this.width,                              // SourceW (Size of frame)
-        this.height,                             // SourceH
-        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-        this.width * cSize,                      // DestinationW (Size on canvas)
-        this.height * cSize                      // DestinationH
-      );
-      ctx.drawImage(  // Cockpit (secondary colour)
-        canvasSec,
-        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height,              // SourceY
-        this.width,                              // SourceW (Size of frame)
-        this.height,                             // SourceH
-        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-        this.width * cSize,                      // DestinationW (Size on canvas)
-        this.height * cSize                      // DestinationH
-      );
-      ctx.drawImage(  // Engine trails
-        this.spriteSheet,
-        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY + this.height * 2,          // SourceY
-        this.width,                              // SourceW (Size of frame)
-        12, // Max height of engine trails is 12 // SourceH
-        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y + this.height - 1) * cSize, // DestinationY (-1 because goes up in ship hull)
-        this.width * cSize,                      // DestinationW (Size on canvas)
-        12 * cSize                               // DestinationH
-      );
-      // And now for the magic cockpit code
-      var tilt = 0;
-      for (i = 0; i < this.maxHealth; i++) {
-        if (this.index === 0) { tilt = this.hp[i].tiltOffsetL; }
-        if (this.index === 2) { tilt = this.hp[i].tiltOffsetR; }
-        if (this.hp[i].lost) {
-          var c = Math.floor(Math.random() * 64);
-          paintCell(
-            ctx,
-            Math.round(this.x) + this.hp[i].x + tilt,
-            Math.round(this.y) + this.hp[i].y,
-            ('rgb(' + (c+191) + ',' + (c*3) + ',' + c + ')')
-          );
-        }
+  this.draw = function(context) {
+    context.drawImage(  // Ship hull (primary colour)
+      canvasPri,
+      this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
+      this.sprite.y,                                     // SourceY
+      this.sprite.w,                                     // SourceW (Frame size)
+      this.sprite.h,                                     // SourceH
+      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
+      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
+      this.sprite.h * cSize);                            // DestinationH
+    context.drawImage(  // Cockpit (secondary colour)
+      canvasSec,
+      this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
+      this.sprite.y + this.sprite.h,                     // SourceY
+      this.sprite.w,                                     // SourceW (Frame size)
+      this.sprite.h,                                     // SourceH
+      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
+      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
+      this.sprite.h * cSize);                            // DestinationH
+    context.drawImage(  // Engine trails
+      this.sprite.source,
+      this.sprite.x + this.sprite.w * this.sprite.index, // SourceX (Position of frame)
+      this.sprite.y + this.sprite.h * 2,                 // SourceY
+      this.sprite.w,                                     // SourceW (Size of frame)
+      12,           // Max height of engine trails is 12 // SourceH
+      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y + this.sprite.h - 1) * cSize,    // DestinationY (-1 because goes up in ship hull)
+      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
+      12 * cSize                                         // DestinationH
+    );
+    // And now for the magic cockpit code
+    var tilt = 0;
+    for (i = 0; i < this.maxHealth; i++) {
+      if (this.sprite.index === 0) { tilt = this.hp[i].tiltOffsetL; }
+      if (this.sprite.index === 2) { tilt = this.hp[i].tiltOffsetR; }
+      if (this.hp[i].lost) {
+        var c = Math.floor(Math.random() * 64);
+        paintCell(
+          context,
+          Math.round(this.x) + this.hp[i].x + tilt,
+          Math.round(this.y) + this.hp[i].y,
+          ('rgb(' + (c+191) + ',' + (c*3) + ',' + c + ')')
+        );
       }
-    } else { // Draw simple sprite that doesn't have fancy colours and shit
-      ctx.drawImage(
-        this.spriteSheet,
-        this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-        this.spriteY,                            // SourceY
-        this.width,                              // SourceW (Size of frame)
-        this.height,                             // SourceH
-        Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-        Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-        this.width * cSize,                      // DestinationW (Size on canvas)
-        this.height * cSize                      // DestinationH
-      );
     }
-    //ctx.restore();
   };
 }
 
 
 
-/**
- * Emitter object that emits other Entities, can be 'attatched' to an entity (weapon for example)
- * @param {Object} options (All the options for the emitter)
- */
-function Emitter(options) {
+function Emitter(options, type) {
+  Entity.call(this, options, type);
 
-  Entity.call(this, options);
+  this.emittedObj = options.emittedObj;
+  this.emitX = options.emitX || [0,0];
+  this.emitY = options.emitY || [0,0];
+  this.emitDir = options.emitDir || "u";
 
-  this.spawnInto = options.spawnInto;      // Where the emitter is being put (level object)
-  this.attatchedTo = options.attatchedTo || false; // Can set a parent object for the emitter
+  this.cooldown = options.cooldown || 1000;
+  this.start = options.start || 0;
+  this.duration = options.duration || -1;
+  this.attatchedTo = options.attatchedTo || false;
+  this.spawnInto = options.spawnInto;
 
-  this.emittedType = options.emittedType;  // Emitted entity (can be array)
-  this.emitX = options.emitX || [0, 0];    // RELATIVE Position of the spawned entity (array: [min, max])
-  this.emitY = options.emitY || 0;
-  this.start = options.start || 0;         // When to start emitting
-  this.duration = options.duration || -1;  // How long to emit for (-1 = forever)
-  this.enable = options.enable || true;    // Toggle emission
-  this.cooldown = options.cooldown || 1000;// Delay between emissions (in ms)
-  this.lasEmitted = 0;                     // Store when the last object was emitted for timing
+  this.emitting = true;
+  this.lastEmission = 0;
 
-  /*
-  // Additions to make work with weapons hopefully:
-  this.direction = options.direction || 'D'; // "Down"
-  this.spriteSheet = mainSprites;
-  this.spriteX = 51;   // Position of the sprite in the sheet
-  this.spriteY = 3;
-  this.width = 4;      // Width/Height of the Frame
-  this.height = 4;
-  */
-
-  console.log(this.x);
-  console.log(this.emitX);
-
-  this.emit = function() {
-    if (now - this.lasEmitted > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
+  this.emit = function(spawnInto) {
+    if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
-        type: this.emittedType,
         x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
         y: this.y
-      });
+      },
+      this.emittedObj);
       this.spawnInto.rocks.push(e);
       this.spawnInto.collidable.push(e);
-      this.lasEmitted = now;
+      this.lastEmission = now;
     }
-  };
-
-  this.draw = function(ctx) {
-    ctx.drawImage(
-      this.spriteSheet,
-      this.spriteX + this.width * this.index,  // SourceX (Position of frame)
-      this.spriteY,                            // SourceY
-      this.width,                              // SourceW (Size of frame)
-      this.height,                             // SourceH
-      Math.round(this.x) * cSize,              // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,              // DestinationY (Rounded to make it locked to grid)
-      this.width * cSize,                      // DestinationW (Size on canvas)
-      this.height * cSize                      // DestinationH
-    );
   };
 }
 
+
+
+// Object Types
+var smallShip = {
+  name: "smallShip",
+  source: mainSprites,
+  x: 0, y: 3,
+  w: 5, h: 6,
+  index: 1,
+  weapons: [
+    {x: 2, y: 1, tiltOffsetL: -1, tiltOffsetR: 1, type: false}
+  ],
+  hp: [
+    {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
+    {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
+  ],
+  maxVelocity: 0.5
+};
+var bigShip = {
+  name: "bigShip",
+  source: mainSprites,
+  x: 16, y: 0,
+  w: 9, h: 9,
+  index: 1,
+  weapons: [
+    {x: 1, y: 6, tiltOffsetL: 0, tiltOffsetR: 0, type: false},
+    {x: 2, y: 7, tiltOffsetL: 0, tiltOffsetR: 0, type: false}
+  ],
+  hp: [
+    {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
+    {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false },
+    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2    },
+    {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2    },
+    {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false },
+    {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
+  ],
+  maxVelocity: 0.3
+};
+var smallGun = {
+  name: "smallgun",
+  source: mainSprites,
+  x: 56, y: 4,
+  w: 1, h: 3,
+  maxVelocity: 2, // Dunno if needed, set high incase it slows ship
+  cooldown: 1
+};
+var bigGun = {
+  name: "bigGun",
+  source: mainSprites,
+  x: 56, y: 3,
+  w: 1, h: 4,
+  maxVelocity: 2,
+  cooldown: 2
+};
+var bullet = {
+  name: "bullet",
+  source: mainSprites,
+  x: 58, y: 3,
+  w: 1, h: 2,
+  maxVelocity: 0.5
+};
+var mediumRock = {
+  name: "mediumRock",
+  source: mainSprites,
+  x: 51, y: 3,
+  w: 4, h: 4,
+  maxVelocity: 0.25
+};
 // ------- Entity END ------- //
 
 
@@ -504,7 +461,7 @@ function Emitter(options) {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
-      rockEmitter,
+      rockSpawner,
       i, j,
       level = {     // Data about the level
         rocks: [],
@@ -541,6 +498,7 @@ function play31() {
       case  50: keys.two   = true; break;
       case  51: keys.three = true; break;
       case  52: keys.four  = true; break;
+      case  82: keys.r     = true; break;
       case 76: console.log(level); break;  // Pretty sure we could avoid having this here *grumpy face*
       case 187: resize(+2);        break;
       case 189: resize(-2);        break;
@@ -559,6 +517,7 @@ function play31() {
       case  50: delete keys.two;   break;
       case  51: delete keys.three; break;
       case  52: delete keys.four;  break;
+      case  82: delete keys.r;     break;
       default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
     }
   };
@@ -592,21 +551,18 @@ function play31() {
     }
 
     playerShip.draw(ctx);
-
-    rockEmitter.draw(ctx);
-
-    playerShip.weapons[0].draw(ctx);
-
+    rockSpawner.draw(ctx);
 
     // ------- DEBUG INFO -------- //
     if (debug) {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
-      debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
-      debugMenu.innerHTML += "Player ship dead: " + playerShip.dead + "<br>";
       debugMenu.innerHTML += "Number of emitters: " + level.emmitters.length + "<br>";
       debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
+      debugMenu.innerHTML += "Number of colliders: " + level.collidable.length + "<br>";
+      debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
+      debugMenu.innerHTML += "Player ship dead: " + playerShip.dead + "<br>";
       debugMenu.innerHTML += "Frame: " + now.toFixed() + "<br>";
     }
     // -------- DEBUG END -------- //
@@ -628,90 +584,38 @@ function play31() {
 
   function update(dt) {
 
-    var i, j, deads;
-
-    // Switching ships for testing. Ship only actually have to be changed at the start of the
-    // level rather than on the fly like this.
-    if (keys.one) {
-      if (level.collidable.indexOf(playerShip) >= 0) {
-        level.collidable.splice(level.collidable.indexOf(playerShip), 1);
-      }
-      playerShip = new Entity({
-        type: "smallShip",
-        primaryColor: "rgba(0,235,230,0.5)",
-        secondaryColor: "rgba(80,50,255,0.5)"
-      });
-
-      playerShip.weapons[0] = new Emitter({
-        attatchedTo: "playerShip",
-        type: "smallGun"
-      });
-    }
-
-    if (keys.two) {
-      if (level.collidable.indexOf(playerShip) >= 0) {
-        level.collidable.splice(level.collidable.indexOf(playerShip), 1);
-      }
-      playerShip = new Entity({
-        type: "bigShip",
-        primaryColor: "rgba(80,80,0,0.7)",
-        secondaryColor: "rgba(0,235,230,0.5)"
-      });
-      playerShip.weapons[0] = new Emitter({
-        attatchedTo: "playerShip",
-        type: "smallGun"
-      });
-      level.collidable.push(playerShip);
-    }
-
-    // Testing up/down movement for "going off top of screen" because looks cool
-    // Minus and plusses look wrong way around but remember 1,1 is top left!
-    if (playerShip.move === "up") { playerShip.y -= playerShip.maxVelocity; }
-    if (playerShip.move === "down") { playerShip.y += playerShip.maxVelocity; }
-
-    // hitpoints / hp / health debugging
-    if (keys.three) { delete keys.three; playerShip.hpLost(); }
-    if (keys.four) { delete keys.four; playerShip.hpRestore(); }
-
-
-
-    // Trigger emitters
-    for (i = 0; i < level.emmitters.length; i++) {
-      level.emmitters[i].emit();
-    }
-
-
-
-    // Rock movement
-    i = level.rocks.length;
-    while (i--) {
-      var ent = level.rocks[i];
-      ent.y += ent.maxVelocity;
-      // If the rock is off the bottom + height, remove
-      if (ent.y > gridSizeY + ent.height) {
-        level.rocks.splice(level.rocks[i], 1);
-        level.collidable.splice(level.collidable.indexOf(ent), 1);
-      }
-    }
-
-
+    var i, j, deads, ent;
 
     // Player movement
     if (playerShip.move === "left") {
       playerShip.x -= playerShip.maxVelocity;
-      playerShip.index = 0;
+      playerShip.sprite.index = 0;
     } else if (!playerShip.move) {
-      playerShip.index = 1;
+      playerShip.sprite.index = 1;
     } else if (playerShip.move === "right") {
       playerShip.x += playerShip.maxVelocity;
-      playerShip.index = 2;
+      playerShip.sprite.index = 2;
     }
 
     // I feel like this should be just a tiny bit seperate from movement :P
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
 
+    for (i = 0; i < level.emmitters.length; i++) {
+      level.emmitters[i].emit(level.rocks);
+    }
 
+    // Rock movement
+    i = level.rocks.length;
+    while (i--) {
+      ent = level.rocks[i];
+      ent.y += ent.maxVelocity;
+      // If the rock is off the bottom + height, remove
+      if (ent.y > gridSizeY + ent.sprite.h) {
+        level.rocks.splice(i, 1);
+        level.collidable.splice(level.collidable.indexOf(ent), 1);
+      }
+    }
 
     // Collision checking
     for (i = 0; i < level.collidable.length; i++) {
@@ -720,16 +624,17 @@ function play31() {
         var obj2 = level.collidable[j];
         // If object not colliding with its self
         if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
-          if (debug) { console.log(now.toFixed() + " " + obj1.type + " colliding with " + obj2.type); }
+          if (debug) { console.log(now.toFixed() + " " + obj1.name + " colliding with " + obj2.name); }
           obj1.hpLost();
           obj2.hpLost();
-          // Remove dead things from the collidable list:
-          // This fucks up when ship respawned and not sure why, replaced with for loop that works but slower.
-          //if (obj1.dead) { level.collidable.splice(i, 1); }
-          //if (obj2.dead) { level.collidable.splice(j, 1); }
-          for (deads = 0; deads < level.collidable.length; deads++) {
-            if (level.collidable[deads].dead) { level.collidable.splice(deads, 1); }
+
+          // Remove dead things from the collidable list
+          i = level.collidable.length;
+          while (i--) {
+            ent = level.collidable[i];
+            if (ent.dead) { level.collidable.splice(i, 1); }
           }
+          console.log(level.collidable);
         }
       }
     }
@@ -771,14 +676,15 @@ function play31() {
         }
       }
 
-      // Testing up/down movement for "going off top of screen" because looks cool
-      if (keys.up) { playerShip.move = "up"; }
-      if (keys.down) { playerShip.move = "down"; }
-
-      // Flip this ship!
       if (keys.space) {
-        playerShip.flip = true;
-      } else { playerShip.flip = false; }
+        rockSpawner.emit(level);
+      }
+
+      if (keys.r) { // Respawn the ship
+        for (i = 0; i < playerShip.maxHealth; i++) { delete playerShip.hp[i].lost; }
+        level.collidable.push(playerShip);
+        playerShip.dead = false;
+      }
       // --- INPUT HANDLING END ---- //
 
       update(dt);
@@ -806,49 +712,23 @@ function play31() {
     // Create new level
     switch (levelID) {
     case "level1":
-      // TODO: level = new Level (and add a nice constructor class)?
-      playerShip = new Entity({
-        type: "smallShip",
+
+      playerShip = new Ship({
+        x: gridSizeX / 2 - smallShip.w / 2,
+        y: gridSizeY - smallShip.h - 2,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
-      });
+      }, smallShip);
       level.collidable.push(playerShip);
 
-      playerShip.weapons[0] = new Emitter({
-        attatchedTo: playerShip,
-        type: "smallGun",
-        x: 1
-      });
+      rockSpawner = new Emitter({
+        x: gridSizeX / 2 - mediumRock.w / 2, y: 5,
+        emittedObj: mediumRock,
+        spawnInto: level,
+        cooldown: 800
+      }, mediumRock);
+      //level.emmitters.push(rockSpawner);
 
-      rockEmitter = new Emitter(
-        {
-          spawnInto: level,
-          emitX: [0, 20],
-          index: 1,
-          x: 0.1, // Can't have as 0 else it will reset to the defualt case :(
-          y: -10,
-          emittedType: "mediumRock",
-          start: 0,
-          duration: -1
-        }
-      );
-      level.emmitters.push(rockEmitter);
-      break;
-
-    case "level2":
-      playerShip = new Entity({
-        type: "bigShip",
-        x: 13,
-        y: 20,
-        primaryColor: "rgba(80,80,0,0.7)",
-        secondaryColor: "rgba(0,235,230,0.5)"
-      });
-      level.collidable.push(playerShip);
-
-      playerShip.weapons[0] = new Emitter({
-        attatchedTo: playerShip,
-        type: "smallGun"
-      });
       break;
 
     default:
