@@ -241,12 +241,85 @@ function Entity(options, type) {
   };
 }
 
-// Ship sub class
+
+
+// Emitter sub-class
+function Emitter(options, type) {
+  Entity.call(this, options, type);
+
+  this.emittedObj = options.emittedObj;
+  this.emitX = options.emitX || [0,0];
+  this.emitY = options.emitY || [0,0];
+  this.emitDir = options.emitDir || "d";
+
+  this.cooldown = options.cooldown || 1000;
+  this.start = options.start || 0;
+  this.duration = options.duration || -1;/*
+  this.attatchedTo = options.attatchedTo || false;
+
+  if (this.attatchedTo) {
+    this.offsetX = this.x;
+    this.offsetY = this.y;
+  }*/
+
+  this.emitting = true;
+  this.lastEmission = 0;
+
+  /*this.updatePos = function() {
+    if (!this.attatchedTo) { throw new Error("No need to updatePos: No parent"); }
+    else {
+      this.x = this.attatchedTo.x + this.offsetX;
+      this.y = this.attatchedTo.y + this.offsetY;
+    }
+  };*/
+
+  this.emit = function(spawnInto) {
+
+    console.log("Emitting " + this.emittedObj.name + " at " + this.x + " " + this.y);
+
+    var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
+    switch(this.emitDir) {
+        case "u": newVX = 0; newVY *= -1; break;
+        case "r": newVY = 0; break;
+        case "d": newVX = 0; break;
+        case "l": newVX *= -1; newVY = 0; break;
+    }
+    if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
+      var e = new Entity({
+        x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
+        y: this.y,
+        vx: newVX, vy: newVY
+      },
+      this.emittedObj);
+      spawnInto.entities.push(e);
+      spawnInto.collidable.push(e);
+      this.lastEmission = now;
+    }
+  };
+}
+
+
+
+// Ship sub-class
 function Ship(options, type) {
   var i;
   Entity.call(this, options, type);
 
   this.weapons = type.weapons || [];
+
+  console.log(this.weapons.length);
+
+  for (i = 0; i < this.weapons.length; i++) {
+    var weap = new Emitter({
+      x: this.x + this.weapons[i].x,
+      y: this.y + this.weapons[i].y,
+      emittedObj: this.weapons[i].type.ammo,
+      emitDir: "u",
+      cooldown: 400
+    }, this.weapons[i].type);
+    this.weapons[i].emitter = weap;
+    console.log(this.weapons);
+  }
 
   // Colour stuff
   this.primaryColor = options.primaryColor || false;
@@ -291,18 +364,18 @@ function Ship(options, type) {
   this.draw = function(context) {
     var tilt = 0;
     // Gun
-    if (this.sprite.index === 0) { tilt = 1; } else
-    if (this.sprite.index === 2) { tilt = -1; }
+    if (this.sprite.index === 0) { tilt = this.weapons[0].tiltOffsetR; } else
+    if (this.sprite.index === 2) { tilt = this.weapons[0].tiltOffsetL; }
     context.drawImage(
       this.sprite.source,
-      56, // SourceX (Position of frame)
-      4,                 // SourceY
-      1,                                     // SourceW (Size of frame)
-      3,           // Max height of engine trails is 12 // SourceH
-      Math.round(this.x + 2 + tilt) * cSize,                        // DestinationX (Position on canvas)
-      Math.round(this.y - 1) * cSize,    // DestinationY (-1 because goes up in ship hull)
-      cSize,                             // DestinationW (Size on canvas)
-      3 * cSize                                         // DestinationH
+      this.weapons[0].type.x,                             // SourceX (Position of frame)
+      this.weapons[0].type.y,                             // SourceY
+      this.weapons[0].type.w,                             // SourceW (Size of frame)
+      this.weapons[0].type.h,                             // Max height of engine trails is 12 // SourceH
+      Math.round(this.x + this.weapons[0].x + tilt) * cSize,// DestinationX (Position on canvas)
+      Math.round(this.y + this.weapons[0].y) * cSize,     // DestinationY (-1 because goes up in ship hull)
+      this.weapons[0].type.w * cSize,                     // DestinationW (Size on canvas)
+      this.weapons[0].type.h * cSize                      // DestinationH
     );
     context.drawImage(  // Ship hull (primary colour)
       canvasPri,
@@ -354,60 +427,32 @@ function Ship(options, type) {
 
 
 
-function Emitter(options, type) {
-  Entity.call(this, options, type);
-
-  this.emittedObj = options.emittedObj;
-  this.emitX = options.emitX || [0,0];
-  this.emitY = options.emitY || [0,0];
-  this.emitDir = options.emitDir || "d";
-
-  this.cooldown = options.cooldown || 1000;
-  this.start = options.start || 0;
-  this.duration = options.duration || -1;
-  this.attatchedTo = options.attatchedTo || false;
-
-  if (this.attatchedTo) {
-    this.offsetX = this.x;
-    this.offsetY = this.y;
-  }
-
-  this.emitting = true;
-  this.lastEmission = 0;
-
-  this.updatePos = function() {
-    if (!this.attatchedTo) { throw new Error("No need to updatePos: No parent"); }
-    else {
-      this.x = this.attatchedTo.x + this.offsetX;
-      this.y = this.attatchedTo.y + this.offsetY;
-    }
-  };
-
-  this.emit = function(spawnInto) {
-    var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
-    switch(this.emitDir) {
-        case "u": newVX = 0; newVY *= -1; break;
-        case "r": newVY = 0; break;
-        case "d": newVX = 0; break;
-        case "l": newVX *= -1; newVY = 0; break;
-    }
-    if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
-      var e = new Entity({
-        x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
-        y: this.y,
-        vx: newVX, vy: newVY
-      },
-      this.emittedObj);
-      spawnInto.entities.push(e);
-      spawnInto.collidable.push(e);
-      this.lastEmission = now;
-    }
-  };
-}
-
-
-
 // Object Types
+var bullet = {
+  name: "bullet",
+  source: mainSprites,
+  x: 58, y: 3,
+  w: 1, h: 2,
+  maxVelocity: 1
+};
+var smallGun = {
+  name: "smallgun",
+  source: mainSprites,
+  x: 56, y: 4,
+  w: 1, h: 3,
+  maxVelocity: 2, // Dunno if needed, set high incase it slows ship
+  cooldown: 1,
+  ammo: bullet
+};
+var bigGun = {
+  name: "bigGun",
+  source: mainSprites,
+  x: 56, y: 3,
+  w: 1, h: 4,
+  maxVelocity: 2,
+  cooldown: 2,
+  ammo: bullet
+};
 var smallShip = {
   name: "smallShip",
   source: mainSprites,
@@ -415,7 +460,7 @@ var smallShip = {
   w: 5, h: 6,
   index: 1,
   weapons: [
-    {x: 2, y: 1, tiltOffsetL: -1, tiltOffsetR: 1, type: false}
+    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR: 1, type: smallGun}
   ],
   hp: [
     {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
@@ -444,29 +489,6 @@ var bigShip = {
     {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
   ],
   maxVelocity: 0.3
-};
-var smallGun = {
-  name: "smallgun",
-  source: mainSprites,
-  x: 56, y: 4,
-  w: 1, h: 3,
-  maxVelocity: 2, // Dunno if needed, set high incase it slows ship
-  cooldown: 1
-};
-var bigGun = {
-  name: "bigGun",
-  source: mainSprites,
-  x: 56, y: 3,
-  w: 1, h: 4,
-  maxVelocity: 2,
-  cooldown: 2
-};
-var bullet = {
-  name: "bullet",
-  source: mainSprites,
-  x: 58, y: 3,
-  w: 1, h: 2,
-  maxVelocity: 1
 };
 var mediumRock = {
   name: "mediumRock",
@@ -585,7 +607,7 @@ function play31() {
       level.entities[i].draw(ctx);
     }
 
-    rockSpawner.draw(ctx);
+    //rockSpawner.draw(ctx);
     //mainGun.draw(ctx);
     playerShip.draw(ctx);
 
@@ -636,8 +658,6 @@ function play31() {
     // I feel like this should be just a tiny bit seperate from movement :P
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
-
-    mainGun.updatePos();
 
     // Trigger emitters
     for (i = 0; i < level.emitters.length; i++) {
@@ -723,7 +743,10 @@ function play31() {
       }
 
       if (keys.space) {
-        mainGun.emit(level);
+        for (i = 0; i < playerShip.weapons.length; i++) {
+          //console.log(playerShip.weapons);
+          playerShip.weapons[i].emitter.emit(level);
+        }
       }
 
       if (keys.r) { // Respawn the ship
@@ -769,23 +792,22 @@ function play31() {
       }, smallShip);
       level.collidable.push(playerShip);
 
-      mainGun = new Emitter({
+      /*mainGun = new Emitter({
         x: playerShip.sprite.w / 2 - 1,
         y: -1,
         emitDir: "u",
         emittedObj: bullet,
-        spawnInto: level,
         attatchedTo: playerShip,
         cooldown: 800
-      }, smallGun);
+      }, smallGun);*/
 
-      rockSpawner = new Emitter({
-        x: gridSizeX / 2 - mediumRock.w / 2, y: 5,
+      /*rockSpawner = new Emitter({
+        x: 2, y: 5,
         emittedObj: mediumRock,
         spawnInto: level,
         cooldown: 800
       }, mediumRock);
-      level.emitters.push(rockSpawner);
+      level.emitters.push(rockSpawner);*/
 
       break;
 
