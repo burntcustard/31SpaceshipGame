@@ -691,7 +691,8 @@ function play31() {
       for (j = 0; j < level.collidable.length; j++) {
         var obj2 = level.collidable[j];
         // If object not colliding with its self
-        if (obj1 !== obj2 && checkCollision(obj1, obj2)) {
+        if (obj1 !== obj2 && !(obj1.name === "bullet" && obj1.vy < 0) &&
+            !(obj2.name === "bullet" && obj2.vy < 0) &&checkCollision(obj1, obj2)) {
           if (debug) { console.log(now.toFixed() + " " + obj1.name + " colliding with " + obj2.name); }
           obj1.hpLost();
           obj2.hpLost();
@@ -702,7 +703,6 @@ function play31() {
             ent = level.collidable[i];
             if (ent.dead) { level.collidable.splice(i, 1); }
           }
-          console.log(level.collidable);
         }
       }
     }
