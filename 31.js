@@ -384,7 +384,7 @@ function Emitter(options, type) {
         vx: newVX, vy: newVY
       },
       this.emittedObj);
-      spawnInto.rocks.push(e);
+      spawnInto.entities.push(e);
       spawnInto.collidable.push(e);
       this.lastEmission = now;
     }
@@ -485,11 +485,9 @@ function play31() {
       rockSpawner,
       i, j,
       level = {     // Data about the level
-        rocks: [],
-        enemies: [],
-        collidable: [], // All things that collide
-        emmitters: [], // Entity emitters
-        background: "Pink!"
+        entities: [],
+        emitters: [],
+        collidable: []
       };
 
 
@@ -568,9 +566,9 @@ function play31() {
     ctx.fillStyle = "#2b383b";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw space rocks
-    for (i = 0; i < level.rocks.length; i++) {
-      level.rocks[i].draw(ctx);
+    // Draw stuff in entity list
+    for (i = 0; i < level.entities.length; i++) {
+      level.entities[i].draw(ctx);
     }
 
     rockSpawner.draw(ctx);
@@ -582,8 +580,8 @@ function play31() {
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
-      debugMenu.innerHTML += "Number of emitters: " + level.emmitters.length + "<br>";
-      debugMenu.innerHTML += "Number of space rocks: " + level.rocks.length + "<br>";
+      debugMenu.innerHTML += "Number of emitters: " + level.emitters.length + "<br>";
+      debugMenu.innerHTML += "Number of entities: " + level.entities.length + "<br>";
       debugMenu.innerHTML += "Number of colliders: " + level.collidable.length + "<br>";
       debugMenu.innerHTML += "Player ship HP: " + playerShip.getHealth() + "<br>";
       debugMenu.innerHTML += "Player ship dead: " + playerShip.dead + "<br>";
@@ -627,21 +625,20 @@ function play31() {
 
     mainGun.updatePos();
 
-    for (i = 0; i < level.emmitters.length; i++) {
-      level.emmitters[i].emit(level.rocks);
-    }
-
-    // Rock movement
-    i = level.rocks.length;
+    // Entity movement
+    i = level.entities.length;
     while (i--) {
-      ent = level.rocks[i];
+      ent = level.entities[i];
       ent.y += ent.vy;
-      // If the rock is off the bottom + height, remove
-      if (ent.y > gridSizeY + ent.sprite.h) {
-        level.rocks.splice(i, 1);
+      // If the entity is off screen, remove
+      if (ent.y < -ent.sprite.h || ent.y > gridSizeY + ent.sprite.h ||
+          ent.x < -ent.sprite.w || ent.x > gridSizeX + ent.sprite.w) {
+        level.entities.splice(i, 1);
         level.collidable.splice(level.collidable.indexOf(ent), 1);
       }
     }
+
+
 
     // Collision checking
     for (i = 0; i < level.collidable.length; i++) {
@@ -665,9 +662,9 @@ function play31() {
       }
     }
 
-    // Remove dead rocks (you already can't collide with them since the collision check)
-    for (i = 0; i < level.rocks.length; i++) {
-      if (level.rocks[i].dead) { level.rocks.splice(i, 1); }
+    // Remove dead entities (you already can't collide with them since the collision check)
+    for (i = 0; i < level.entities.length; i++) {
+      if (level.entities[i].dead) { level.entities.splice(i, 1); }
     }
 
   }
