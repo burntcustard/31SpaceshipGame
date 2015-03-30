@@ -289,6 +289,21 @@ function Ship(options, type) {
   // End initial hidden draw
 
   this.draw = function(context) {
+    var tilt = 0;
+    // Gun
+    if (this.sprite.index === 0) { tilt = 1; } else
+    if (this.sprite.index === 2) { tilt = -1; }
+    context.drawImage(
+      this.sprite.source,
+      56, // SourceX (Position of frame)
+      4,                 // SourceY
+      1,                                     // SourceW (Size of frame)
+      3,           // Max height of engine trails is 12 // SourceH
+      Math.round(this.x + 2 + tilt) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y - 1) * cSize,    // DestinationY (-1 because goes up in ship hull)
+      cSize,                             // DestinationW (Size on canvas)
+      3 * cSize                                         // DestinationH
+    );
     context.drawImage(  // Ship hull (primary colour)
       canvasPri,
       this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
@@ -321,7 +336,6 @@ function Ship(options, type) {
       12 * cSize                                         // DestinationH
     );
     // And now for the magic cockpit code
-    var tilt = 0;
     for (i = 0; i < this.maxHealth; i++) {
       if (this.sprite.index === 0) { tilt = this.hp[i].tiltOffsetL; }
       if (this.sprite.index === 2) { tilt = this.hp[i].tiltOffsetR; }
@@ -572,7 +586,7 @@ function play31() {
     }
 
     rockSpawner.draw(ctx);
-    mainGun.draw(ctx);
+    //mainGun.draw(ctx);
     playerShip.draw(ctx);
 
     // ------- DEBUG INFO -------- //
@@ -624,6 +638,11 @@ function play31() {
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
 
     mainGun.updatePos();
+
+    // Trigger emitters
+    for (i = 0; i < level.emitters.length; i++) {
+      level.emitters[i].emit(level);
+    }
 
     // Entity movement
     i = level.entities.length;
@@ -766,7 +785,7 @@ function play31() {
         spawnInto: level,
         cooldown: 800
       }, mediumRock);
-      //level.emmitters.push(rockSpawner);
+      level.emitters.push(rockSpawner);
 
       break;
 
