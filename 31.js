@@ -346,26 +346,46 @@ function Emitter(options, type) {
   this.emittedObj = options.emittedObj;
   this.emitX = options.emitX || [0,0];
   this.emitY = options.emitY || [0,0];
-  this.emitDir = options.emitDir || "u";
+  this.emitDir = options.emitDir || "d";
 
   this.cooldown = options.cooldown || 1000;
   this.start = options.start || 0;
   this.duration = options.duration || -1;
   this.attatchedTo = options.attatchedTo || false;
-  this.spawnInto = options.spawnInto;
+
+  if (this.attatchedTo) {
+    this.offsetX = this.x;
+    this.offsetY = this.y;
+  }
 
   this.emitting = true;
   this.lastEmission = 0;
 
+  this.updatePos = function() {
+    if (!this.attatchedTo) { throw new Error("No need to updatePos: No parent"); }
+    else {
+      this.x = this.attatchedTo.x + this.offsetX;
+      this.y = this.attatchedTo.y + this.offsetY;
+    }
+  };
+
   this.emit = function(spawnInto) {
+    var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
+    switch(this.emitDir) {
+        case "u": newVX = 0; newVY *= -1; break;
+        case "r": newVY = 0; break;
+        case "d": newVX = 0; break;
+        case "l": newVX *= -1; newVY = 0; break;
+    }
     if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
         x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
-        y: this.y
+        y: this.y,
+        vx: newVX, vy: newVY
       },
       this.emittedObj);
-      this.spawnInto.rocks.push(e);
-      this.spawnInto.collidable.push(e);
+      spawnInto.rocks.push(e);
+      spawnInto.collidable.push(e);
       this.lastEmission = now;
     }
   };
@@ -432,7 +452,7 @@ var bullet = {
   source: mainSprites,
   x: 58, y: 3,
   w: 1, h: 2,
-  maxVelocity: 0.5
+  maxVelocity: 1
 };
 var mediumRock = {
   name: "mediumRock",
@@ -461,6 +481,7 @@ var mediumRock = {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
+      mainGun,
       rockSpawner,
       i, j,
       level = {     // Data about the level
@@ -498,6 +519,7 @@ function play31() {
       case  50: keys.two   = true; break;
       case  51: keys.three = true; break;
       case  52: keys.four  = true; break;
+      case  80: keys.p     = true; break;
       case  82: keys.r     = true; break;
       case 76: console.log(level); break;  // Pretty sure we could avoid having this here *grumpy face*
       case 187: resize(+2);        break;
@@ -517,6 +539,7 @@ function play31() {
       case  50: delete keys.two;   break;
       case  51: delete keys.three; break;
       case  52: delete keys.four;  break;
+      case  80: delete keys.p;     break;
       case  82: delete keys.r;     break;
       default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
     }
@@ -550,8 +573,9 @@ function play31() {
       level.rocks[i].draw(ctx);
     }
 
-    playerShip.draw(ctx);
     rockSpawner.draw(ctx);
+    mainGun.draw(ctx);
+    playerShip.draw(ctx);
 
     // ------- DEBUG INFO -------- //
     if (debug) {
@@ -601,6 +625,8 @@ function play31() {
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
 
+    mainGun.updatePos();
+
     for (i = 0; i < level.emmitters.length; i++) {
       level.emmitters[i].emit(level.rocks);
     }
@@ -609,7 +635,7 @@ function play31() {
     i = level.rocks.length;
     while (i--) {
       ent = level.rocks[i];
-      ent.y += ent.maxVelocity;
+      ent.y += ent.vy;
       // If the rock is off the bottom + height, remove
       if (ent.y > gridSizeY + ent.sprite.h) {
         level.rocks.splice(i, 1);
@@ -676,14 +702,20 @@ function play31() {
         }
       }
 
-      if (keys.space) {
+      if (keys.p) {
         rockSpawner.emit(level);
       }
 
+      if (keys.space) {
+        mainGun.emit(level);
+      }
+
       if (keys.r) { // Respawn the ship
-        for (i = 0; i < playerShip.maxHealth; i++) { delete playerShip.hp[i].lost; }
-        level.collidable.push(playerShip);
-        playerShip.dead = false;
+        if (playerShip.dead) {
+          for (i = 0; i < playerShip.maxHealth; i++) { delete playerShip.hp[i].lost; }
+          level.collidable.push(playerShip);
+          playerShip.dead = false;
+        }
       }
       // --- INPUT HANDLING END ---- //
 
@@ -720,6 +752,16 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       }, smallShip);
       level.collidable.push(playerShip);
+
+      mainGun = new Emitter({
+        x: playerShip.sprite.w / 2 - 1,
+        y: -1,
+        emitDir: "u",
+        emittedObj: bullet,
+        spawnInto: level,
+        attatchedTo: playerShip,
+        cooldown: 800
+      }, smallGun);
 
       rockSpawner = new Emitter({
         x: gridSizeX / 2 - mediumRock.w / 2, y: 5,
