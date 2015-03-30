@@ -360,26 +360,28 @@ function Ship(options, type) {
 
   this.draw = function(context) {
     var tilt = 0;
-    // Gun
-    if (this.sprite.index === 0) { tilt = this.weapons[0].tiltOffsetR; } else
-    if (this.sprite.index === 2) { tilt = this.weapons[0].tiltOffsetL; }
-
-    // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
+    // Weapons
     for (i = 0; i < this.weapons.length; i++) {
+      if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetR; } else
+      if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetL; }
+
+      // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
       this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
+
+      context.drawImage(
+        this.sprite.source,
+        this.weapons[i].type.x,                             // SourceX (Position of frame)
+        this.weapons[i].type.y,                             // SourceY
+        this.weapons[i].type.w,                             // SourceW (Size of frame)
+        this.weapons[i].type.h,                             // Max height of engine trails is 12 // SourceH
+        Math.round(this.x + this.weapons[i].x + tilt) * cSize,// DestinationX (Position on canvas)
+        Math.round(this.y + this.weapons[i].y) * cSize,     // DestinationY (-1 because goes up in ship hull)
+        this.weapons[i].type.w * cSize,                     // DestinationW (Size on canvas)
+        this.weapons[i].type.h * cSize                      // DestinationH
+      );
     }
 
-    context.drawImage(
-      this.sprite.source,
-      this.weapons[0].type.x,                             // SourceX (Position of frame)
-      this.weapons[0].type.y,                             // SourceY
-      this.weapons[0].type.w,                             // SourceW (Size of frame)
-      this.weapons[0].type.h,                             // Max height of engine trails is 12 // SourceH
-      Math.round(this.x + this.weapons[0].x + tilt) * cSize,// DestinationX (Position on canvas)
-      Math.round(this.y + this.weapons[0].y) * cSize,     // DestinationY (-1 because goes up in ship hull)
-      this.weapons[0].type.w * cSize,                     // DestinationW (Size on canvas)
-      this.weapons[0].type.h * cSize                      // DestinationH
-    );
+
     context.drawImage(  // Ship hull (primary colour)
       canvasPri,
       this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
@@ -478,8 +480,9 @@ var bigShip = {
   w: 9, h: 9,
   index: 1,
   weapons: [
-    {x: 1, y: 6, tiltOffsetL: 0, tiltOffsetR: 0, type: false},
-    {x: 2, y: 7, tiltOffsetL: 0, tiltOffsetR: 0, type: false}
+    {x: 0, y: 4, tiltOffsetL: 1, tiltOffsetR: 1, type: smallGun},
+    {x: 8, y: 4, tiltOffsetL: -1, tiltOffsetR: -2, type: smallGun},
+    {x: 4, y: -1, tiltOffsetL: -1, tiltOffsetR: 1, type: bigGun}
   ],
   hp: [
     {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
@@ -788,29 +791,20 @@ function play31() {
     case "level1":
 
       playerShip = new Ship({
-        x: gridSizeX / 2 - smallShip.w / 2,
-        y: gridSizeY - smallShip.h - 2,
+        x: gridSizeX / 2 - bigShip.w / 2,
+        y: gridSizeY - bigShip.h - 2,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
-      }, smallShip);
+      }, bigShip);
       level.collidable.push(playerShip);
 
-      /*mainGun = new Emitter({
-        x: playerShip.sprite.w / 2 - 1,
-        y: -1,
-        emitDir: "u",
-        emittedObj: bullet,
-        attatchedTo: playerShip,
-        cooldown: 800
-      }, smallGun);*/
-
-      /*rockSpawner = new Emitter({
+      rockSpawner = new Emitter({
         x: 2, y: 5,
         emittedObj: mediumRock,
         spawnInto: level,
-        cooldown: 800
+        cooldown: 2000
       }, mediumRock);
-      level.emitters.push(rockSpawner);*/
+      level.emitters.push(rockSpawner);
 
       break;
 
@@ -821,6 +815,8 @@ function play31() {
   }
 
   newGame("level1");
+
+  console.log(playerShip);
 
 }
 
