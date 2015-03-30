@@ -523,8 +523,6 @@ var mediumRock = {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
-      mainGun,
-      rockSpawner,
       i, j,
       level = {     // Data about the level
         entities: [],
@@ -691,8 +689,9 @@ function play31() {
       for (j = 0; j < level.collidable.length; j++) {
         var obj2 = level.collidable[j];
         // If object not colliding with its self
-        if (obj1 !== obj2 && !(obj1.name === "bullet" && obj1.vy < 0) &&
-            !(obj2.name === "bullet" && obj2.vy < 0) &&checkCollision(obj1, obj2)) {
+        if (obj1 !== obj2 && !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player")
+            && !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player")
+            && checkCollision(obj1, obj2)) {
           if (debug) { console.log(now.toFixed() + " " + obj1.name + " colliding with " + obj2.name); }
           obj1.hpLost();
           obj2.hpLost();
@@ -744,10 +743,6 @@ function play31() {
         }
       }
 
-      if (keys.p) {
-        rockSpawner.emit(level);
-      }
-
       if (keys.space) {
         for (i = 0; i < playerShip.weapons.length; i++) {
           //console.log(playerShip.weapons);
@@ -791,6 +786,7 @@ function play31() {
     case "level1":
 
       playerShip = new Ship({
+        name: "player",
         x: gridSizeX / 2 - bigShip.w / 2,
         y: gridSizeY - bigShip.h - 2,
         primaryColor: "rgba(80,80,0,0.7)",
@@ -798,11 +794,12 @@ function play31() {
       }, bigShip);
       level.collidable.push(playerShip);
 
-      rockSpawner = new Emitter({
-        x: 2, y: 5,
+      var rockSpawner = new Emitter({
+        x: 0, y: -4,
+        emitX: [0, gridSizeX - mediumRock.w],
         emittedObj: mediumRock,
         spawnInto: level,
-        cooldown: 2000
+        cooldown: 1000
       }, mediumRock);
       level.emitters.push(rockSpawner);
 
