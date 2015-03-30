@@ -80,20 +80,22 @@ function toggleDebug() {
  * @param   {Object}  obj The object with the sprite to look at, e.g. a spaceship or a space rock.
  * @returns {[array]} An array of objects containing x, y coordinates.
  */
+
+canvasCollision = document.getElementById("canvasCollision");
 function createPixelMap(obj) {
   var pixelMap = [], x, y, i;
   var ctxCollision = canvasCollision.getContext('2d');
   ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   ctxCollision.drawImage(
     obj.sprite.source,
-    obj.sprite.x + obj.sprite.w * obj.sprite.index, // SourceX (Position of frame)
-    obj.sprite.y,                                   // SourceY
-    obj.sprite.w,                                   // SourceW (Size of frame)
-    obj.sprite.h,                                   // SourceH
-    0,                                              // DestinationX (Position on canvas)
-    0,                                              // DestinationY
-    obj.sprite.w * 10,                                   // DestinationW (Size on canvas)
-    obj.sprite.h * 10                                    // DestinationH
+    obj.sprite.x + obj.sprite.w * obj.sprite.index,  // SourceX (Position of frame)
+    obj.sprite.y,                          // SourceY
+    obj.sprite.w,                            // SourceW (Size of frame)
+    obj.sprite.h,                           // SourceH
+    0,                                    // DestinationX (Position on canvas)
+    0,                                    // DestinationY
+    obj.sprite.w,                            // DestinationW (Size on canvas)
+    obj.sprite.h                            // DestinationH
   );
   for(y = 0; y < obj.height; y++) {
     for(x = 0; x < obj.width; x++) {
@@ -105,7 +107,6 @@ function createPixelMap(obj) {
       }
     }
   }
-  ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   // Add the x and y offset of the object in the game to the pixel map
   for (i = 0; i < pixelMap.length; i++) {
     pixelMap[i].x += Math.round(obj.x);
@@ -145,10 +146,10 @@ function checkCollision(obj1, obj2) {
   if (b1 <= t2) {return false;}
   if (l1 >= r2) {return false;}
   // It got to here so bounding boxes are colliding!
-  return true;
+  //return true;
 
   // Per pixel collisions !! NOT WORKING
-  /*obj1PixelMap = createPixelMap(obj1);
+  obj1PixelMap = createPixelMap(obj1);
   obj2PixelMap = createPixelMap(obj2);
   for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
     for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
@@ -158,7 +159,7 @@ function checkCollision(obj1, obj2) {
         return true;
       }
     }
-  }*/
+  }
 }
 // - COLLISION DETECTION END - //
 
