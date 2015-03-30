@@ -274,9 +274,6 @@ function Emitter(options, type) {
   };*/
 
   this.emit = function(spawnInto) {
-
-    console.log("Emitting " + this.emittedObj.name + " at " + this.x + " " + this.y);
-
     var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
     switch(this.emitDir) {
         case "u": newVX = 0; newVY *= -1; break;
@@ -366,6 +363,12 @@ function Ship(options, type) {
     // Gun
     if (this.sprite.index === 0) { tilt = this.weapons[0].tiltOffsetR; } else
     if (this.sprite.index === 2) { tilt = this.weapons[0].tiltOffsetL; }
+
+    // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
+    for (i = 0; i < this.weapons.length; i++) {
+      this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
+    }
+
     context.drawImage(
       this.sprite.source,
       this.weapons[0].type.x,                             // SourceX (Position of frame)
@@ -657,7 +660,7 @@ function play31() {
 
     // I feel like this should be just a tiny bit seperate from movement :P
     if (playerShip.x < 0) { playerShip.x = 0; }
-    if (playerShip.x > (31 - playerShip.width)) { playerShip.x = 31 - playerShip.width; }
+    if (playerShip.x > (31 - playerShip.sprite.w)) { playerShip.x = 31 - playerShip.sprite.w; }
 
     // Trigger emitters
     for (i = 0; i < level.emitters.length; i++) {
