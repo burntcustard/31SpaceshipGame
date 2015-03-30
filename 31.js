@@ -81,7 +81,6 @@ function toggleDebug() {
  * @returns {[array]} An array of objects containing x, y coordinates.
  */
 
-canvasCollision = document.getElementById("canvasCollision");
 function createPixelMap(obj) {
   var pixelMap = [], x, y, i;
   var ctxCollision = canvasCollision.getContext('2d');
@@ -97,8 +96,8 @@ function createPixelMap(obj) {
     obj.sprite.w,                            // DestinationW (Size on canvas)
     obj.sprite.h                            // DestinationH
   );
-  for(y = 0; y < obj.height; y++) {
-    for(x = 0; x < obj.width; x++) {
+  for(y = 0; y < obj.sprite.h; y++) {
+    for(x = 0; x < obj.sprite.w; x++) {
     // Fetch pixel at current position
       var pixel = ctxCollision.getImageData(x, y, 1, 1);
       // Check that opacity is above zero
@@ -128,6 +127,7 @@ function createPixelMap(obj) {
  * @returns {Boolean} True if the objects have collided, else false.
  */
 function checkCollision(obj1, obj2) {
+
   var t1 = Math.round(obj1.y),
       r1 = Math.round(obj1.x + obj1.sprite.w),
       b1 = Math.round(obj1.y + obj1.sprite.h),
@@ -146,7 +146,6 @@ function checkCollision(obj1, obj2) {
   if (b1 <= t2) {return false;}
   if (l1 >= r2) {return false;}
   // It got to here so bounding boxes are colliding!
-  //return true;
 
   // Per pixel collisions !! NOT WORKING
   obj1PixelMap = createPixelMap(obj1);
