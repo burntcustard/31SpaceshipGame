@@ -101,7 +101,7 @@ function createPixelMap(obj) {
       // Check that opacity is above zero
       if(pixel.data[3] !== 0) {
         var tmp = {x: x, y: y};
-        console.log("Pushing " + JSON.stringify(tmp) + " to pixel map");
+        //console.log("Pushing " + JSON.stringify(tmp) + " to pixel map");
         obj.pixelMap.push(tmp);
       }
     }
@@ -157,7 +157,7 @@ function checkCollision(obj1, obj2) {
 
 function checkPixelCollision(obj1PixelMap, obj2PixelMap) {
   var obj1i, obj2i;
-  console.log("Obj1PixelMap: " + JSON.stringify(obj1PixelMap));
+  //console.log("Obj1PixelMap: " + JSON.stringify(obj1PixelMap));
   for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
     for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
       if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
@@ -262,24 +262,10 @@ function Emitter(options, type) {
 
   this.cooldown = options.cooldown || 1000;
   this.start = options.start || 0;
-  this.duration = options.duration || -1;/*
-  this.attatchedTo = options.attatchedTo || false;
-
-  if (this.attatchedTo) {
-    this.offsetX = this.x;
-    this.offsetY = this.y;
-  }*/
+  this.duration = options.duration || -1;
 
   this.emitting = true;
   this.lastEmission = 0;
-
-  /*this.updatePos = function() {
-    if (!this.attatchedTo) throw new Error("No need to updatePos: No parent"); }
-    else {
-      this.x = this.attatchedTo.x + this.offsetX;
-      this.y = this.attatchedTo.y + this.offsetY;
-    }
-  };*/
 
   this.emit = function(spawnInto) {
     var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
@@ -350,12 +336,12 @@ function Ship(options, type) {
   ctxSec.globalCompositeOperation = "source-atop";
   ctxSec.fillStyle = this.secondaryColor;
   ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
-  
+
   // End initial hidden draw
 
   this.draw = function(context) {
     var tilt = 0;
-    
+
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
       if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; } else
@@ -376,7 +362,7 @@ function Ship(options, type) {
         this.weapons[i].type.h * cSize                      // DestinationH
       );
     }
-    
+
     // Draw ship hull (primary colour)
     context.drawImage(
       canvasPri,
@@ -389,7 +375,7 @@ function Ship(options, type) {
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
       this.sprite.h * cSize                              // DestinationH
     );
-    
+
     // Draw cockpit (secondary colour)
     context.drawImage(
       canvasSec,
@@ -402,7 +388,7 @@ function Ship(options, type) {
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
       this.sprite.h * cSize                              // DestinationH
     );
-    
+
     // Draw engine trails
     context.drawImage(
       this.sprite.source,
@@ -415,7 +401,7 @@ function Ship(options, type) {
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
       12 * cSize                                         // DestinationH
     );
-    
+
     // Draw destroyed cockpit tiles
     for (i = 0; i < this.maxHealth; i++) {
       if (this.sprite.index === 0) { tilt = this.hp[i].tiltOffsetL; }
@@ -430,7 +416,7 @@ function Ship(options, type) {
         );
       }
     }
-    
+
   };
 }
 
@@ -697,7 +683,7 @@ function play31() {
           if (!obj1.pixelMap) { createPixelMap(obj1); }
           if (!obj2.pixelMap) { createPixelMap(obj2); }
           if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
-            
+
             // Lower HP of things that collided
             obj1.hpLost();
             obj2.hpLost();
@@ -808,7 +794,7 @@ function play31() {
         spawnInto: level,
         cooldown: 1000
       }, mediumRock);
-      level.emitters.push(rockSpawner);
+      //level.emitters.push(rockSpawner);
 
       break;
 
