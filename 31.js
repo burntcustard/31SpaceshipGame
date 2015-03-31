@@ -66,19 +66,16 @@ function toggleDebug() {
 // ======================================================================================= //
 
 /**
- * Creates a map of all of the visible pixels in the object. Effectively draws the objects sprite
- * onto a hidden canvas with no scaling, and then checks each pixel, top to bottom (similar to how
- * text is read along and then down a line) If a pixel is fully transparent, i.e. rgba(-,-,-,0),
- * it adds that pixels x, y coordinates as an object to the pixelMap array. Also offsets the those
- * coordinates in the pixel map to align with the sprites current position in the "real" game canvas.
+ * Creates a map of all of the visible pixels in the object. Effectively draws the objects
+ * sprite onto a hidden canvas with no scaling, and then checks each pixel, top to bottom
+ * (similar to how text is read along and then down a line) If a pixel is fully transparent,
+ * i.e. rgba(-,-,-,0), it adds that pixels x, y coordinates as an object to the pixelMap array.
  *
- * @todo Make this decription shorter and easier to understand :D
  * @todo Consider calling this function only once per sprite, rather than every time for both
  *       sprites that might be colliding.
- * @todo Consider passing this function only relevant info about the object rather than the whole thing.
+ * @todo Pass this function only relevant info about the object rather than the whole thing.
  *
  * @param   {Object}  obj The object with the sprite to look at, e.g. a spaceship or a space rock.
- * @returns {[array]} An array of objects containing x, y coordinates.
  */
 
 function createPixelMap(obj) {
@@ -88,14 +85,14 @@ function createPixelMap(obj) {
   ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   ctxCollision.drawImage(
     obj.sprite.source,
-    obj.sprite.x + obj.sprite.w * obj.sprite.index,  // SourceX (Position of frame)
-    obj.sprite.y,                          // SourceY
-    obj.sprite.w,                            // SourceW (Size of frame)
-    obj.sprite.h,                           // SourceH
-    0,                                    // DestinationX (Position on canvas)
-    0,                                    // DestinationY
-    obj.sprite.w,                            // DestinationW (Size on canvas)
-    obj.sprite.h                            // DestinationH
+    obj.sprite.x + obj.sprite.w * obj.sprite.index,// SourceX (Position of frame)
+    obj.sprite.y,                                  // SourceY
+    obj.sprite.w,                                  // SourceW (Size of frame)
+    obj.sprite.h,                                  // SourceH
+    0,                                             // DestinationX (Position on canvas)
+    0,                                             // DestinationY
+    obj.sprite.w,                                  // DestinationW (Size on canvas)
+    obj.sprite.h                                   // DestinationH
   );
   for(y = 0; y < obj.sprite.h; y++) {
     for(x = 0; x < obj.sprite.w; x++) {
@@ -111,15 +108,19 @@ function createPixelMap(obj) {
   }
 }
 
+/**
+ * Offsets an entities pixel map so that it matches the entities location in the game.
+ * @param   {Object}  obj The object with the pixel map to look at, e.g. a spaceship or a space rock.
+ * @returns {[array]} pixelMap An array of objects containing x, y coordinates.
+ */
 function offsetPixelMap(obj) {
   var i,
-      offsetPixelMap = JSON.parse(JSON.stringify(obj.pixelMap)); // Reference bye bye
-  // Add the x and y offset of the object in the game to the pixel map
+      pixelMap = JSON.parse(JSON.stringify(obj.pixelMap)); // Reference bye bye
   for (i = 0; i < offsetPixelMap.length; i++) {
-    offsetPixelMap[i].x = obj.pixelMap[i].x + Math.round(obj.x);
-    offsetPixelMap[i].y = obj.pixelMap[i].y + Math.round(obj.y);
+    pixelMap[i].x = obj.pixelMap[i].x + Math.round(obj.x);
+    pixelMap[i].y = obj.pixelMap[i].y + Math.round(obj.y);
   }
-  return offsetPixelMap;
+  return pixelMap;
 }
 
 
