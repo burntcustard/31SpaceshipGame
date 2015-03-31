@@ -319,8 +319,8 @@ function Ship(options, type) {
   }
 
   // Colour stuff
-  this.primaryColor = options.primaryColor || rgba(0,0,0,0);
-  this.secondaryColor = options.secondaryColor || rgba(0,0,0,0);
+  this.primaryColor = options.primaryColor || "rgba(0,0,0,0)";
+  this.secondaryColor = options.secondaryColor || "rgba(0,0,0,0)";
 
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
@@ -347,10 +347,11 @@ function Ship(options, type) {
 
   this.draw = function(context) {
     var tilt = 0;
-    // Weapons
+    
+    // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
-      if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetR; } else
-      if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetL; }
+      if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; } else
+      if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
 
       // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
       this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
@@ -360,16 +361,16 @@ function Ship(options, type) {
         this.weapons[i].type.x,                             // SourceX (Position of frame)
         this.weapons[i].type.y,                             // SourceY
         this.weapons[i].type.w,                             // SourceW (Size of frame)
-        this.weapons[i].type.h,                             // Max height of engine trails is 12 // SourceH
+        this.weapons[i].type.h,                             // SourceH
         Math.round(this.x + this.weapons[i].x + tilt) * cSize,// DestinationX (Position on canvas)
-        Math.round(this.y + this.weapons[i].y) * cSize,     // DestinationY (-1 because goes up in ship hull)
+        Math.round(this.y + this.weapons[i].y) * cSize,     // DestinationY
         this.weapons[i].type.w * cSize,                     // DestinationW (Size on canvas)
         this.weapons[i].type.h * cSize                      // DestinationH
       );
     }
-
-
-    context.drawImage(  // Ship hull (primary colour)
+    
+    // Draw ship hull (primary colour)
+    context.drawImage(
       canvasPri,
       this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
       this.sprite.y,                                     // SourceY
@@ -378,8 +379,11 @@ function Ship(options, type) {
       Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
       Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-      this.sprite.h * cSize);                            // DestinationH
-    context.drawImage(  // Cockpit (secondary colour)
+      this.sprite.h * cSize                              // DestinationH
+    );
+    
+    // Draw cockpit (secondary colour)
+    context.drawImage(
       canvasSec,
       this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
       this.sprite.y + this.sprite.h,                     // SourceY
@@ -388,8 +392,11 @@ function Ship(options, type) {
       Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
       Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-      this.sprite.h * cSize);                            // DestinationH
-    context.drawImage(  // Engine trails
+      this.sprite.h * cSize                              // DestinationH
+    );
+    
+    // Draw engine trails
+    context.drawImage(
       this.sprite.source,
       this.sprite.x + this.sprite.w * this.sprite.index, // SourceX (Position of frame)
       this.sprite.y + this.sprite.h * 2,                 // SourceY
@@ -400,7 +407,8 @@ function Ship(options, type) {
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
       12 * cSize                                         // DestinationH
     );
-    // And now for the magic cockpit code
+    
+    // Draw destroyed cockpit tiles
     for (i = 0; i < this.maxHealth; i++) {
       if (this.sprite.index === 0) { tilt = this.hp[i].tiltOffsetL; }
       if (this.sprite.index === 2) { tilt = this.hp[i].tiltOffsetR; }
@@ -414,6 +422,7 @@ function Ship(options, type) {
         );
       }
     }
+    
   };
 }
 
@@ -432,7 +441,6 @@ var smallGun = {
   source: mainSprites,
   x: 56, y: 4,
   w: 1, h: 3,
-  maxVelocity: 2, // Dunno if needed, set high incase it slows ship
   cooldown: 1,
   ammo: bullet
 };
@@ -441,7 +449,6 @@ var bigGun = {
   source: mainSprites,
   x: 56, y: 3,
   w: 1, h: 4,
-  maxVelocity: 2,
   cooldown: 2,
   ammo: bullet
 };
@@ -452,7 +459,7 @@ var smallShip = {
   w: 5, h: 6,
   index: 1,
   weapons: [
-    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR: 1, type: smallGun}
+    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR:  1, type: smallGun}
   ],
   hp: [
     {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
@@ -467,13 +474,12 @@ var bigShip = {
   w: 9, h: 9,
   index: 1,
   weapons: [
-    {x: 0, y: 4, tiltOffsetL: 1, tiltOffsetR: 1, type: smallGun},
-    {x: 8, y: 4, tiltOffsetL: -1, tiltOffsetR: -2, type: smallGun},
-    {x: 4, y: -1, tiltOffsetL: -1, tiltOffsetR: 1, type: bigGun}
+    {x: 1, y: 3, tiltOffsetL:  0, tiltOffsetR:  2, type: bigGun},
+    {x: 7, y: 3, tiltOffsetL: -2, tiltOffsetR:  0, type: bigGun}
   ],
   hp: [
     {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // tiltOffset: false means not displayed
+    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // false = not displayed
     {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
     {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false },
     {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2    },
