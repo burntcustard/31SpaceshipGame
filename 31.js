@@ -638,17 +638,7 @@ function play31() {
     var i, j, deads, ent;
 
     // Player movement
-    if (playerShip.move === "left") {
-      playerShip.x -= playerShip.maxVelocity;
-      playerShip.sprite.index = 0;
-    } else if (!playerShip.move) {
-      playerShip.sprite.index = 1;
-    } else if (playerShip.move === "right") {
-      playerShip.x += playerShip.maxVelocity;
-      playerShip.sprite.index = 2;
-    }
-
-    // I feel like this should be just a tiny bit seperate from movement :P
+    playerShip.x += playerShip.vx;
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (31 - playerShip.sprite.w)) { playerShip.x = 31 - playerShip.sprite.w; }
 
@@ -730,13 +720,14 @@ function play31() {
 
       // ----- INPUT HANDLING ------ //
       if (keys.left && !keys.right) {
-        playerShip.move = "left";
+        playerShip.vx = -playerShip.maxVelocity;
+        playerShip.sprite.index = 0;
+      } else if (!keys.left && keys.right) {
+        playerShip.vx = playerShip.maxVelocity;
+        playerShip.sprite.index = 2;
       } else {
-        if (!keys.left && keys.right) {
-          playerShip.move = "right";
-        } else {
-          playerShip.move = false;
-        }
+        playerShip.vx = 0;
+        playerShip.sprite.index = 1;
       }
 
       if (keys.space) {
