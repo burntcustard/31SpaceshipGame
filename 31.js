@@ -319,43 +319,30 @@ function Ship(options, type) {
   }
 
   // Colour stuff
-  this.primaryColor = options.primaryColor || false;
-  this.secondaryColor = options.secondaryColor || false;
+  this.primaryColor = options.primaryColor || rgba(0,0,0,0);
+  this.secondaryColor = options.secondaryColor || rgba(0,0,0,0);
 
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
   // to make hidden canvaseses on the fly whenever a coloured object is spawned.
 
-  if (this.primaryColor && this.secondaryColor) {
-    if (debug) { console.log("Creating a fancy colourful ship"); }
+  var ctxPri = canvasPri.getContext('2d');
+  ctxPri.mozImageSmoothingEnabled = false;
+  ctxPri.imageSmoothingEnabled = false;
+  ctxPri.drawImage(this.sprite.source, 0, 0);
+  ctxPri.globalCompositeOperation = "source-atop";
+  ctxPri.fillStyle = this.primaryColor;
+  ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
 
-    //canvasPri = document.getElementById('canvasPri');
-    var ctxPri = canvasPri.getContext('2d');
-    ctxPri.mozImageSmoothingEnabled = false;
-    ctxPri.imageSmoothingEnabled = false;
-
-    ctxPri.drawImage(this.sprite.source, 0, 0);
-    ctxPri.globalCompositeOperation = "source-atop";
-    ctxPri.fillStyle = this.primaryColor;
-    ctxPri.fillRect(0,0,canvasPri.width,canvasPri.height);
-
-
-    //canvasSec = document.getElementById('canvasSec');
-    var ctxSec = canvasSec.getContext('2d');
-    ctxSec.mozImageSmoothingEnabled = false;
-    ctxSec.imageSmoothingEnabled = false;
-
-    ctxSec.drawImage(this.sprite.source, 0, 0);
-    ctxSec.globalCompositeOperation = "source-atop";
-    ctxSec.fillStyle = this.secondaryColor;
-    ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
-
-    //canvas = document.getElementById('canvas31');
-    var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false;
-    ctx.imageSmoothingEnabled = false;
-  }
+  var ctxSec = canvasSec.getContext('2d');
+  ctxSec.mozImageSmoothingEnabled = false;
+  ctxSec.imageSmoothingEnabled = false;
+  ctxSec.drawImage(this.sprite.source, 0, 0);
+  ctxSec.globalCompositeOperation = "source-atop";
+  ctxSec.fillStyle = this.secondaryColor;
+  ctxSec.fillRect(0,0,canvasSec.width,canvasSec.height);
+  
   // End initial hidden draw
 
   this.draw = function(context) {
