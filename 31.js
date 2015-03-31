@@ -492,6 +492,12 @@ var mediumRock = {
   w: 4, h: 4,
   maxVelocity: 0.25
 };
+var explosion = {
+  name: "explision",
+  source: mainSprites,
+  x: 64, y: 0,
+  w: 6, h: 6
+};
 // ------- Entity END ------- //
 
 
@@ -516,7 +522,8 @@ function play31() {
       level = {     // Data about the level
         entities: [],
         emitters: [],
-        collidable: []
+        collidable: [],
+        explosions: []
       };
 
 
@@ -602,6 +609,15 @@ function play31() {
 
     //rockSpawner.draw(ctx);
     //mainGun.draw(ctx);
+
+    // Animate explosions
+    i = level.explosions.length;
+    while (i--) {
+      var boom = level.explosions[i];
+      boom.draw(ctx);
+      if (!boom.last || now - boom.last > 100) { boom.sprite.index++; boom.last = now; }
+      if (boom.sprite.index > 2) { level.explosions.splice(i, 1); }
+    }
     playerShip.draw(ctx);
 
     // ------- DEBUG INFO -------- //
@@ -685,7 +701,13 @@ function play31() {
             i = level.collidable.length;
             while (i--) {
               ent = level.collidable[i];
-              if (ent.dead) { level.collidable.splice(i, 1); }
+              if (ent.dead) {
+                var boom = new Entity({
+                  x: ent.x, y: ent.y
+                }, explosion);
+                level.explosions.push(boom);
+                level.collidable.splice(i, 1);
+              }
             }
           }
         }
