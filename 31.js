@@ -797,7 +797,7 @@ function play31() {
         spawnInto: level,
         cooldown: 1000
       }, mediumRock);
-      //level.emitters.push(rockSpawner);
+      level.emitters.push(rockSpawner);
 
       break;
 
