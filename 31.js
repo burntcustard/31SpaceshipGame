@@ -79,9 +79,10 @@ function toggleDebug() {
  */
 
 function createPixelMap(obj) {
-  var x, y;
+  var x, y, mI = obj.sprite.index;  // mI is map index
   var ctxCollision = canvasCollision.getContext('2d');
-  obj.pixelMap = [];
+  if (!obj.pixelMap) { obj.pixelMap = []; }
+  obj.pixelMap[mI] = [];
   ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   ctxCollision.drawImage(
     obj.sprite.source,
@@ -100,9 +101,7 @@ function createPixelMap(obj) {
       var pixel = ctxCollision.getImageData(x, y, 1, 1);
       // Check that opacity is above zero
       if(pixel.data[3] !== 0) {
-        var tmp = {x: x, y: y};
-        console.log("Pushing " + JSON.stringify(tmp) + " to pixel map");
-        obj.pixelMap.push(tmp);
+        obj.pixelMap[mI].push({x: x, y: y});
       }
     }
   }
@@ -115,10 +114,10 @@ function createPixelMap(obj) {
  */
 function offsetPixelMap(obj) {
   var i,
-      pixelMap = JSON.parse(JSON.stringify(obj.pixelMap)); // Reference bye bye
-  for (i = 0; i < offsetPixelMap.length; i++) {
-    pixelMap[i].x = obj.pixelMap[i].x + Math.round(obj.x);
-    pixelMap[i].y = obj.pixelMap[i].y + Math.round(obj.y);
+      pixelMap = JSON.parse(JSON.stringify(obj.pixelMap[obj.sprite.index])); // Reference bye bye
+  for (i = 0; i < pixelMap.length; i++) {
+    pixelMap[i].x = obj.pixelMap[obj.sprite.index][i].x + Math.round(obj.x);
+    pixelMap[i].y = obj.pixelMap[obj.sprite.index][i].y + Math.round(obj.y);
   }
   return pixelMap;
 }
@@ -126,10 +125,7 @@ function offsetPixelMap(obj) {
 
 
 /**
- * Checks if two objects have sprites that are colliding.
- *
- * @todo Make the crazy long if statement a bit neater.
- * @todo Check if the object already has a pixelMap so it doesn't have to be generated again.
+ * Checks if two objects have sprites with colliding hitboxes (squares of object h/w).
  *
  * @param   {Object}  obj1 [[Description]]
  * @param   {Object}  obj2 [[Description]]
@@ -155,9 +151,15 @@ function checkCollision(obj1, obj2) {
   return true;
 }
 
+/**
+ * Checks if two pixel maps both have a pixel with the same coordinates.
+ *
+ * @param   {Object}  obj1PixelMap [[Description]]
+ * @param   {Object}  obj2PixelMap [[Description]]
+ * @returns {Boolean} True if found 2 pixels with same coordinates.
+ */
 function checkPixelCollision(obj1PixelMap, obj2PixelMap) {
   var obj1i, obj2i;
-  console.log("Obj1PixelMap: " + JSON.stringify(obj1PixelMap));
   for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
     for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
       if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
@@ -689,13 +691,14 @@ function play31() {
       var obj1 = level.collidable[i];
       for (j = 0; j < level.collidable.length; j++) {
         var obj2 = level.collidable[j];
-        // If object not colliding with its self
+        // If object isn't being checked against itself, isn't a thing that shouldn't collide
+        // with another thing (hmm)... and has a bounding box collision with other object
         if (obj1 !== obj2
             && !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player")
             && !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player")
             && checkCollision(obj1, obj2)) {
-          if (!obj1.pixelMap) { createPixelMap(obj1); }
-          if (!obj2.pixelMap) { createPixelMap(obj2); }
+          if (!(obj1.pixelMap && obj1.pixelMap[obj1.sprite.index])) { createPixelMap(obj1); }
+          if (!(obj2.pixelMap && obj2.pixelMap[obj2.sprite.index])) { createPixelMap(obj2); }
           if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
             
             // Lower HP of things that collided
