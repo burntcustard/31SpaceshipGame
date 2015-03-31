@@ -82,8 +82,9 @@ function toggleDebug() {
  */
 
 function createPixelMap(obj) {
-  var pixelMap = [], x, y, i;
+  var x, y;
   var ctxCollision = canvasCollision.getContext('2d');
+  obj.pixelMap = [];
   ctxCollision.clearRect(0, 0, gridSizeX, gridSizeY);  // Clear space to draw sprites
   ctxCollision.drawImage(
     obj.sprite.source,
@@ -102,16 +103,23 @@ function createPixelMap(obj) {
       var pixel = ctxCollision.getImageData(x, y, 1, 1);
       // Check that opacity is above zero
       if(pixel.data[3] !== 0) {
-        pixelMap.push({x: x, y: y});
+        var tmp = {x: x, y: y};
+        console.log("Pushing " + JSON.stringify(tmp) + " to pixel map");
+        obj.pixelMap.push(tmp);
       }
     }
   }
+}
+
+function offsetPixelMap(obj) {
+  var i,
+      offsetPixelMap = JSON.parse(JSON.stringify(obj.pixelMap)); // Reference bye bye
   // Add the x and y offset of the object in the game to the pixel map
-  for (i = 0; i < pixelMap.length; i++) {
-    pixelMap[i].x += Math.round(obj.x);
-    pixelMap[i].y += Math.round(obj.y);
+  for (i = 0; i < offsetPixelMap.length; i++) {
+    offsetPixelMap[i].x = obj.pixelMap[i].x + Math.round(obj.x);
+    offsetPixelMap[i].y = obj.pixelMap[i].y + Math.round(obj.y);
   }
-  return pixelMap;
+  return offsetPixelMap;
 }
 
 
@@ -135,10 +143,7 @@ function checkCollision(obj1, obj2) {
       t2 = Math.round(obj2.y),
       r2 = Math.round(obj2.x + obj2.sprite.w),
       b2 = Math.round(obj2.y + obj2.sprite.h),
-      l2 = Math.round(obj2.x),
-      obj1PixelMap,
-      obj2PixelMap,
-      obj1i, obj2i;
+      l2 = Math.round(obj2.x);
 
   // Bounding box collisions
   if (t1 >= b2) {return false;}
@@ -146,15 +151,17 @@ function checkCollision(obj1, obj2) {
   if (b1 <= t2) {return false;}
   if (l1 >= r2) {return false;}
   // It got to here so bounding boxes are colliding!
+  return true;
+}
 
-  // Per pixel collisions !! NOT WORKING
-  obj1PixelMap = createPixelMap(obj1);
-  obj2PixelMap = createPixelMap(obj2);
+function checkPixelCollision(obj1PixelMap, obj2PixelMap) {
+  var obj1i, obj2i;
+  console.log("Obj1PixelMap: " + JSON.stringify(obj1PixelMap));
   for (obj1i = 0; obj1i < obj1PixelMap.length; obj1i++) {
     for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
       if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
           obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) {
-        console.log("Collision");
+        if (debug) { console.log("Pixel collision"); }
         return true;
       }
     }
@@ -266,7 +273,7 @@ function Emitter(options, type) {
   this.lastEmission = 0;
 
   /*this.updatePos = function() {
-    if (!this.attatchedTo) { throw new Error("No need to updatePos: No parent"); }
+    if (!this.attatchedTo) throw new Error("No need to updatePos: No parent"); }
     else {
       this.x = this.attatchedTo.x + this.offsetX;
       this.y = this.attatchedTo.y + this.offsetY;
@@ -276,10 +283,10 @@ function Emitter(options, type) {
   this.emit = function(spawnInto) {
     var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
     switch(this.emitDir) {
-        case "u": newVX = 0; newVY *= -1; break;
-        case "r": newVY = 0; break;
-        case "d": newVX = 0; break;
-        case "l": newVX *= -1; newVY = 0; break;
+        case "u": newVX  =  0; newVY *= -1; break;
+        case "r": newVX *=  1; newVY  =  0; break;
+        case "d": newVX  =  0; newVY *=  1; break;
+        case "l": newVX *= -1; newVY  =  0; break;
     }
     if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
       var e = new Entity({
@@ -682,18 +689,24 @@ function play31() {
       for (j = 0; j < level.collidable.length; j++) {
         var obj2 = level.collidable[j];
         // If object not colliding with its self
-        if (obj1 !== obj2 && !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player")
+        if (obj1 !== obj2
+            && !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player")
             && !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player")
             && checkCollision(obj1, obj2)) {
-          if (debug) { console.log(now.toFixed() + " " + obj1.name + " colliding with " + obj2.name); }
-          obj1.hpLost();
-          obj2.hpLost();
+          if (!obj1.pixelMap) { createPixelMap(obj1); }
+          if (!obj2.pixelMap) { createPixelMap(obj2); }
+          if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
+            
+            // Lower HP of things that collided
+            obj1.hpLost();
+            obj2.hpLost();
 
-          // Remove dead things from the collidable list
-          i = level.collidable.length;
-          while (i--) {
-            ent = level.collidable[i];
-            if (ent.dead) { level.collidable.splice(i, 1); }
+            // Remove dead things from the collidable list
+            i = level.collidable.length;
+            while (i--) {
+              ent = level.collidable[i];
+              if (ent.dead) { level.collidable.splice(i, 1); }
+            }
           }
         }
       }
