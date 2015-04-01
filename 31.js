@@ -300,6 +300,12 @@ function Ship(options) {
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
     this.y = gridSizeY - this.sprite.h - 2;
   }
+  
+  // Initial position for enemy ship:
+  if (this.name === "enemy" && !this.x && !this.y) { // !this.x == true if this.x == 0;
+    this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
+    this.y = 2;
+  }
 
   for (i = 0; i < this.weapons.length; i++) {
     var weap = new Emitter({
@@ -545,13 +551,9 @@ function BigExplosion(options) {
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
-      i, j,
-      level = {     // Data about the level
-        entities: [],
-        emitters: [],
-        collidable: [],
-        explosions: []
-      };
+      enemyShip,  // Enemy ship, should be array of enemy shipS?
+      level,
+      i, j;
 
 
 // =============================== //
@@ -637,7 +639,8 @@ function play31() {
 
     //rockSpawner.draw(ctx);
 
-    playerShip.draw(ctx);
+    if (enemyShip) { enemyShip.draw(ctx); }
+    if (playerShip) { playerShip.draw(ctx); }
 
     // Animate explosions
     i = level.explosions.length;
@@ -687,13 +690,12 @@ function play31() {
     if (playerShip.x > (31 - playerShip.sprite.w)) { playerShip.x = 31 - playerShip.sprite.w; }
 
     // Trigger emitters
-    for (i = 0; i < level.emitters.length; i++) {
+    for (i in level.emitters) {
       level.emitters[i].emit(level);
     }
 
     // Entity movement
-    i = level.entities.length;
-    while (i--) {
+    for (i in level.entities) {
       ent = level.entities[i];
       ent.y += ent.vy;
       // If the entity is off screen, remove
@@ -804,7 +806,22 @@ function play31() {
     if (meter) { meter.tick(); }  // FPS Meter tick finish
 
     last = now;
-    window.requestAnimationFrame(gameLoop);
+    
+    // Switching to new levels hmm this is messy
+    var loop = true; // Are you gonn' keep looping? 
+    if (keys.one) {
+      console.log("Starting level 1");
+      loop = false;
+      keys.one = false;
+      newGame("level1");
+    }
+    if (keys.two) {
+      console.log("Starting level 2");
+      loop = false;
+      keys.two = false;
+      newGame("level2");
+    }
+    if (loop) { window.requestAnimationFrame(gameLoop); }
   }
 
 // =================================================== //
@@ -819,11 +836,18 @@ function play31() {
   function newGame(levelID) {
     // Clear old stuff
     //  - Old collidable list, rocks, etc.
-
+    level = {     // Data about the level
+        entities: [],
+        emitters: [],
+        collidable: [],
+        explosions: [],
+        id: ''
+      };
+    
     // Create new level
     switch (levelID) {
     case "level1":
-
+      level.id = levelID;
       playerShip = new BigShip({
         name: "player",
         primaryColor: "rgba(80,80,0,0.7)",
@@ -842,9 +866,26 @@ function play31() {
 
       break;
 
+    case "level2":
+      level.id = levelID;
+      playerShip = new SmallShip({
+        name: "player",
+        primaryColor: "rgba(80,80,0,0.7)",
+        secondaryColor: "rgba(0,235,230,0.5)"
+      });
+      level.collidable.push(playerShip);
+
+      enemyShip = new BigShip({
+        name: "enemy",
+      });
+      level.collidable.push(enemyShip);
+        
+      break;
+        
     default:
       throw new Error ("Tried to load unknown level.");
     }
+    
     gameLoop();
   }
 
