@@ -517,7 +517,6 @@ function SmallExplosion(options) {
 }
 function BigExplosion(options) {
   this.name = "bigExplosion";
-  this.name = "bigExplosion";
   this.sprite = {
     source: mainSprites,
     x: 0, y: 59,
@@ -732,9 +731,10 @@ function play31() {
               ent = level.collidable[i];
               if (ent.dead) {
                 if (ent.name !== "bullet") {
-                  var boom = new SmallExplosion({
-                    x: ent.x, y: ent.y
-                  });
+                  var boom = new BigExplosion({});
+                  // All the widths/2 just help center the explosion
+                  boom.x = ent.x + ent.sprite.w / 2 - boom.sprite.w / 2;
+                  boom.y = ent.y + ent.sprite.h / 2 - boom.sprite.h / 2;
                   level.explosions.push(boom);
                 }
                 level.collidable.splice(i, 1);
