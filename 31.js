@@ -510,7 +510,19 @@ function SmallExplosion(options) {
   this.sprite = {
     source: mainSprites,
     x: 64, y: 0,
-    w: 4, h: 4
+    w: 4, h: 4,
+    frames: 7
+  };
+  Entity.call(this, options);
+}
+function BigExplosion(options) {
+  this.name = "bigExplosion";
+  this.name = "bigExplosion";
+  this.sprite = {
+    source: mainSprites,
+    x: 0, y: 59,
+    w: 15, h: 15,
+    frames: 9
   };
   Entity.call(this, options);
 }
@@ -634,7 +646,7 @@ function play31() {
       var boom = level.explosions[i];
       boom.draw(ctx);
       if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
-      if (boom.sprite.index > 6) { level.explosions.splice(i, 1); }
+      if (boom.sprite.index >= boom.sprite.frames) { level.explosions.splice(i, 1); }
     }
     
     // ------- DEBUG INFO -------- //
