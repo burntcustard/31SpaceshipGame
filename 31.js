@@ -345,14 +345,14 @@ function Ship(options) {
 
       context.drawImage(
         this.sprite.source,
-        this.weapons[i].type.x,                             // SourceX (Position of frame)
-        this.weapons[i].type.y,                             // SourceY
-        this.weapons[i].type.w,                             // SourceW (Size of frame)
-        this.weapons[i].type.h,                             // SourceH
+        this.weapons[i].type.sprite.x,                             // SourceX (Position of frame)
+        this.weapons[i].type.sprite.y,                             // SourceY
+        this.weapons[i].type.sprite.w,                             // SourceW (Size of frame)
+        this.weapons[i].type.sprite.h,                             // SourceH
         Math.round(this.x + this.weapons[i].x + tilt) * cSize,// DestinationX (Position on canvas)
         Math.round(this.y + this.weapons[i].y) * cSize,     // DestinationY
-        this.weapons[i].type.w * cSize,                     // DestinationW (Size on canvas)
-        this.weapons[i].type.h * cSize                      // DestinationH
+        this.weapons[i].type.sprite.w * cSize,                     // DestinationW (Size on canvas)
+        this.weapons[i].type.sprite.h * cSize                      // DestinationH
       );
     }
 
