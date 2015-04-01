@@ -436,6 +436,7 @@ function Bullet(options) {
     w: 1, h: 2
   };
   this.maxVelocity = 1.5;
+  this.explosion = SmallExplosion; 
   Entity.call(this, options);
 }
 function SmallGun(options) {
@@ -509,10 +510,21 @@ function MediumRock(options) {
     w: 4, h: 4
   };
   this.maxVelocity = 0.25;
+  this.explosion = MediumExplosion;
   Entity.call(this, options);
 }
 function SmallExplosion(options) {
   this.name = "smallExplosion";
+  this.sprite = {
+    source: mainSprites,
+    x: 64, y: 5,
+    w: 3, h: 6,
+    frames: 8
+  };
+  Entity.call(this, options);
+}
+function MediumExplosion(options) {
+  this.name = "mediumExplosion";
   this.sprite = {
     source: mainSprites,
     x: 64, y: 0,
@@ -732,8 +744,8 @@ function play31() {
             while (i--) {
               ent = level.collidable[i];
               if (ent.dead) {
-                if (ent.name !== "bullet") {
-                  var boom = new BigExplosion({});
+                if (ent.explosion) {
+                  var boom = new ent.explosion({});
                   // All the widths/2 just help center the explosion
                   boom.x = ent.x + ent.sprite.w / 2 - boom.sprite.w / 2;
                   boom.y = ent.y + ent.sprite.h / 2 - boom.sprite.h / 2;
@@ -843,6 +855,7 @@ function play31() {
         explosions: [],
         id: ''
       };
+    enemyShip = false;
     
     // Create new level
     switch (levelID) {
