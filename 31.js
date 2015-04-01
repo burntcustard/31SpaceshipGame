@@ -189,19 +189,22 @@ var mainSprites = new Image();
 mainSprites.src = "spriteSheet.png";
 
 // Entity super class
-function Entity(options, type) {
+function Entity(options) {
   var i;
 
-  this.name = options.name || type.name || "Entity"; // For debugging
+  this.name = options.name || this.name || "Entity"; // For debugging
 
-  this.x = options.x || 0;
-  this.y = options.y || 0;
-  this.vx = options.vx || 0;
-  this.vy = options.vy || 0;
+  this.x = options.x || this.x || 0;
+  this.y = options.y || this.y || 0;
+  this.vx = options.vx || this.vx || 0;
+  this.vy = options.vy || this.vy || 0;
 
-  this.maxVelocity = options.maxVelocity|| type.maxVelocity || 1;
+  this.sprite = this.sprite || {};
+  this.sprite.index = this.sprite.index || 0;
 
-  this.hp = type.hp || [];
+  this.maxVelocity = options.maxVelocity || this.maxVelocity || 1;
+
+  this.hp = this.hp || [];
   this.maxHealth = this.hp.length;
   this.dead = false;
   this.getHealth = function() {
@@ -228,15 +231,6 @@ function Entity(options, type) {
     }
   };
 
-  this.sprite = {
-    source: type.source || mainSprites,
-    index: type.index || 0,
-    x: type.x || 0,
-    y: type.y || 0,
-    w: type.w || 1,
-    h: type.h || 1
-  };
-
   this.draw = function(context) {
     context.drawImage(
         this.sprite.source,
@@ -254,8 +248,8 @@ function Entity(options, type) {
 
 
 // Emitter sub-class
-function Emitter(options, type) {
-  Entity.call(this, options, type);
+function Emitter(options) {
+  Entity.call(this, options);
 
   this.emittedObj = options.emittedObj;
   this.emitX = options.emitX || [0,0];
@@ -278,12 +272,13 @@ function Emitter(options, type) {
         case "l": newVX *= -1; newVY  =  0; break;
     }
     if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
-      var e = new Entity({
-        x: this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0])),
-        y: this.y,
-        vx: newVX, vy: newVY
-      },
-      this.emittedObj);
+      var e = Object.create(this.emittedObj);
+      e.x = this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0]));
+      e.y = this.y;
+      e.vx = newVX;
+      e.vy = newVY;
+      //console.log(e);
+      //console.log(spawnInto);
       spawnInto.entities.push(e);
       spawnInto.collidable.push(e);
       this.lastEmission = now;
@@ -294,13 +289,10 @@ function Emitter(options, type) {
 
 
 // Ship sub-class
-function Ship(options, type) {
+function Ship(options) {
+
   var i;
-  Entity.call(this, options, type);
-
-  this.weapons = type.weapons || [];
-
-  console.log(this.weapons.length);
+  Entity.call(this, options);
 
   for (i = 0; i < this.weapons.length; i++) {
     var weap = new Emitter({
@@ -311,7 +303,6 @@ function Ship(options, type) {
       cooldown: 400
     }, this.weapons[i].type);
     this.weapons[i].emitter = weap;
-    console.log(this.weapons);
   }
 
   // Colour stuff
@@ -424,56 +415,64 @@ function Ship(options, type) {
 
 
 
-// Object Types
-var bullet = {
-  name: "bullet",
-  source: mainSprites,
-  x: 58, y: 3,
-  w: 1, h: 2,
-  maxVelocity: 1
-};
-var smallGun = {
-  name: "smallgun",
-  source: mainSprites,
-  x: 56, y: 4,
-  w: 1, h: 3,
-  cooldown: 1,
-  ammo: bullet
-};
-var bigGun = {
-  name: "bigGun",
-  source: mainSprites,
-  x: 56, y: 3,
-  w: 1, h: 4,
-  cooldown: 2,
-  ammo: bullet
-};
-var smallShip = {
-  name: "smallShip",
-  source: mainSprites,
-  x: 0, y: 3,
-  w: 5, h: 6,
-  index: 1,
-  weapons: [
-    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR:  1, type: smallGun}
-  ],
-  hp: [
+// Object Types sub-classes
+function Bullet(options) {
+  this.name = "bullet";
+  this.sprite = {
+    source: mainSprites,
+    x: 58, y: 3,
+    w: 1, h: 2
+  };
+  this.maxVelocity = 1;
+  Entity.call(this, options);
+}
+function SmallGun(options) {
+  this.name = "smallgun";
+  this.sprite = {
+    source: mainSprites,
+    x: 56, y: 4,
+    w: 1, h: 3
+  };
+  this.cooldown = 1;
+  this.ammo = new Bullet({});
+  Entity.call(this, options);
+}
+function BigGun(options) {
+  this.name = "bigGun";
+  this.sprite = {
+    source: mainSprites,
+    x: 56, y: 3,
+    w: 1, h: 4
+  };
+  this.cooldown = 2;
+  this.ammo = new Bullet({});
+  Entity.call(this, options);
+}
+function SmallShip(options) {
+  this.name = "smallShip";
+  this.weapons = [
+    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR:  1, type: new SmallGun({})}
+  ];
+  this.hp = [
     {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
     {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
-  ],
-  maxVelocity: 0.5
-};
-var bigShip = {
-  name: "bigShip",
-  source: mainSprites,
-  x: 16, y: 0,
-  w: 9, h: 9,
-  index: 1,
-  weapons: [
-    {x: 1, y: 3, tiltOffsetL:  0, tiltOffsetR:  2, type: bigGun},
-    {x: 7, y: 3, tiltOffsetL: -2, tiltOffsetR:  0, type: bigGun}
-  ],
-  hp: [
+  ];
+  this.sprite = {
+    source: mainSprites,
+    x: 0, y: 3,
+    w: 5, h: 6,
+    index: 1
+  };
+  this.maxVelocity = 0.5;
+  Ship.call(this, options);
+}
+function BigShip(options) {
+  this.name = "bigShip";
+  this.weapons = [
+    {x: 1, y: 3, tiltOffsetL:  0, tiltOffsetR:  2, type: new BigGun({})},
+    {x: 7, y: 3, tiltOffsetL: -2, tiltOffsetR:  0, type: new BigGun({})}
+  ];
+  this.hp = [
     {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
     {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // false = not displayed
     {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
@@ -482,22 +481,35 @@ var bigShip = {
     {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2    },
     {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false },
     {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
-  ],
-  maxVelocity: 0.3
-};
-var mediumRock = {
-  name: "mediumRock",
-  source: mainSprites,
-  x: 51, y: 3,
-  w: 4, h: 4,
-  maxVelocity: 0.25
-};
-var explosion = {
-  name: "explision",
-  source: mainSprites,
-  x: 64, y: 0,
-  w: 6, h: 6
-};
+  ];
+  this.sprite = {
+    source: mainSprites,
+    x: 16, y: 0,
+    w: 9, h: 9,
+    index: 1
+  };
+  this.maxVelocity = 0.3;
+  Ship.call(this, options);
+}
+function MediumRock(options) {
+  this.name = "mediumRock";
+  this.sprite = {
+    source: mainSprites,
+    x: 51, y: 3,
+    w: 4, h: 4
+  };
+  this.maxVelocity = 0.25;
+  Entity.call(this, options);
+}
+function Explosion(options) {
+  this.name = "explision";
+  this.sprite = {
+    source: mainSprites,
+    x: 64, y: 0,
+    w: 6, h: 6
+  };
+  Entity.call(this, options);
+}
 // ------- Entity END ------- //
 
 
@@ -603,6 +615,7 @@ function play31() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw stuff in entity list
+    //console.log(level);
     for (i = 0; i < level.entities.length; i++) {
       level.entities[i].draw(ctx);
     }
@@ -693,6 +706,8 @@ function play31() {
           if (!(obj2.pixelMap && obj2.pixelMap[obj2.sprite.index])) { createPixelMap(obj2); }
           if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
 
+            //console.log(obj1.name + " collided with " + obj2.name);
+
             // Lower HP of things that collided
             obj1.hpLost();
             obj2.hpLost();
@@ -702,9 +717,9 @@ function play31() {
             while (i--) {
               ent = level.collidable[i];
               if (ent.dead) {
-                var boom = new Entity({
+                var boom = new Explosion({
                   x: ent.x, y: ent.y
-                }, explosion);
+                });
                 level.explosions.push(boom);
                 level.collidable.splice(i, 1);
               }
@@ -794,22 +809,22 @@ function play31() {
     switch (levelID) {
     case "level1":
 
-      playerShip = new Ship({
+      playerShip = new BigShip({
         name: "player",
-        x: gridSizeX / 2 - bigShip.w / 2,
-        y: gridSizeY - bigShip.h - 2,
+        x: gridSizeX / 2 - 9 / 2,
+        y: gridSizeY - 9 - 2,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
-      }, bigShip);
+      });
       level.collidable.push(playerShip);
 
       var rockSpawner = new Emitter({
         x: 0, y: -4,
-        emitX: [0, gridSizeX - mediumRock.w],
-        emittedObj: mediumRock,
+        emitX: [0, gridSizeX - 4],
+        emittedObj: new MediumRock({}),
         spawnInto: level,
         cooldown: 1000
-      }, mediumRock);
+      });
       level.emitters.push(rockSpawner);
 
       break;
