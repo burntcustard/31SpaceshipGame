@@ -164,7 +164,6 @@ function checkPixelCollision(obj1PixelMap, obj2PixelMap) {
     for (obj2i = 0; obj2i < obj2PixelMap.length; obj2i++) {
       if (obj1PixelMap[obj1i].x === obj2PixelMap[obj2i].x &&
           obj1PixelMap[obj1i].y === obj2PixelMap[obj2i].y) {
-        if (debug) { console.log("Pixel collision"); }
         return true;
       }
     }
@@ -250,7 +249,8 @@ function Entity(options) {
 // Emitter sub-class
 function Emitter(options) {
   Entity.call(this, options);
-
+  
+  if (!options.emittedObj) { throw new Error ("Tried to create emitter without something to emit."); }
   this.emittedObj = options.emittedObj;
   this.emitX = options.emitX || [0,0];
   this.emitY = options.emitY || [0,0];
@@ -292,16 +292,23 @@ function Emitter(options) {
 function Ship(options) {
 
   var i;
+
   Entity.call(this, options);
+
+  // Initial position for player ship:
+  if (this.name === "player" && !this.x && !this.y) { // !this.x == true if this.x == 0;
+    this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
+    this.y = gridSizeY - this.sprite.h - 2;
+  }
 
   for (i = 0; i < this.weapons.length; i++) {
     var weap = new Emitter({
       x: this.x + this.weapons[i].x,
       y: this.y + this.weapons[i].y,
       emittedObj: this.weapons[i].type.ammo,
-      emitDir: "u",
-      cooldown: 400
-    }, this.weapons[i].type);
+      emitDir: 'u',
+      cooldown: this.weapons[i].type.cooldown
+    });
     this.weapons[i].emitter = weap;
   }
 
@@ -345,54 +352,54 @@ function Ship(options) {
 
       context.drawImage(
         this.sprite.source,
-        this.weapons[i].type.sprite.x,                             // SourceX (Position of frame)
-        this.weapons[i].type.sprite.y,                             // SourceY
-        this.weapons[i].type.sprite.w,                             // SourceW (Size of frame)
-        this.weapons[i].type.sprite.h,                             // SourceH
-        Math.round(this.x + this.weapons[i].x + tilt) * cSize,// DestinationX (Position on canvas)
-        Math.round(this.y + this.weapons[i].y) * cSize,     // DestinationY
-        this.weapons[i].type.sprite.w * cSize,                     // DestinationW (Size on canvas)
-        this.weapons[i].type.sprite.h * cSize                      // DestinationH
+        this.weapons[i].type.sprite.x,                         // SourceX (Position of frame)
+        this.weapons[i].type.sprite.y,                         // SourceY
+        this.weapons[i].type.sprite.w,                         // SourceW (Size of frame)
+        this.weapons[i].type.sprite.h,                         // SourceH
+        Math.round(this.x + this.weapons[i].x + tilt) * cSize, // DestinationX (Position on canvas)
+        Math.round(this.y + this.weapons[i].y) * cSize,        // DestinationY
+        this.weapons[i].type.sprite.w * cSize,                 // DestinationW (Size on canvas)
+        this.weapons[i].type.sprite.h * cSize                  // DestinationH
       );
     }
 
     // Draw ship hull (primary colour)
     context.drawImage(
       canvasPri,
-      this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
-      this.sprite.y,                                     // SourceY
-      this.sprite.w,                                     // SourceW (Frame size)
-      this.sprite.h,                                     // SourceH
-      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
-      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-      this.sprite.h * cSize                              // DestinationH
+      this.sprite.x + this.sprite.index * this.sprite.w,// SourceX (Frame pos)
+      this.sprite.y,                                    // SourceY
+      this.sprite.w,                                    // SourceW (Frame size)
+      this.sprite.h,                                    // SourceH
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                       // DestinationY (Rounded to grid)
+      this.sprite.w * cSize,                            // DestinationW (Size on canvas)
+      this.sprite.h * cSize                             // DestinationH
     );
 
     // Draw cockpit (secondary colour)
     context.drawImage(
       canvasSec,
-      this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
-      this.sprite.y + this.sprite.h,                     // SourceY
-      this.sprite.w,                                     // SourceW (Frame size)
-      this.sprite.h,                                     // SourceH
-      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
-      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
-      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-      this.sprite.h * cSize                              // DestinationH
+      this.sprite.x + this.sprite.index * this.sprite.w,// SourceX (Frame pos)
+      this.sprite.y + this.sprite.h,                    // SourceY
+      this.sprite.w,                                    // SourceW (Frame size)
+      this.sprite.h,                                    // SourceH
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                       // DestinationY (Rounded to grid)
+      this.sprite.w * cSize,                            // DestinationW (Size on canvas)
+      this.sprite.h * cSize                             // DestinationH
     );
 
     // Draw engine trails
     context.drawImage(
       this.sprite.source,
-      this.sprite.x + this.sprite.w * this.sprite.index, // SourceX (Position of frame)
-      this.sprite.y + this.sprite.h * 2,                 // SourceY
-      this.sprite.w,                                     // SourceW (Size of frame)
-      12,           // Max height of engine trails is 12 // SourceH
-      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
-      Math.round(this.y + this.sprite.h - 1) * cSize,    // DestinationY (-1 because goes up in ship hull)
-      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-      12 * cSize                                         // DestinationH
+      this.sprite.x + this.sprite.w * this.sprite.index,// SourceX (Position of frame)
+      this.sprite.y + this.sprite.h * 2,                // SourceY
+      this.sprite.w,                                    // SourceW (Size of frame)
+      12,          // Max height of engine trails is 12 // SourceH
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y + this.sprite.h - 1) * cSize,   // DestinationY (-1 because goes up in ship hull)
+      this.sprite.w * cSize,                            // DestinationW (Size on canvas)
+      12 * cSize                                        // DestinationH
     );
 
     // Draw destroyed cockpit tiles
@@ -409,7 +416,6 @@ function Ship(options) {
         );
       }
     }
-
   };
 }
 
@@ -423,7 +429,7 @@ function Bullet(options) {
     x: 58, y: 3,
     w: 1, h: 2
   };
-  this.maxVelocity = 1;
+  this.maxVelocity = 1.5;
   Entity.call(this, options);
 }
 function SmallGun(options) {
@@ -433,9 +439,8 @@ function SmallGun(options) {
     x: 56, y: 4,
     w: 1, h: 3
   };
-  this.cooldown = 1;
+  this.cooldown = 800;  // ms
   this.ammo = new Bullet({});
-  Entity.call(this, options);
 }
 function BigGun(options) {
   this.name = "bigGun";
@@ -444,14 +449,13 @@ function BigGun(options) {
     x: 56, y: 3,
     w: 1, h: 4
   };
-  this.cooldown = 2;
+  this.cooldown = 400;  // ms
   this.ammo = new Bullet({});
-  Entity.call(this, options);
 }
 function SmallShip(options) {
   this.name = "smallShip";
   this.weapons = [
-    {x: 2, y: -1, tiltOffsetL: -1, tiltOffsetR:  1, type: new SmallGun({})}
+    {x: 2, y: -1, tiltOffsetL:  1, tiltOffsetR: -1, type: new SmallGun({})}
   ];
   this.hp = [
     {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
@@ -488,7 +492,7 @@ function BigShip(options) {
     w: 9, h: 9,
     index: 1
   };
-  this.maxVelocity = 0.3;
+  this.maxVelocity = 0.5;
   Ship.call(this, options);
 }
 function MediumRock(options) {
@@ -501,12 +505,12 @@ function MediumRock(options) {
   this.maxVelocity = 0.25;
   Entity.call(this, options);
 }
-function Explosion(options) {
-  this.name = "explision";
+function SmallExplosion(options) {
+  this.name = "smallExplosion";
   this.sprite = {
     source: mainSprites,
     x: 64, y: 0,
-    w: 6, h: 6
+    w: 4, h: 4
   };
   Entity.call(this, options);
 }
@@ -621,18 +625,18 @@ function play31() {
     }
 
     //rockSpawner.draw(ctx);
-    //mainGun.draw(ctx);
+
+    playerShip.draw(ctx);
 
     // Animate explosions
     i = level.explosions.length;
     while (i--) {
       var boom = level.explosions[i];
       boom.draw(ctx);
-      if (!boom.last || now - boom.last > 100) { boom.sprite.index++; boom.last = now; }
-      if (boom.sprite.index > 2) { level.explosions.splice(i, 1); }
+      if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
+      if (boom.sprite.index > 6) { level.explosions.splice(i, 1); }
     }
-    playerShip.draw(ctx);
-
+    
     // ------- DEBUG INFO -------- //
     if (debug) {
       debugMenu.innerHTML = "";
@@ -698,15 +702,13 @@ function play31() {
         var obj2 = level.collidable[j];
         // If object isn't being checked against itself, isn't a thing that shouldn't collide
         // with another thing (hmm)... and has a bounding box collision with other object
-        if (obj1 !== obj2
-            && !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player")
-            && !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player")
-            && checkCollision(obj1, obj2)) {
+        if (obj1 !== obj2 &&
+            !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player") &&
+            !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player") &&
+            checkCollision(obj1, obj2)) {
           if (!(obj1.pixelMap && obj1.pixelMap[obj1.sprite.index])) { createPixelMap(obj1); }
           if (!(obj2.pixelMap && obj2.pixelMap[obj2.sprite.index])) { createPixelMap(obj2); }
           if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
-
-            //console.log(obj1.name + " collided with " + obj2.name);
 
             // Lower HP of things that collided
             obj1.hpLost();
@@ -717,7 +719,7 @@ function play31() {
             while (i--) {
               ent = level.collidable[i];
               if (ent.dead) {
-                var boom = new Explosion({
+                var boom = new SmallExplosion({
                   x: ent.x, y: ent.y
                 });
                 level.explosions.push(boom);
@@ -767,9 +769,8 @@ function play31() {
         playerShip.sprite.index = 1;
       }
 
-      if (keys.space) {
+      if (keys.space) { // Fire ze weapons. Todo: more weapon keys?
         for (i = 0; i < playerShip.weapons.length; i++) {
-          //console.log(playerShip.weapons);
           playerShip.weapons[i].emitter.emit(level);
         }
       }
@@ -811,8 +812,6 @@ function play31() {
 
       playerShip = new BigShip({
         name: "player",
-        x: gridSizeX / 2 - 9 / 2,
-        y: gridSizeY - 9 - 2,
         primaryColor: "rgba(80,80,0,0.7)",
         secondaryColor: "rgba(0,235,230,0.5)"
       });
