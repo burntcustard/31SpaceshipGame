@@ -249,7 +249,7 @@ function Entity(options) {
 // Emitter sub-class
 function Emitter(options) {
   Entity.call(this, options);
-  
+
   if (!options.emittedObj) { throw new Error ("Tried to create emitter without something to emit."); }
   this.emittedObj = options.emittedObj;
   this.emitX = options.emitX || [0,0];
@@ -648,7 +648,7 @@ function play31() {
       if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
       if (boom.sprite.index >= boom.sprite.frames) { level.explosions.splice(i, 1); }
     }
-    
+
     // ------- DEBUG INFO -------- //
     if (debug) {
       debugMenu.innerHTML = "";
@@ -731,10 +731,12 @@ function play31() {
             while (i--) {
               ent = level.collidable[i];
               if (ent.dead) {
-                var boom = new SmallExplosion({
-                  x: ent.x, y: ent.y
-                });
-                level.explosions.push(boom);
+                if (ent.name !== "bullet") {
+                  var boom = new SmallExplosion({
+                    x: ent.x, y: ent.y
+                  });
+                  level.explosions.push(boom);
+                }
                 level.collidable.splice(i, 1);
               }
             }
