@@ -1,5 +1,5 @@
 /*jslint plusplus: true, browser: true, devel: true, node: true, unparam: true, vars: true, white: true*/
-/*global FPSMeter*/
+/*global FPSMeter, newGame*/
 "use strict";
 
 var canvas = document.getElementById("canvas31"),
@@ -341,7 +341,7 @@ function Emitter(options) {
       //if (debug) { console.log(e); }
       //if (debug) { console.log(spawnInto); }
       spawnInto.entities.push(e);
-      spawnInto.collidable.push(e);
+      if (this.emitCollidable !== "no") { spawnInto.collidable.push(e); }
       this.lastEmission = now;
     }
   };
@@ -362,14 +362,14 @@ function Ship(options) {
     this.y = gridSizeY - this.sprite.h - 2;
     this.facing = 'U';
   }
-  
+
   // Initial position for enemy ship:
   if (this.name === "enemy" && !this.x && !this.y) { // !this.x == true if this.x == 0;
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
     this.y = 2;
     this.facing = 'D';
   }
-  
+
   // Colour stuff
   this.primaryColor = options.primaryColor || "rgba(0,0,0,0)";
   this.secondaryColor = options.secondaryColor || "rgba(0,0,0,0)";
@@ -393,7 +393,7 @@ function Ship(options) {
       if (this.weapons[i].type) { this.weapons[i].type.emit(level); }
     }
   };
-  
+
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
@@ -422,7 +422,7 @@ function Ship(options) {
 
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
-      if (this.weapons[i].type) { // If there is a weapon in this weapon slot      
+      if (this.weapons[i].type) { // If there is a weapon in this weapon slot
         if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; } else
         if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
 
@@ -540,7 +540,7 @@ function Bullet(options) {
     w: 1, h: 2
   };
   this.maxVelocity = 1.5;
-  this.explosion = SmallExplosion; 
+  this.explosion = SmallExplosion;
   Entity.call(this, options);
 }
 function SmallGun(options) {
@@ -740,7 +740,9 @@ function play31() {
       if (ent.y < -ent.sprite.h || ent.y > gridSizeY + ent.sprite.h ||
           ent.x < -ent.sprite.w || ent.x > gridSizeX + ent.sprite.w) {
         level.entities.splice(i, 1);
-        level.collidable.splice(level.collidable.indexOf(ent), 1);
+        if (level.collidable.indexOf(ent) !== -1) {
+          level.collidable.splice(level.collidable.indexOf(ent), 1);
+        }
       }
     }
 
@@ -842,9 +844,9 @@ function play31() {
     if (meter) { meter.tick(); }  // FPS Meter tick finish
 
     last = now;
-    
+
     // Switching to new levels hmm this is messy
-    var loop = true; // Are you gonn' keep looping? 
+    var loop = true; // Are you gonn' keep looping?
     if (keys.one) {
       loop = false;
       keys.one = false;
@@ -878,7 +880,7 @@ function play31() {
         id: ''
       };
     enemyShip = false;
-    
+
     // Create new level
     switch (levelID) {
     case "level1":
@@ -900,6 +902,22 @@ function play31() {
       });
       level.emitters.push(rockSpawner);
 
+      var starSpawner = new Emitter({
+        emitX: [0, gridSizeX],
+        ammo: {
+          name: "star",
+          maxVelocity: 1,
+          sprite: {w: 1, h: 1},
+          draw: function(context) {
+            paintCell(context, this.x, this.y, "red");
+          }
+        },
+        spawnInto: level,
+        cooldown: 100
+      });
+      starSpawner.emitCollidable = "no";
+      level.emitters.push(starSpawner);
+
       break;
 
     case "level2":
@@ -916,13 +934,13 @@ function play31() {
         name: "enemy"
       });
       level.collidable.push(enemyShip);
-        
+
       break;
-        
+
     default:
       throw new Error ("Tried to load unknown level.");
     }
-    
+
     gameLoop();
   }
 
