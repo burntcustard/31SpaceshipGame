@@ -54,6 +54,61 @@ function toggleDebug() {
 
 
 
+// =============================== //
+//   _____                   _     //
+//  |_   _|                 | |    //
+//    | |  _ __  _ __  _   _| |_   //
+//    | | | '_ \| '_ \| | | | __|  //
+//   _| |_| | | | |_) | |_| | |_   //
+//  |_____|_| |_| .__/ \__,_|\__|  //
+//              |_|                //
+// =============================== //
+var key,
+  keys = {};
+
+document.onkeydown = function (key) {
+  switch (key.which) {
+    // Gameplay input keys - should be duplicated in .onkeyup
+    case  32: keys.space = true; break;
+    case  37: keys.left  = true; break;
+    case  38: keys.up    = true; break;
+    case  39: keys.right = true; break;
+    case  40: keys.down  = true; break;
+
+    // Other keys
+    case  49: keys.one   = true; break;
+    case  50: keys.two   = true; break;
+    case  51: keys.three = true; break;
+    case  52: keys.four  = true; break;
+    case  76: keys.l     = true; break;
+    case  80: keys.p     = true; break;
+    case  82: keys.r     = true; break;
+    case 187: resize(+2);        break;
+    case 189: resize(-2);        break;
+    case 191: toggleDebug();     break;
+    default : if (debug) { console.log("Unhandled keypress: " + key.which); }
+  }
+};
+document.onkeyup = function (key) {
+  switch (key.which) {
+    case  32: delete keys.space; break;
+    case  37: delete keys.left;  break;
+    case  38: delete keys.up;    break;
+    case  39: delete keys.right; break;
+    case  40: delete keys.down;  break;
+    case  49: delete keys.one;   break;
+    case  50: delete keys.two;   break;
+    case  51: delete keys.three; break;
+    case  52: delete keys.four;  break;
+    case  80: delete keys.p;     break;
+    case  82: delete keys.r;     break;
+    default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
+  }
+};
+// -------- INPUT END -------- //
+
+
+
 // ======================================================================================= //
 //                                                                                         //
 //   .o88b.  .d88b.  db      db      d888888b .d8888. d888888b  .d88b.  d8b   db .d8888.   //
@@ -428,6 +483,36 @@ function Ship(options) {
 
 
 // Object Types sub-classes
+function SmallExplosion(options) {
+  this.name = "smallExplosion";
+  this.sprite = {
+    source: mainSprites,
+    x: 64, y: 5,
+    w: 3, h: 6,
+    frames: 8
+  };
+  Entity.call(this, options);
+}
+function MediumExplosion(options) {
+  this.name = "mediumExplosion";
+  this.sprite = {
+    source: mainSprites,
+    x: 64, y: 0,
+    w: 4, h: 4,
+    frames: 7
+  };
+  Entity.call(this, options);
+}
+function BigExplosion(options) {
+  this.name = "bigExplosion";
+  this.sprite = {
+    source: mainSprites,
+    x: 0, y: 59,
+    w: 15, h: 15,
+    frames: 9
+  };
+  Entity.call(this, options);
+}
 function Bullet(options) {
   this.name = "bullet";
   this.sprite = {
@@ -500,6 +585,7 @@ function BigShip(options) {
     index: 1
   };
   this.maxVelocity = 0.5;
+  this.explosion = BigExplosion;
   Ship.call(this, options);
 }
 function MediumRock(options) {
@@ -511,36 +597,6 @@ function MediumRock(options) {
   };
   this.maxVelocity = 0.25;
   this.explosion = MediumExplosion;
-  Entity.call(this, options);
-}
-function SmallExplosion(options) {
-  this.name = "smallExplosion";
-  this.sprite = {
-    source: mainSprites,
-    x: 64, y: 5,
-    w: 3, h: 6,
-    frames: 8
-  };
-  Entity.call(this, options);
-}
-function MediumExplosion(options) {
-  this.name = "mediumExplosion";
-  this.sprite = {
-    source: mainSprites,
-    x: 64, y: 0,
-    w: 4, h: 4,
-    frames: 7
-  };
-  Entity.call(this, options);
-}
-function BigExplosion(options) {
-  this.name = "bigExplosion";
-  this.sprite = {
-    source: mainSprites,
-    x: 0, y: 59,
-    w: 15, h: 15,
-    frames: 9
-  };
   Entity.call(this, options);
 }
 // ------- Entity END ------- //
@@ -567,59 +623,6 @@ function play31() {
       level,
       i, j;
 
-
-// =============================== //
-//   _____                   _     //
-//  |_   _|                 | |    //
-//    | |  _ __  _ __  _   _| |_   //
-//    | | | '_ \| '_ \| | | | __|  //
-//   _| |_| | | | |_) | |_| | |_   //
-//  |_____|_| |_| .__/ \__,_|\__|  //
-//              |_|                //
-// =============================== //
-  var key,
-    keys = {};
-
-  document.onkeydown = function (key) {
-    switch (key.which) {
-      // Gameplay input keys - should be duplicated in .onkeyup
-      case  32: keys.space = true; break;
-      case  37: keys.left  = true; break;
-      case  38: keys.up    = true; break;
-      case  39: keys.right = true; break;
-      case  40: keys.down  = true; break;
-
-      // Other keys
-      case  49: keys.one   = true; break;
-      case  50: keys.two   = true; break;
-      case  51: keys.three = true; break;
-      case  52: keys.four  = true; break;
-      case  80: keys.p     = true; break;
-      case  82: keys.r     = true; break;
-      case 76: console.log(level); break;  // Pretty sure we could avoid having this here *grumpy face*
-      case 187: resize(+2);        break;
-      case 189: resize(-2);        break;
-      case 191: toggleDebug();     break;
-      default : if (debug) { console.log("Unhandled keypress: " + key.which); }
-    }
-  };
-  document.onkeyup = function (key) {
-    switch (key.which) {
-      case  32: delete keys.space; break;
-      case  37: delete keys.left;  break;
-      case  38: delete keys.up;    break;
-      case  39: delete keys.right; break;
-      case  40: delete keys.down;  break;
-      case  49: delete keys.one;   break;
-      case  50: delete keys.two;   break;
-      case  51: delete keys.three; break;
-      case  52: delete keys.four;  break;
-      case  80: delete keys.p;     break;
-      case  82: delete keys.r;     break;
-      default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
-    }
-  };
-  // -------- INPUT END -------- //
 
 
 // =================================== //
@@ -651,8 +654,10 @@ function play31() {
 
     //rockSpawner.draw(ctx);
 
-    if (enemyShip) { enemyShip.draw(ctx); }
-    if (playerShip) { playerShip.draw(ctx); }
+    // Draw the ships. Should dead checking be done in .draw? Would be an extra function
+    // call which isn't great for performance, but might be neater?
+    if (enemyShip && !enemyShip.dead) { enemyShip.draw(ctx); }
+    if (playerShip && !playerShip.dead) { playerShip.draw(ctx); }
 
     // Animate explosions
     i = level.explosions.length;
@@ -665,6 +670,7 @@ function play31() {
 
     // ------- DEBUG INFO -------- //
     if (debug) {
+      if (keys.l) { console.log(level); delete keys.l; }
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
       debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
@@ -702,12 +708,12 @@ function play31() {
     if (playerShip.x > (31 - playerShip.sprite.w)) { playerShip.x = 31 - playerShip.sprite.w; }
 
     // Trigger emitters
-    for (i in level.emitters) {
+    for (i = 0; i < level.emitters.length; i++) {
       level.emitters[i].emit(level);
     }
 
     // Entity movement
-    for (i in level.entities) {
+    for (i = 0; i < level.entities.length; i++) {
       ent = level.entities[i];
       ent.y += ent.vy;
       // If the entity is off screen, remove
@@ -822,13 +828,11 @@ function play31() {
     // Switching to new levels hmm this is messy
     var loop = true; // Are you gonn' keep looping? 
     if (keys.one) {
-      console.log("Starting level 1");
       loop = false;
       keys.one = false;
       newGame("level1");
     }
     if (keys.two) {
-      console.log("Starting level 2");
       loop = false;
       keys.two = false;
       newGame("level2");
@@ -889,7 +893,7 @@ function play31() {
       level.collidable.push(playerShip);
 
       enemyShip = new BigShip({
-        name: "enemy",
+        name: "enemy"
       });
       level.collidable.push(enemyShip);
         
@@ -903,8 +907,6 @@ function play31() {
   }
 
   newGame("level1");
-
-  console.log(playerShip);
 
 }
 
