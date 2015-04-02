@@ -305,35 +305,41 @@ function Entity(options) {
 function Emitter(options) {
   Entity.call(this, options);
 
-  if (!options.emittedObj) { throw new Error ("Tried to create emitter without something to emit."); }
-  this.emittedObj = options.emittedObj;
+  if (!this.ammo && !options.ammo) {
+    throw new Error ("Tried to create emitter without ammo type to emit.");
+  }
+  this.ammo = this.ammo || options.ammo;
   this.emitX = options.emitX || [0,0];
   this.emitY = options.emitY || [0,0];
-  this.emitDir = options.emitDir || "d";
+  this.emitDir = options.emitDir || "D"; // Default is emitting down towards player
 
-  this.cooldown = options.cooldown || 1000;
+  this.cooldown = this.cooldown || options.cooldown || 1000;
   this.start = options.start || 0;
-  this.duration = options.duration || -1;
+  this.duration = options.duration || -1; // Default is emitter that emits forever
 
   this.emitting = true;
   this.lastEmission = 0;
 
   this.emit = function(spawnInto) {
-    var newVX = this.emittedObj.maxVelocity, newVY = this.emittedObj.maxVelocity;
+    var newVX = this.ammo.maxVelocity, newVY = this.ammo.maxVelocity;
     switch(this.emitDir) {
-        case "u": newVX  =  0; newVY *= -1; break;
-        case "r": newVX *=  1; newVY  =  0; break;
-        case "d": newVX  =  0; newVY *=  1; break;
-        case "l": newVX *= -1; newVY  =  0; break;
+        case "U": newVX  =  0; newVY *= -1; break;
+        case "R": newVX *=  1; newVY  =  0; break;
+        case "D": newVX  =  0; newVY *=  1; break;
+        case "L": newVX *= -1; newVY  =  0; break;
+        default : throw new Error ("Tried to emit something going in an unknown direction.");
     }
-    if (now - this.lastEmission > this.cooldown && now > this.start && (now < this.start + this.duration || this.duration === -1)) {
-      var e = Object.create(this.emittedObj);
+    if ((now - this.lastEmission > this.cooldown) &&
+        (now > this.start) &&
+        (now < this.start + this.duration || this.duration === -1)) {
+      var e = Object.create(this.ammo);
       e.x = this.x + Math.floor(this.emitX[0] + Math.random() * (this.emitX[1] - this.emitX[0]));
       e.y = this.y;
       e.vx = newVX;
       e.vy = newVY;
-      //console.log(e);
-      //console.log(spawnInto);
+      e.belongsTo = this.belongsTo; // Belongs to what the weapon belongs to.
+      //if (debug) { console.log(e); }
+      //if (debug) { console.log(spawnInto); }
       spawnInto.entities.push(e);
       spawnInto.collidable.push(e);
       this.lastEmission = now;
@@ -354,29 +360,40 @@ function Ship(options) {
   if (this.name === "player" && !this.x && !this.y) { // !this.x == true if this.x == 0;
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
     this.y = gridSizeY - this.sprite.h - 2;
+    this.facing = 'U';
   }
   
   // Initial position for enemy ship:
   if (this.name === "enemy" && !this.x && !this.y) { // !this.x == true if this.x == 0;
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
     this.y = 2;
+    this.facing = 'D';
   }
-
-  for (i = 0; i < this.weapons.length; i++) {
-    var weap = new Emitter({
-      x: this.x + this.weapons[i].x,
-      y: this.y + this.weapons[i].y,
-      emittedObj: this.weapons[i].type.ammo,
-      emitDir: 'u',
-      cooldown: this.weapons[i].type.cooldown
-    });
-    this.weapons[i].emitter = weap;
-  }
-
+  
   // Colour stuff
   this.primaryColor = options.primaryColor || "rgba(0,0,0,0)";
   this.secondaryColor = options.secondaryColor || "rgba(0,0,0,0)";
 
+  // Fire ze weapons
+  this.fire = function(level) {
+    var tilt = 0;
+    // Update weapons positions n stuff. Should probably be done in Ship.move
+    // (and then also wouldn't have to draw the gun in a funky way)
+    for (i = 0; i < this.weapons.length; i++) {
+      if (this.weapons[i].type) { // If there is a weapon in this weapon slot
+        if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; }
+        if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
+        this.weapons[i].type.belongsTo = this.name;
+        this.weapons[i].type.x = this.x + this.weapons[i].x + tilt; // Update emitter location
+        this.weapons[i].type.y = this.y + this.weapons[i].y;
+        this.weapons[i].type.emitDir = this.facing;
+      }
+    }
+    for (i = 0; i < this.weapons.length; i++) {
+      if (this.weapons[i].type) { this.weapons[i].type.emit(level); }
+    }
+  };
+  
   // Initial draw creates the object off screen, then these two images both get
   // drawn onto the main canvas when this.draw() is called. Each entity that is coloured
   // in this way needs to have it's own canvas or two (I think), so we should come up with a way
@@ -405,23 +422,25 @@ function Ship(options) {
 
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
-      if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; } else
-      if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
+      if (this.weapons[i].type) { // If there is a weapon in this weapon slot      
+        if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; } else
+        if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
 
-      // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
-      this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
+        // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
+        //this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
 
-      context.drawImage(
-        this.sprite.source,
-        this.weapons[i].type.sprite.x,                         // SourceX (Position of frame)
-        this.weapons[i].type.sprite.y,                         // SourceY
-        this.weapons[i].type.sprite.w,                         // SourceW (Size of frame)
-        this.weapons[i].type.sprite.h,                         // SourceH
-        Math.round(this.x + this.weapons[i].x + tilt) * cSize, // DestinationX (Position on canvas)
-        Math.round(this.y + this.weapons[i].y) * cSize,        // DestinationY
-        this.weapons[i].type.sprite.w * cSize,                 // DestinationW (Size on canvas)
-        this.weapons[i].type.sprite.h * cSize                  // DestinationH
-      );
+        context.drawImage(
+          this.sprite.source,
+          this.weapons[i].type.sprite.x,                         // SourceX (Position of frame)
+          this.weapons[i].type.sprite.y,                         // SourceY
+          this.weapons[i].type.sprite.w,                         // SourceW (Size of frame)
+          this.weapons[i].type.sprite.h,                         // SourceH
+          Math.round(this.x + this.weapons[i].x + tilt) * cSize, // DestinationX (Position on canvas)
+          Math.round(this.y + this.weapons[i].y) * cSize,        // DestinationY
+          this.weapons[i].type.sprite.w * cSize,                 // DestinationW (Size on canvas)
+          this.weapons[i].type.sprite.h * cSize                  // DestinationH
+        );
+      }
     }
 
     // Draw ship hull (primary colour)
@@ -543,15 +562,16 @@ function BigGun(options) {
   };
   this.cooldown = 400;  // ms
   this.ammo = new Bullet({});
+  Emitter.call(this, options);
 }
 function SmallShip(options) {
   this.name = "smallShip";
   this.weapons = [
-    {x: 2, y: -1, tiltOffsetL:  1, tiltOffsetR: -1, type: new SmallGun({})}
+    {x:  2, y: -1, tiltOffsetL:  1, tiltOffsetR: -1}
   ];
   this.hp = [
-    {x: 2, y: 2, tiltOffsetL: -1, tiltOffsetR:  1},
-    {x: 2, y: 3, tiltOffsetL: -1, tiltOffsetR:  1}
+    {x:  2, y:  2, tiltOffsetL: -1, tiltOffsetR:  1},
+    {x:  2, y:  3, tiltOffsetL: -1, tiltOffsetR:  1}
   ];
   this.sprite = {
     source: mainSprites,
@@ -565,18 +585,18 @@ function SmallShip(options) {
 function BigShip(options) {
   this.name = "bigShip";
   this.weapons = [
-    {x: 1, y: 3, tiltOffsetL:  0, tiltOffsetR:  2, type: new BigGun({})},
-    {x: 7, y: 3, tiltOffsetL: -2, tiltOffsetR:  0, type: new BigGun({})}
+    {x: 1, y: 3, tiltOffsetL:  0, tiltOffsetR:  2},
+    {x: 7, y: 3, tiltOffsetL: -2, tiltOffsetR:  0}
   ];
   this.hp = [
-    {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2    }, // false = not displayed
-    {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false },
-    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2    },
-    {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2    },
-    {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false },
-    {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2    }
+    {x: 4, y: 3, tiltOffsetL: -2   , tiltOffsetR:  2   },
+    {x: 3, y: 4, tiltOffsetL: false, tiltOffsetR:  2   }, // false = not displayed
+    {x: 4, y: 4, tiltOffsetL: -2   , tiltOffsetR:  2   },
+    {x: 5, y: 4, tiltOffsetL: -2   , tiltOffsetR: false},
+    {x: 3, y: 5, tiltOffsetL: false, tiltOffsetR:  2   },
+    {x: 4, y: 5, tiltOffsetL: -2   , tiltOffsetR:  2   },
+    {x: 5, y: 5, tiltOffsetL: -2   , tiltOffsetR: false},
+    {x: 4, y: 6, tiltOffsetL: -2   , tiltOffsetR:  2   }
   ];
   this.sprite = {
     source: mainSprites,
@@ -734,9 +754,9 @@ function play31() {
         // If object isn't being checked against itself, isn't a thing that shouldn't collide
         // with another thing (hmm)... and has a bounding box collision with other object
         if (obj1 !== obj2 &&
-            !(obj1.name === "bullet" && obj1.vy < 0 && obj2.name === "player") &&
-            !(obj2.name === "bullet" && obj2.vy < 0 && obj1.name === "player") &&
-            checkCollision(obj1, obj2)) {
+            !(obj1.belongsTo && obj1.belongsTo === obj2.name) && // If objects don't belong to each
+            !(obj2.belongsTo && obj2.belongsTo === obj1.name) && // other (e.g. no friendly fire).
+            (checkCollision(obj1, obj2))) {
           if (!(obj1.pixelMap && obj1.pixelMap[obj1.sprite.index])) { createPixelMap(obj1); }
           if (!(obj2.pixelMap && obj2.pixelMap[obj2.sprite.index])) { createPixelMap(obj2); }
           if (checkPixelCollision(offsetPixelMap(obj1), offsetPixelMap(obj2))) {
@@ -804,9 +824,7 @@ function play31() {
       }
 
       if (keys.space) { // Fire ze weapons. Todo: more weapon keys?
-        for (i = 0; i < playerShip.weapons.length; i++) {
-          playerShip.weapons[i].emitter.emit(level);
-        }
+        playerShip.fire(level);
       }
 
       if (keys.r) { // Respawn the ship
@@ -871,11 +889,12 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(playerShip);
+      playerShip.weapons[0].type = new BigGun({});
 
       var rockSpawner = new Emitter({
         x: 0, y: -4,
         emitX: [0, gridSizeX - 4],
-        emittedObj: new MediumRock({}),
+        ammo: new MediumRock({}),
         spawnInto: level,
         cooldown: 1000
       });
@@ -891,6 +910,7 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(playerShip);
+      playerShip.weapons[0].type = new BigGun({});
 
       enemyShip = new BigShip({
         name: "enemy"
