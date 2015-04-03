@@ -663,7 +663,7 @@ function play31() {
     ctx.imageSmoothingEnabled = false;
 
     // Fill canvas with levels color
-    ctx.fillStyle = "#2b383b";
+    ctx.fillStyle = "#2c2c39";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw stuff in entity list
@@ -896,27 +896,51 @@ function play31() {
       var rockSpawner = new Emitter({
         x: 0, y: -4,
         emitX: [0, gridSizeX - 4],
-        ammo: new MediumRock({}),
+        ammo: new MediumRock({
+          maxVelocity: 1
+        }),
         spawnInto: level,
-        cooldown: 1000
+        cooldown: 500
       });
       level.emitters.push(rockSpawner);
 
       var starSpawner = new Emitter({
+        y: -1,
         emitX: [0, gridSizeX],
         ammo: {
           name: "star",
-          maxVelocity: 1,
+          maxVelocity: 0.5,
           sprite: {w: 1, h: 1},
           draw: function(context) {
-            paintCell(context, this.x, this.y, "red");
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.2)");
+            paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.15)");
+            paintCell(context, this.x, this.y - 2, "rgba(255, 255, 255, 0.1)");
+            paintCell(context, this.x, this.y - 3, "rgba(255, 255, 255, 0.05)");
           }
         },
         spawnInto: level,
-        cooldown: 100
+        cooldown: 400
       });
       starSpawner.emitCollidable = "no";
       level.emitters.push(starSpawner);
+
+      var starSpawner_2 = new Emitter({
+        y: -1,
+        emitX: [0, gridSizeX],
+        ammo: {
+          name: "star",
+          maxVelocity: 0.25,
+          sprite: {w: 1, h: 1},
+          draw: function(context) {
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.1)");
+            paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
+          }
+        },
+        spawnInto: level,
+        cooldown: 200
+      });
+      starSpawner_2.emitCollidable = "no";
+      level.emitters.push(starSpawner_2);
 
       break;
 
