@@ -906,7 +906,7 @@ function play31() {
         x: 0, y: -4,
         emitX: [0, gridSizeX - 4],
         ammo: new MediumRock({
-          maxVelocity: 1
+          maxVelocity: 0.5
         }),
         spawnInto: level,
         cooldown: 500
@@ -921,10 +921,10 @@ function play31() {
           maxVelocity: 0.5,
           sprite: {w: 1, h: 1},
           draw: function(context) {
-            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.2)");
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.5)");
             paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.15)");
-            paintCell(context, this.x, this.y - 2, "rgba(255, 255, 255, 0.1)");
-            paintCell(context, this.x, this.y - 3, "rgba(255, 255, 255, 0.05)");
+            //paintCell(context, this.x, this.y - 2, "rgba(255, 255, 255, 0.30)");
+            //paintCell(context, this.x, this.y - 3, "rgba(255, 255, 255, 0.20)");
           }
         },
         spawnInto: level,
@@ -941,8 +941,8 @@ function play31() {
           maxVelocity: 0.25,
           sprite: {w: 1, h: 1},
           draw: function(context) {
-            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.1)");
-            paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.3)");
+            //paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
           }
         },
         spawnInto: level,
