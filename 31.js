@@ -366,7 +366,7 @@ function Ship(options) {
   // Initial position for enemy ship:
   if (this.name === "enemy" && !this.x && !this.y) { // !this.x == true if this.x == 0;
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
-    this.y = 2;
+    this.y = 0;
     this.facing = 'D';
   }
   
@@ -417,9 +417,15 @@ function Ship(options) {
 
   // End initial hidden draw
 
-  this.draw = function(context) {
+  this.draw = function(ctx) {
     var tilt = 0;
 
+     if (this.facing === 'D') {
+       ctx.save();
+       ctx.translate(0, canvas.width);
+       ctx.scale(1, -1);
+     }
+    
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
       if (this.weapons[i].type) { // If there is a weapon in this weapon slot      
@@ -429,7 +435,7 @@ function Ship(options) {
         // Cheeky hack to get the weapon emitters following the ship !NEEDS TO CHANGE!
         //this.weapons[i].emitter.x = this.x + this.weapons[i].x + tilt;
 
-        context.drawImage(
+        ctx.drawImage(
           this.sprite.source,
           this.weapons[i].type.sprite.x,                         // SourceX (Position of frame)
           this.weapons[i].type.sprite.y,                         // SourceY
@@ -444,7 +450,7 @@ function Ship(options) {
     }
 
     // Draw ship hull (primary colour)
-    context.drawImage(
+    ctx.drawImage(
       canvasPri,
       this.sprite.x + this.sprite.index * this.sprite.w,// SourceX (Frame pos)
       this.sprite.y,                                    // SourceY
@@ -457,7 +463,7 @@ function Ship(options) {
     );
 
     // Draw cockpit (secondary colour)
-    context.drawImage(
+    ctx.drawImage(
       canvasSec,
       this.sprite.x + this.sprite.index * this.sprite.w,// SourceX (Frame pos)
       this.sprite.y + this.sprite.h,                    // SourceY
@@ -470,7 +476,7 @@ function Ship(options) {
     );
 
     // Draw engine trails
-    context.drawImage(
+    ctx.drawImage(
       this.sprite.source,
       this.sprite.x + this.sprite.w * this.sprite.index,// SourceX (Position of frame)
       this.sprite.y + this.sprite.h * 2,                // SourceY
@@ -489,13 +495,16 @@ function Ship(options) {
       if (this.hp[i].lost) {
         var c = Math.floor(Math.random() * 64);
         paintCell(
-          context,
+          ctx,
           Math.round(this.x) + this.hp[i].x + tilt,
           Math.round(this.y) + this.hp[i].y,
           ('rgb(' + (c+191) + ',' + (c*3) + ',' + c + ')')
         );
       }
     }
+    
+    ctx.restore(); // Restore to er make flipping work.
+    
   };
 }
 
