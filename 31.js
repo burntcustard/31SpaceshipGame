@@ -10,7 +10,10 @@ var canvas = document.getElementById("canvas31"),
   debugMenu = document.getElementById("debug"),
   meter,
   now,
+  pauseTime,
+  pauseOffset = 0,
   dt,
+  loop = true, // Whether the game is running
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
   gridSizeX = 31,  // Size of board in "pixels" (number of cells) STARTS AT 1,1 in top left
@@ -81,7 +84,12 @@ document.onkeydown = function (key) {
     case  51: keys.three = true; break;
     case  52: keys.four  = true; break;
     case  76: keys.l     = true; break;
-    case  80: keys.p     = true; break;
+    case  80:
+    if (loop) {
+      loop = false; pauseTime = now;
+    } else {
+      loop = true; now = window.performance.now(); pauseOffset = now - pauseTime;
+    } break;
     case  82: keys.r     = true; break;
     case 187: resize(+2);        break;
     case 189: resize(-2);        break;
@@ -100,7 +108,6 @@ document.onkeyup = function (key) {
     case  50: delete keys.two;   break;
     case  51: delete keys.three; break;
     case  52: delete keys.four;  break;
-    case  80: delete keys.p;     break;
     case  82: delete keys.r;     break;
     default : if (debug) { console.log("Unhandled keyUNpress: " + key.which); }
   }
@@ -425,7 +432,7 @@ function Ship(options) {
        ctx.translate(0, canvas.width);
        ctx.scale(1, -1);
      }
-    
+
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
       if (this.weapons[i].type) { // If there is a weapon in this weapon slot
@@ -502,9 +509,9 @@ function Ship(options) {
         );
       }
     }
-    
+
     ctx.restore(); // Restore to er make flipping work.
-    
+
   };
 }
 
@@ -814,59 +821,65 @@ function play31() {
 // =================================================== //
   function gameLoop() {
 
-    now = window.performance.now();
-    dt = Math.min(1000, (now - last));  // duration in mili-seconds
+    if (loop) {
+      now = window.performance.now() - pauseOffset;
+      dt = Math.min(50, (now - last));  // duration in mili-seconds
 
-    render(dt);
+      // Some fancy timelogging stuff
+      //console.log("N: " + Math.round(now) + " L: " + Math.round(last) + " PO: " + Math.round(pauseOffset) + " PT: " + Math.round(pauseTime) + " DT: " + Math.round(dt));
 
-    while (dt > step) {
-      dt -= step;
+      render(dt);
 
-      // ----- INPUT HANDLING ------ //
-      if (keys.left && !keys.right) {
-        playerShip.vx = -playerShip.maxVelocity;
-        playerShip.sprite.index = 0;
-      } else if (!keys.left && keys.right) {
-        playerShip.vx = playerShip.maxVelocity;
-        playerShip.sprite.index = 2;
-      } else {
-        playerShip.vx = 0;
-        playerShip.sprite.index = 1;
-      }
+      while (dt > step) {
+        dt -= step;
 
-      if (keys.space) { // Fire ze weapons. Todo: more weapon keys?
-        playerShip.fire(level);
-      }
-
-      if (keys.r) { // Respawn the ship
-        if (playerShip.dead) {
-          for (i = 0; i < playerShip.maxHealth; i++) { delete playerShip.hp[i].lost; }
-          level.collidable.push(playerShip);
-          playerShip.dead = false;
+        // ----- INPUT HANDLING ------ //
+        if (keys.left && !keys.right) {
+          playerShip.vx = -playerShip.maxVelocity;
+          playerShip.sprite.index = 0;
+        } else if (!keys.left && keys.right) {
+          playerShip.vx = playerShip.maxVelocity;
+          playerShip.sprite.index = 2;
+        } else {
+          playerShip.vx = 0;
+          playerShip.sprite.index = 1;
         }
-      }
-      // --- INPUT HANDLING END ---- //
 
-      update(dt);
+        if (keys.space) { // Fire ze weapons. Todo: more weapon keys?
+          playerShip.fire(level);
+        }
+
+        if (keys.r) { // Respawn the ship
+          if (playerShip.dead) {
+            for (i = 0; i < playerShip.maxHealth; i++) { delete playerShip.hp[i].lost; }
+            level.collidable.push(playerShip);
+            playerShip.dead = false;
+          }
+        }
+        // --- INPUT HANDLING END ---- //
+
+        update(dt);
+      }
+
+      if (meter) { meter.tick(); }  // FPS Meter tick finish
+
+      last = now;
+
     }
 
-    if (meter) { meter.tick(); }  // FPS Meter tick finish
-
-    last = now;
-
     // Switching to new levels hmm this is messy
-    var loop = true; // Are you gonn' keep looping?
+    var endLoop = false;
     if (keys.one) {
-      loop = false;
+      endLoop = true;
       keys.one = false;
       newGame("level1");
     }
     if (keys.two) {
-      loop = false;
+      endLoop = true;
       keys.two = false;
       newGame("level2");
     }
-    if (loop) { window.requestAnimationFrame(gameLoop); }
+    if (!endLoop) { window.requestAnimationFrame(gameLoop); }
   }
 
 // =================================================== //
