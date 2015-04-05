@@ -13,6 +13,7 @@ var canvas = document.getElementById("canvas31"),
   pauseTime,
   pauseOffset = 0,
   dt,
+  updateCount = 0,
   loop = true, // Whether the game is running
   last = window.performance.now,
   step = 1000 / 60,  // Try to update game 60 times a second, step = 16.67ms
@@ -765,9 +766,13 @@ function play31() {
     }
 
     // Entity movement
-    for (i = 0; i < level.entities.length; i++) {
+    i = level.entities.length;
+    while (i--) {
       ent = level.entities[i];
-      if (ent.move) { ent.move(); }
+      if (ent.vy === 100 || (ent.vy === 50 && updateCount % 2 === 0) || (ent.vy === 25 && updateCount % 4 === 0)) {
+        ent.x += ent.vx;
+        ent.y += 100;
+      }
       // If the entity is off screen, remove
       if (ent.y / 100 < -ent.sprite.h || ent.y / 100 > gridSizeY + ent.sprite.h ||
           ent.x / 100 < -ent.sprite.w || ent.x / 100 > gridSizeX + ent.sprite.w) {
@@ -777,8 +782,6 @@ function play31() {
         }
       }
     }
-
-
 
     // Collision checking
     for (i = 0; i < level.collidable.length; i++) {
@@ -826,6 +829,8 @@ function play31() {
     for (i = 0; i < level.entities.length; i++) {
       if (level.entities[i].dead) { level.entities.splice(i, 1); }
     }
+
+    updateCount++;
 
   }
 
