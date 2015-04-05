@@ -765,7 +765,8 @@ function play31() {
     }
 
     // Entity movement
-    for (i = 0; i < level.entities.length; i++) {
+    i = level.entities.length;
+    while (i--) {
       ent = level.entities[i];
       if (ent.move) { ent.move(); }
       // If the entity is off screen, remove
