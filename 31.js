@@ -691,16 +691,20 @@ function play31() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     //rockSpawner.draw(ctx);
-
+    
+    // Draw stars WE NEED A Z-BUFFER
+    for (i = 0; i < level.entities.length; i++) {
+      if (level.entities[i].name === "star") { level.entities[i].draw(ctx); }
+    }
+    
     // Draw the ships. Should dead checking be done in .draw? Would be an extra function
     // call which isn't great for performance, but might be neater?
     if (enemyShip && !enemyShip.dead) { enemyShip.draw(ctx); }
     if (playerShip && !playerShip.dead) { playerShip.draw(ctx); }
 
     // Draw stuff in entity list
-    //console.log(level);
     for (i = 0; i < level.entities.length; i++) {
-      level.entities[i].draw(ctx);
+      if (level.entities[i].name !== "star") { level.entities[i].draw(ctx); }
     }
     
     // Animate explosions
