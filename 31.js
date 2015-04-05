@@ -1,4 +1,5 @@
 /*jslint plusplus: true, browser: true, devel: true, node: true, unparam: true, vars: true, white: true*/
+/*jshint quotmark: false*/ 
 /*global FPSMeter, newGame*/
 "use strict";
 
@@ -67,8 +68,7 @@ function toggleDebug() {
 //  |_____|_| |_| .__/ \__,_|\__|  //
 //              |_|                //
 // =============================== //
-var key,
-  keys = {};
+var keys = {};
 
 document.onkeydown = function (key) {
   switch (key.which) {
@@ -577,6 +577,7 @@ function SmallGun(options) {
   };
   this.cooldown = 800;  // ms
   this.ammo = new Bullet({});
+  Emitter.call(this, options);
 }
 function BigGun(options) {
   this.name = "bigGun";
@@ -666,7 +667,7 @@ function play31() {
   var playerShip,   // Players current ship and all the fancy stuff on it
       enemyShip,  // Enemy ship, should be array of enemy shipS?
       level,
-      i, j;
+      i;
 
 
 
@@ -751,9 +752,9 @@ function play31() {
 //         |_|                          //
 // ==================================== //
 
-  function update(dt) {
+  function update() {
 
-    var i, j, deads, ent;
+    var i, j, ent;
 
     // Player movement
     playerShip.x += playerShip.vx;
