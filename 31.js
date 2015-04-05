@@ -253,7 +253,7 @@ function Entity(options) {
   this.vx = options.vx || this.vx || 0;
   this.vy = options.vy || this.vy || 0;
 
-  this.sprite = this.sprite || {};
+  this.sprite = this.sprite || options.sprite || {};
   this.sprite.index = this.sprite.index || 0;
 
   this.maxVelocity = options.maxVelocity || this.maxVelocity || 1;
@@ -261,6 +261,7 @@ function Entity(options) {
   this.hp = this.hp || [];
   this.maxHealth = this.hp.length;
   this.dead = false;
+  
   this.getHealth = function() {
     var currentHealth = this.maxHealth;
     for (i = 0; i < this.maxHealth; i++) {
@@ -268,6 +269,7 @@ function Entity(options) {
     }
     return currentHealth;
   };
+  
   this.hpLost = function() {
     var lostHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -278,24 +280,30 @@ function Entity(options) {
       if (debug) { console.log(this.name + " Dead at X: " + this.x + " Y: " + this.y); }
     }
   };
+  
   this.hpRestore = function() {
     var restoredHp;
     for (i = 0; i < this.maxHealth; i++) {
       if (this.hp[i].lost && !restoredHp) { delete this.hp[i].lost; restoredHp = true; }
     }
   };
+  
+  this.move = function() {
+    this.x += this.vx;
+    this.y += this.vy;
+  };
 
-  this.draw = function(context) {
-    context.drawImage(
-        this.sprite.source,
-        this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
-        this.sprite.y,                                     // SourceY
-        this.sprite.w,                                     // SourceW (Frame size)
-        this.sprite.h,                                     // SourceH
-        Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
-        Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
-        this.sprite.w * cSize,                             // DestinationW (Size on canvas)
-        this.sprite.h * cSize);                            // DestinationH
+  this.draw = options.draw || function(ctx) {
+    ctx.drawImage(
+      this.sprite.source,
+      this.sprite.x + this.sprite.index * this.sprite.w, // SourceX (Frame pos)
+      this.sprite.y,                                     // SourceY
+      this.sprite.w,                                     // SourceW (Frame size)
+      this.sprite.h,                                     // SourceH
+      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
+      this.sprite.w * cSize,                             // DestinationW (Size on canvas)
+      this.sprite.h * cSize);                            // DestinationH
   };
 }
 
@@ -675,12 +683,6 @@ function play31() {
     ctx.fillStyle = "#2c2c39";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw stuff in entity list
-    //console.log(level);
-    for (i = 0; i < level.entities.length; i++) {
-      level.entities[i].draw(ctx);
-    }
-
     //rockSpawner.draw(ctx);
 
     // Draw the ships. Should dead checking be done in .draw? Would be an extra function
@@ -688,13 +690,23 @@ function play31() {
     if (enemyShip && !enemyShip.dead) { enemyShip.draw(ctx); }
     if (playerShip && !playerShip.dead) { playerShip.draw(ctx); }
 
+    // Draw stuff in entity list
+    //console.log(level);
+    for (i = 0; i < level.entities.length; i++) {
+      level.entities[i].draw(ctx);
+    }
+    
     // Animate explosions
-    i = level.explosions.length;
+    i = level.entities.length;
     while (i--) {
-      var boom = level.explosions[i];
-      boom.draw(ctx);
-      if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
-      if (boom.sprite.index >= boom.sprite.frames) { level.explosions.splice(i, 1); }
+      var boom = level.entities[i];
+      //boom.draw(ctx);
+      if (boom.sprite.frames) { // If it has a frame count, it won't last when it runs out
+        if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
+        if (boom.sprite.index >= boom.sprite.frames) {
+          level.entities.splice(i, 1);
+        }
+      }
     }
 
     // ------- DEBUG INFO -------- //
@@ -744,7 +756,7 @@ function play31() {
     // Entity movement
     for (i = 0; i < level.entities.length; i++) {
       ent = level.entities[i];
-      ent.y += ent.vy;
+      if (ent.move) { ent.move(); }
       // If the entity is off screen, remove
       if (ent.y < -ent.sprite.h || ent.y > gridSizeY + ent.sprite.h ||
           ent.x < -ent.sprite.w || ent.x > gridSizeX + ent.sprite.w) {
@@ -783,10 +795,13 @@ function play31() {
               if (ent.dead) {
                 if (ent.explosion) {
                   var boom = new ent.explosion({});
+                  // Unless it's a bullet, keep the velocity of the exploding object.
+                  if (ent.name !== "bullet") { boom.vy = ent.vy; }
                   // All the widths/2 just help center the explosion
                   boom.x = ent.x + ent.sprite.w / 2 - boom.sprite.w / 2;
                   boom.y = ent.y + ent.sprite.h / 2 - boom.sprite.h / 2;
-                  level.explosions.push(boom);
+                  level.entities.push(boom);
+                  //level.entities.push(boom);
                 }
                 level.collidable.splice(i, 1);
               }
@@ -916,7 +931,7 @@ function play31() {
       var starSpawner = new Emitter({
         y: -1,
         emitX: [0, gridSizeX],
-        ammo: {
+        ammo: new Entity ({
           name: "star",
           maxVelocity: 0.5,
           sprite: {w: 1, h: 1},
@@ -926,9 +941,9 @@ function play31() {
             //paintCell(context, this.x, this.y - 2, "rgba(255, 255, 255, 0.30)");
             //paintCell(context, this.x, this.y - 3, "rgba(255, 255, 255, 0.20)");
           }
-        },
+        }),
         spawnInto: level,
-        cooldown: 400
+        cooldown: 500
       });
       starSpawner.emitCollidable = "no";
       level.emitters.push(starSpawner);
@@ -936,7 +951,7 @@ function play31() {
       var starSpawner_2 = new Emitter({
         y: -1,
         emitX: [0, gridSizeX],
-        ammo: {
+        ammo: new Entity ({
           name: "star",
           maxVelocity: 0.25,
           sprite: {w: 1, h: 1},
@@ -944,9 +959,9 @@ function play31() {
             paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.3)");
             //paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
           }
-        },
+        }),
         spawnInto: level,
-        cooldown: 200
+        cooldown: 250
       });
       starSpawner_2.emitCollidable = "no";
       level.emitters.push(starSpawner_2);
