@@ -178,8 +178,8 @@ function offsetPixelMap(obj) {
   var i,
       pixelMap = JSON.parse(JSON.stringify(obj.pixelMap[obj.sprite.index])); // Reference bye bye
   for (i = 0; i < pixelMap.length; i++) {
-    pixelMap[i].x = obj.pixelMap[obj.sprite.index][i].x + Math.round(obj.x / 100);
-    pixelMap[i].y = obj.pixelMap[obj.sprite.index][i].y + Math.round(obj.y / 100);
+    pixelMap[i].x = obj.pixelMap[obj.sprite.index][i].x + Math.round(obj.x);
+    pixelMap[i].y = obj.pixelMap[obj.sprite.index][i].y + Math.round(obj.y);
   }
   return pixelMap;
 }
@@ -195,14 +195,14 @@ function offsetPixelMap(obj) {
  */
 function checkCollision(obj1, obj2) {
 
-  var t1 = Math.round(obj1.y / 100),
-      r1 = Math.round(obj1.x / 100 + obj1.sprite.w),
-      b1 = Math.round(obj1.y / 100 + obj1.sprite.h),
-      l1 = Math.round(obj1.x / 100),
-      t2 = Math.round(obj2.y / 100),
-      r2 = Math.round(obj2.x / 100 + obj2.sprite.w),
-      b2 = Math.round(obj2.y / 100 + obj2.sprite.h),
-      l2 = Math.round(obj2.x / 100);
+  var t1 = Math.round(obj1.y),
+      r1 = Math.round(obj1.x + obj1.sprite.w),
+      b1 = Math.round(obj1.y + obj1.sprite.h),
+      l1 = Math.round(obj1.x),
+      t2 = Math.round(obj2.y),
+      r2 = Math.round(obj2.x + obj2.sprite.w),
+      b2 = Math.round(obj2.y + obj2.sprite.h),
+      l2 = Math.round(obj2.x);
 
   // Bounding box collisions
   if (t1 >= b2) {return false;}
@@ -263,7 +263,7 @@ function Entity(options) {
   this.sprite = this.sprite || options.sprite || {};
   this.sprite.index = this.sprite.index || 0;
 
-  this.maxVelocity = options.maxVelocity || this.maxVelocity || 100;
+  this.maxVelocity = options.maxVelocity || this.maxVelocity || 1;
 
   this.hp = this.hp || [];
   this.maxHealth = this.hp.length;
@@ -307,8 +307,8 @@ function Entity(options) {
       this.sprite.y,                                     // SourceY
       this.sprite.w,                                     // SourceW (Frame size)
       this.sprite.h,                                     // SourceH
-      Math.round(this.x / 100) * cSize,                        // DestinationX (Position on canvas)
-      Math.round(this.y / 100) * cSize,                        // DestinationY (Rounded to grid)
+      Math.round(this.x) * cSize,                        // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                        // DestinationY (Rounded to grid)
       this.sprite.w * cSize,                             // DestinationW (Size on canvas)
       this.sprite.h * cSize);                            // DestinationH
   };
@@ -373,14 +373,14 @@ function Ship(options) {
 
   // Initial position for player ship:
   if (this.name === "player" && !this.x && !this.y) { // !this.x == true if this.x == 0;
-    this.x = (Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2)) * 100;
-    this.y = (gridSizeY - this.sprite.h - 2) * 100;
+    this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
+    this.y = gridSizeY - this.sprite.h - 2;
     this.facing = 'U';
   }
 
   // Initial position for enemy ship:
   if (this.name === "enemy" && !this.x && !this.y) { // !this.x == true if this.x == 0;
-    this.x = (Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2)) * 100;
+    this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
     this.y = 0;
     this.facing = 'D';
   }
@@ -399,8 +399,8 @@ function Ship(options) {
         if (this.sprite.index === 0) { tilt = this.weapons[i].tiltOffsetL; }
         if (this.sprite.index === 2) { tilt = this.weapons[i].tiltOffsetR; }
         this.weapons[i].type.belongsTo = this.name;
-        this.weapons[i].type.x = this.x + (this.weapons[i].x + tilt) * 100; // Update emitter location
-        this.weapons[i].type.y = this.y + (this.weapons[i].y) * 100;
+        this.weapons[i].type.x = this.x + this.weapons[i].x + tilt; // Update emitter location
+        this.weapons[i].type.y = this.y + this.weapons[i].y;
         this.weapons[i].type.emitDir = this.facing;
       }
     }
@@ -456,8 +456,8 @@ function Ship(options) {
           this.weapons[i].type.sprite.y,                         // SourceY
           this.weapons[i].type.sprite.w,                         // SourceW (Size of frame)
           this.weapons[i].type.sprite.h,                         // SourceH
-          Math.round(this.x / 100 + this.weapons[i].x + tilt) * cSize, // DestinationX (Position on canvas)
-          Math.round(this.y / 100 + this.weapons[i].y) * cSize,        // DestinationY
+          Math.round(this.x + this.weapons[i].x + tilt) * cSize, // DestinationX (Position on canvas)
+          Math.round(this.y + this.weapons[i].y) * cSize,        // DestinationY
           this.weapons[i].type.sprite.w * cSize,                 // DestinationW (Size on canvas)
           this.weapons[i].type.sprite.h * cSize                  // DestinationH
         );
@@ -471,8 +471,8 @@ function Ship(options) {
       this.sprite.y,                                    // SourceY
       this.sprite.w,                                    // SourceW (Frame size)
       this.sprite.h,                                    // SourceH
-      Math.round(this.x / 100) * cSize,                       // DestinationX (Position on canvas)
-      Math.round(this.y / 100) * cSize,                       // DestinationY (Rounded to grid)
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                       // DestinationY (Rounded to grid)
       this.sprite.w * cSize,                            // DestinationW (Size on canvas)
       this.sprite.h * cSize                             // DestinationH
     );
@@ -484,8 +484,8 @@ function Ship(options) {
       this.sprite.y + this.sprite.h,                    // SourceY
       this.sprite.w,                                    // SourceW (Frame size)
       this.sprite.h,                                    // SourceH
-      Math.round(this.x / 100) * cSize,                       // DestinationX (Position on canvas)
-      Math.round(this.y / 100) * cSize,                       // DestinationY (Rounded to grid)
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y) * cSize,                       // DestinationY (Rounded to grid)
       this.sprite.w * cSize,                            // DestinationW (Size on canvas)
       this.sprite.h * cSize                             // DestinationH
     );
@@ -497,8 +497,8 @@ function Ship(options) {
       this.sprite.y + this.sprite.h * 2,                // SourceY
       this.sprite.w,                                    // SourceW (Size of frame)
       12,          // Max height of engine trails is 12 // SourceH
-      Math.round(this.x / 100) * cSize,                       // DestinationX (Position on canvas)
-      Math.round(this.y / 100 + this.sprite.h - 1) * cSize,   // DestinationY (-1 because goes up in ship hull)
+      Math.round(this.x) * cSize,                       // DestinationX (Position on canvas)
+      Math.round(this.y + this.sprite.h - 1) * cSize,   // DestinationY (-1 because goes up in ship hull)
       this.sprite.w * cSize,                            // DestinationW (Size on canvas)
       12 * cSize                                        // DestinationH
     );
@@ -511,8 +511,8 @@ function Ship(options) {
         var c = Math.floor(Math.random() * 64);
         paintCell(
           ctx,
-          Math.round(this.x / 100) + this.hp[i].x + tilt,
-          Math.round(this.y / 100) + this.hp[i].y,
+          Math.round(this.x) + this.hp[i].x + tilt,
+          Math.round(this.y) + this.hp[i].y,
           ('rgb(' + (c+191) + ',' + (c*3) + ',' + c + ')')
         );
       }
@@ -563,7 +563,7 @@ function Bullet(options) {
     x: 58, y: 3,
     w: 1, h: 2
   };
-  this.maxVelocity = 150;
+  this.maxVelocity = 1.5;
   this.explosion = SmallExplosion;
   Entity.call(this, options);
 }
@@ -603,7 +603,7 @@ function SmallShip(options) {
     w: 5, h: 6,
     index: 1
   };
-  this.maxVelocity = 50;
+  this.maxVelocity = 0.5;
   Ship.call(this, options);
 }
 function BigShip(options) {
@@ -628,7 +628,7 @@ function BigShip(options) {
     w: 9, h: 9,
     index: 1
   };
-  this.maxVelocity = 50;
+  this.maxVelocity = 0.5;
   this.explosion = BigExplosion;
   Ship.call(this, options);
 }
@@ -639,7 +639,7 @@ function MediumRock(options) {
     x: 51, y: 3,
     w: 4, h: 4
   };
-  this.maxVelocity = 25;
+  this.maxVelocity = 0.25;
   this.explosion = MediumExplosion;
   Entity.call(this, options);
 }
@@ -725,7 +725,7 @@ function play31() {
       if (keys.l) { console.log(level); delete keys.l; }
       debugMenu.innerHTML = "";
       debugMenu.innerHTML += "Input: " + JSON.stringify(keys) + "<br>";
-      debugMenu.innerHTML += "Player ship pos: " + playerShip.x + " " + playerShip.y + " " + "<br>";
+      debugMenu.innerHTML += "Player ship direction: " + playerShip.move + "<br>";
       debugMenu.innerHTML += "Number of emitters: " + level.emitters.length + "<br>";
       debugMenu.innerHTML += "Number of entities: " + level.entities.length + "<br>";
       debugMenu.innerHTML += "Number of colliders: " + level.collidable.length + "<br>";
@@ -757,7 +757,7 @@ function play31() {
     // Player movement
     playerShip.x += playerShip.vx;
     if (playerShip.x < 0) { playerShip.x = 0; }
-    if (playerShip.x / 100 > (31 - playerShip.sprite.w)) { playerShip.x = (31 - playerShip.sprite.w) * 100; }
+    if (playerShip.x > (31 - playerShip.sprite.w)) { playerShip.x = 31 - playerShip.sprite.w; }
 
     // Trigger emitters
     for (i = 0; i < level.emitters.length; i++) {
@@ -770,8 +770,8 @@ function play31() {
       ent = level.entities[i];
       if (ent.move) { ent.move(); }
       // If the entity is off screen, remove
-      if (ent.y / 100 < -ent.sprite.h || ent.y / 100 > gridSizeY + ent.sprite.h ||
-          ent.x / 100 < -ent.sprite.w || ent.x / 100 > gridSizeX + ent.sprite.w) {
+      if (ent.y < -ent.sprite.h || ent.y > gridSizeY + ent.sprite.h ||
+          ent.x < -ent.sprite.w || ent.x > gridSizeX + ent.sprite.w) {
         level.entities.splice(i, 1);
         if (level.collidable.indexOf(ent) !== -1) {
           level.collidable.splice(level.collidable.indexOf(ent), 1);
@@ -936,10 +936,10 @@ function play31() {
       playerShip.weapons[0].type = new BigGun({});
 
       var rockSpawner = new Emitter({
-        x: 0, y: -400,
-        emitX: [0, (gridSizeX - 4) * 100],
+        x: 0, y: -4,
+        emitX: [0, gridSizeX - 4],
         ammo: new MediumRock({
-          maxVelocity: 50
+          maxVelocity: 0.5
         }),
         spawnInto: level,
         cooldown: 500
@@ -947,17 +947,17 @@ function play31() {
       level.emitters.push(rockSpawner);
 
       var starSpawner = new Emitter({
-        y: -100,
-        emitX: [0, gridSizeX * 100],
+        y: -1,
+        emitX: [0, gridSizeX],
         ammo: new Entity ({
           name: "star",
-          maxVelocity: 50,
+          maxVelocity: 0.5,
           sprite: {w: 1, h: 1},
-          draw: function(ctx) {
-            paintCell(ctx, Math.round(this.x / 100), Math.round(this.y / 100), "rgba(255, 255, 255, 0.5)");
-            paintCell(ctx, Math.round(this.x / 100), Math.round(this.y / 100 - 1), "rgba(255, 255, 255, 0.15)");
-            //paintCell(ctx, this.x, this.y - 2, "rgba(255, 255, 255, 0.30)");
-            //paintCell(ctx, this.x, this.y - 3, "rgba(255, 255, 255, 0.20)");
+          draw: function(context) {
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.5)");
+            paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.15)");
+            //paintCell(context, this.x, this.y - 2, "rgba(255, 255, 255, 0.30)");
+            //paintCell(context, this.x, this.y - 3, "rgba(255, 255, 255, 0.20)");
           }
         }),
         spawnInto: level,
@@ -967,15 +967,15 @@ function play31() {
       level.emitters.push(starSpawner);
 
       var starSpawner_2 = new Emitter({
-        y: -100,
-        emitX: [0, gridSizeX * 100],
+        y: -1,
+        emitX: [0, gridSizeX],
         ammo: new Entity ({
           name: "star",
-          maxVelocity: 25,
+          maxVelocity: 0.25,
           sprite: {w: 1, h: 1},
-          draw: function(ctx) {
-            paintCell(ctx, Math.round(this.x / 100), Math.round(this.y / 100), "rgba(255, 255, 255, 0.3)");
-            //paintCell(ctx, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
+          draw: function(context) {
+            paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.3)");
+            //paintCell(context, this.x, this.y - 1, "rgba(255, 255, 255, 0.05)");
           }
         }),
         spawnInto: level,
