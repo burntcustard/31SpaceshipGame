@@ -292,7 +292,7 @@ function Entity(options) {
   this.hp = this.hp || [];
   this.maxHealth = this.hp.length;
   this.dead = false;
-  
+
   this.getHealth = function() {
     var currentHealth = this.maxHealth;
     for (i = 0; i < this.maxHealth; i++) {
@@ -300,7 +300,7 @@ function Entity(options) {
     }
     return currentHealth;
   };
-  
+
   this.hpLost = function() {
     var lostHp;
     for (i = 0; i < this.maxHealth; i++) {
@@ -311,14 +311,14 @@ function Entity(options) {
       if (debug) { console.log(this.name + " Dead at X: " + this.x + " Y: " + this.y); }
     }
   };
-  
+
   this.hpRestore = function() {
     var restoredHp;
     for (i = 0; i < this.maxHealth; i++) {
       if (this.hp[i].lost && !restoredHp) { delete this.hp[i].lost; restoredHp = true; }
     }
   };
-  
+
   this.move = function() {
     this.x += this.vx;
     this.y += this.vy;
@@ -765,12 +765,12 @@ function play31() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     //rockSpawner.draw(ctx);
-    
+
     // Draw stars WE NEED A Z-BUFFER
     for (i = 0; i < level.entities.length; i++) {
       if (level.entities[i].name === "star") { level.entities[i].draw(ctx); }
     }
-    
+
     // Draw the ships. Should dead checking be done in .draw? Would be an extra function
     // call which isn't great for performance, but might be neater?
     if (enemyShip && !enemyShip.dead) { enemyShip.draw(ctx); }
@@ -780,7 +780,7 @@ function play31() {
     for (i = 0; i < level.entities.length; i++) {
       if (level.entities[i].name !== "star") { level.entities[i].draw(ctx); }
     }
-    
+
     // Animate explosions
     i = level.entities.length;
     while (i--) {
@@ -839,7 +839,8 @@ function play31() {
     }
 
     // Entity movement
-    for (i = 0; i < level.entities.length; i++) {
+    i = level.entities.length;
+    while (i--) {
       ent = level.entities[i];
       if (ent.move) { ent.move(); }
       // If the entity is off screen, remove
