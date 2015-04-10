@@ -1,4 +1,5 @@
 /*jslint plusplus: true, bitwise: true, browser: true, devel: true, node: true, unparam: true, vars: true, white: true*/
+/*jshint quotmark: false*/
 /*global FPSMeter, newGame*/
 "use strict";
 
@@ -76,8 +77,7 @@ function toggleDebug() {
 //  |_____|_| |_| .__/ \__,_|\__|  //
 //              |_|                //
 // =============================== //
-var key,
-  keys = {};
+var keys = {};
 
 document.onkeydown = function (key) {
   switch (key.which) {
@@ -278,12 +278,15 @@ function Entity(options) {
   this.vy = options.vy || this.vy || 0;
 
   this.facing = this.facing || options.facing || {};
-  
+
   if (this.facing === 'D') {
     //this.sprite.source = canvasFlip;
     console.log("Gave something upside down sprite");
   }
-  
+
+  // 'Layer' 0 is the player layer, + is behind, - in front
+  this.zIndex = this.zIndex || options.zIndex || 0;
+
   this.sprite = this.sprite || options.sprite || {};
   this.sprite.index = this.sprite.index || 0;
 
@@ -323,7 +326,7 @@ function Entity(options) {
     this.x += this.vx;
     this.y += this.vy;
   };
-  
+
   this.flip = function() {
     this.sprite.source = canvasFlip;
     this.sprite.y = this.sprite.source.height - this.sprite.y - this.sprite.h;
@@ -399,9 +402,9 @@ function Ship(options) {
   var i,
       canvasPri,
       canvasSec;
-  
+
   Entity.call(this, options);
-  
+
   // Initial position for player ship:
   if (options.name === "player" && !this.x && !this.y) { // !this.x == true if this.x == 0;
     this.x = Math.round(gridSizeX / 2) - Math.round(this.sprite.w / 2);
@@ -476,9 +479,9 @@ function Ship(options) {
   this.draw = function(ctx) {
     var tilt = 0,
         ySpriteOffset = this.sprite.h;
-    
+
     if (this.facing === 'D') { ySpriteOffset = -ySpriteOffset; }
-    
+
     // Draw weapons
     for (i = 0; i < this.weapons.length; i++) {
       if (this.weapons[i].type) { // If there is a weapon in this weapon slot
@@ -539,7 +542,7 @@ function Ship(options) {
     );
 
     var ifFlip = (ySpriteOffset >>> 31);
-    
+
     // Draw destroyed cockpit tiles
     for (i = 0; i < this.maxHealth; i++) {
       if (this.sprite.index === 0) { tilt = this.hp[i].tiltOffsetL; }
@@ -764,35 +767,41 @@ function play31() {
     ctx.fillStyle = "#2c2c39";
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    //rockSpawner.draw(ctx);
 
-    // Draw stars WE NEED A Z-BUFFER
-    for (i = 0; i < level.entities.length; i++) {
-      if (level.entities[i].name === "star") { level.entities[i].draw(ctx); }
-    }
 
-    // Draw the ships. Should dead checking be done in .draw? Would be an extra function
-    // call which isn't great for performance, but might be neater?
-    if (enemyShip && !enemyShip.dead) { enemyShip.draw(ctx); }
-    if (playerShip && !playerShip.dead) { playerShip.draw(ctx); }
-
-    // Draw stuff in entity list
-    for (i = 0; i < level.entities.length; i++) {
-      if (level.entities[i].name !== "star") { level.entities[i].draw(ctx); }
-    }
-
-    // Animate explosions
-    i = level.entities.length;
-    while (i--) {
-      var boom = level.entities[i];
-      //boom.draw(ctx);
-      if (boom.sprite.frames) { // If it has a frame count, it won't last when it runs out
-        if (!boom.last || now - boom.last > 1000/20) { boom.sprite.index++; boom.last = now; } // 20FPS
-        if (boom.sprite.index >= boom.sprite.frames) {
-          level.entities.splice(i, 1);
+    function drawThings(e) {
+      e.draw(ctx);
+      if (e.sprite.frames) {
+        // Sprites animate at 20FPS
+        if (!e.last || now - e.last > 1000 / 20) { e.sprite.index++; e.last = now; }
+        if (e.sprite.index >= e.sprite.frames) {
+          // If there are no more frames it is dead
+          level.entities.splice(level.entities.indexOf(e), 1);
         }
       }
     }
+
+    // Arrays that objects not being rendered yet get put into to
+    var zList_1 = [], zList0 = [], zList1 = [];
+
+    i = level.entities.length;
+    while (i--) {
+      var e = level.entities[i];
+      // If e isn't in the 'furthest' layer put it into its corresponding array
+      if (e.zIndex === -1) { zList_1.push(e); }
+      else if (e.zIndex === 0) { zList0.push(e); }
+      else if (e.zIndex === 1) { zList1.push(e); }
+      else if (e.zIndex === 2) { drawThings(e); }
+    }
+    // Now loop the arrays in the correct draw order (highest to lowest)
+    i = zList1.length;
+    while (i--) { drawThings(zList1[i]); }
+    i = zList0.length;
+    while (i--) { drawThings(zList0[i]); }
+    i = zList_1.length;
+    while (i--) { drawThings(zList_1[i]); }
+
+
 
     // ------- DEBUG INFO -------- //
     if (debug) {
@@ -832,7 +841,7 @@ function play31() {
     playerShip.x += playerShip.vx;
     if (playerShip.x < 0) { playerShip.x = 0; }
     if (playerShip.x > (gridSizeX - playerShip.sprite.w)) { playerShip.x = gridSizeX - playerShip.sprite.w; }
-    
+
     // Trigger emitters
     for (i = 0; i < level.emitters.length; i++) {
       level.emitters[i].emit(level);
@@ -886,8 +895,8 @@ function play31() {
                   // All the widths/2 just help center the explosion
                   boom.x = ent.x + ent.sprite.w / 2 - boom.sprite.w / 2;
                   boom.y = ent.y + ent.sprite.h / 2 - boom.sprite.h / 2;
+                  boom.zIndex = -1;
                   level.entities.push(boom);
-                  //level.entities.push(boom);
                 }
                 level.collidable.splice(i, 1);
               }
@@ -898,7 +907,8 @@ function play31() {
     }
 
     // Remove dead entities (you already can't collide with them since the collision check)
-    for (i = 0; i < level.entities.length; i++) {
+    i = level.entities.length;
+    while (i--) {
       if (level.entities[i].dead) { level.entities.splice(i, 1); }
     }
 
@@ -989,9 +999,9 @@ function play31() {
     // Clear old stuff
     //  - Old collidable list, rocks, etc.
     level = {     // Data about the level
+        collidable: [],
         entities: [],
         emitters: [],
-        collidable: [],
         explosions: [],
         id: ''
       };
@@ -1007,13 +1017,15 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(playerShip);
+      level.entities.push(playerShip);
       playerShip.weapons[0].type = new BigGun({});
 
       var rockSpawner = new Emitter({
         x: 0, y: -4,
         emitX: [0, gridSizeX - 4],
         ammo: new MediumRock({
-          maxVelocity: 0.5
+          maxVelocity: 0.5,
+          zIndex: 0
         }),
         spawnInto: level,
         cooldown: 500
@@ -1026,6 +1038,7 @@ function play31() {
         ammo: new Entity ({
           name: "star",
           maxVelocity: 0.25,
+          zIndex: 1,
           sprite: {w: 1, h: 1},
           draw: function(context) {
             paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.5)");
@@ -1046,6 +1059,7 @@ function play31() {
         ammo: new Entity ({
           name: "star",
           maxVelocity: 0.1,
+          zIndex: 2,
           sprite: {w: 1, h: 1},
           draw: function(context) {
             paintCell(context, this.x, this.y, "rgba(255, 255, 255, 0.3)");
@@ -1057,6 +1071,8 @@ function play31() {
       });
       starSpawner_2.emitCollidable = "no";
       level.emitters.push(starSpawner_2);
+
+      console.log(level);
 
       break;
 
