@@ -1084,6 +1084,7 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(playerShip);
+      level.entities.push(playerShip);
       playerShip.weapons[0].type = new BigGun({});
 
       enemyShip = new BigShip({
@@ -1092,6 +1093,7 @@ function play31() {
         secondaryColor: "rgba(0,235,230,0.5)"
       });
       level.collidable.push(enemyShip);
+      level.entities.push(enemyShip);
 
       break;
 
