@@ -760,7 +760,7 @@ function play31() {
     if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
 
     var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false
+    ctx.mozImageSmoothingEnabled = false;
     ctx.webkitImageSmoothingEnabled = false;
     ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
