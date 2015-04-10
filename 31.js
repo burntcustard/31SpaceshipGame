@@ -456,6 +456,8 @@ function Ship(options) {
 
   var ctxPri = canvasPri.getContext('2d');
   ctxPri.mozImageSmoothingEnabled = false;
+  ctxPri.webkitImageSmoothingEnabled = false;
+  ctxPri.msImageSmoothingEnabled = false;
   ctxPri.imageSmoothingEnabled = false;
   ctxPri.globalCompositeOperation = "source-over";
   ctxPri.clearRect(0, 0, canvasPri.width, canvasPri.height);
@@ -466,6 +468,8 @@ function Ship(options) {
 
   var ctxSec = canvasSec.getContext('2d');
   ctxSec.mozImageSmoothingEnabled = false;
+  ctxSec.webkitImageSmoothingEnabled = false;
+  ctxSec.msImageSmoothingEnabled = false;
   ctxSec.imageSmoothingEnabled = false;
   ctxSec.globalCompositeOperation = "source-over";
   ctxSec.clearRect(0, 0, canvasSec.width, canvasSec.height);
@@ -726,17 +730,13 @@ function MediumRock(options) {
 
 
 
-// ============================================================================================================== //
-//                                                                                                                //
-//  .88b  d88.  .d8b.  d888888b d8b   db  d88888b db    db d8b   db  .o88b. d888888b d888888b  .d88b.  d8b   db   //
-//  88'YbdP`88 d8' `8b   `88'   888o  88  88'     88    88 888o  88 d8P  Y8 `~~88~~'   `88'   .8P  Y8. 888o  88   //
-//  88  88  88 88ooo88    88    88V8o 88  88ooo   88    88 88V8o 88 8P         88       88    88    88 88V8o 88   //
-//  88  88  88 88~~~88    88    88 V8o88  88~~~   88    88 88 V8o88 8b         88       88    88    88 88 V8o88   //
-//  88  88  88 88   88   .88.   88  V888  88      88b  d88 88  V888 Y8b  d8    88      .88.   `8b  d8' 88  V888   //
-//  YP  YP  YP YP   YP Y888888P VP   V8P  YP      ~Y8888P' VP   V8P  `Y88P'    YP    Y888888P  `Y88P'  VP   V8P   //
-//                                                                                                                //
-// ============================================================================================================== //
-
+// ======================================================================== //
+//                                                                          //
+//  █▄ ▄█   ▄▀▄   ▀█▀  █▄  █  █▀▀  █  █  █▄  █  ▄▀▀  ▀█▀  ▀█▀  ▄▀▀▄  █▄  █  //
+//  █ ▀ █  █ ▄ █   █   █ ▀▄█  █▄   █  █  █ ▀▄█  █     █    █   █  █  █ ▀▄█  //
+//  █   █  █   █  ▄█▄  █  ▀█  █    ▀▄▄▀  █  ▀█  ▀▄▄   █   ▄█▄  ▀▄▄▀  █  ▀█  //
+//                                                                          //
+// ======================================================================== //
 function play31() {
 
   var playerShip,   // Players current ship and all the fancy stuff on it
@@ -760,7 +760,9 @@ function play31() {
     if (meter) { meter.tickStart(); }  // FPS Meter start measuring time taken to render this frame
 
     var ctx = canvas.getContext('2d');
-    ctx.mozImageSmoothingEnabled = false;
+    ctx.mozImageSmoothingEnabled = false
+    ctx.webkitImageSmoothingEnabled = false;
+    ctx.msImageSmoothingEnabled = false;
     ctx.imageSmoothingEnabled = false;
 
     // Fill canvas with levels color
